@@ -20,6 +20,7 @@ function App() {
   const [menuActivo, setMenuActivo] = useState('inicio');
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [drawerClosing, setDrawerClosing] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
 
   useEffect(() => {
     cargarBarberias();
@@ -59,6 +60,21 @@ function App() {
       }, 350); // igual a la duración de la animación
     }
   }, [menuActivo]);
+
+  // Al cargar la app, obtener ubicación del usuario (solo para el indicador)
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+      },
+      (error) => {
+        setUserLocation(null);
+      }
+    );
+  }, []);
 
   const checkScreenSize = () => {
     setIsMobile(window.innerWidth <= 768);
@@ -139,6 +155,7 @@ function App() {
         <MapaBarberias 
           barberias={barberiasFiltradas}
           onBarberiaSelect={handleBarberiaSelectFromMap}
+          userLocation={userLocation}
         />
 
         {/* Header flotante */}
@@ -249,6 +266,7 @@ function App() {
           <MapaBarberias 
             barberias={barberiasFiltradas}
             onBarberiaSelect={handleBarberiaSelectFromMap}
+            userLocation={userLocation}
           />
         </div>
 

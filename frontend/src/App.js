@@ -3,6 +3,7 @@ import axios from 'axios';
 import BarberiaCard from './components/BarberiaCard';
 import BarberiaModal from './components/BarberiaModal';
 import CalificarModal from './components/CalificarModal';
+import MapaBarberias from './components/MapaBarberias';
 
 function App() {
   const [barberias, setBarberias] = useState([]);
@@ -11,6 +12,7 @@ function App() {
   const [mostrarCalificar, setMostrarCalificar] = useState(false);
   const [busqueda, setBusqueda] = useState('');
   const [cargando, setCargando] = useState(true);
+  const [vistaActual, setVistaActual] = useState('lista'); // 'lista' o 'mapa'
 
   useEffect(() => {
     cargarBarberias();
@@ -73,6 +75,11 @@ function App() {
     await cargarBarberias();
   };
 
+  const handleBarberiaSelectFromMap = (barberia) => {
+    setBarberiaSeleccionada(barberia);
+    setMostrarModal(true);
+  };
+
   const barberiasFiltradas = barberias.filter(barberia =>
     barberia.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
     barberia.direccion.toLowerCase().includes(busqueda.toLowerCase())
@@ -95,26 +102,48 @@ function App() {
         />
       </div>
 
-      <div className="barberias-list">
-        {cargando ? (
-          <div className="loading">
-            <p>Cargando barberías...</p>
-          </div>
-        ) : barberiasFiltradas.length === 0 ? (
-          <div className="empty-state">
-            <h3>No se encontraron barberías</h3>
-            <p>Intenta con una búsqueda diferente</p>
-          </div>
-        ) : (
-          barberiasFiltradas.map(barberia => (
-            <BarberiaCard
-              key={barberia.id}
-              barberia={barberia}
-              onVerDetalles={() => handleVerBarberia(barberia)}
-            />
-          ))
-        )}
+      <div className="vista-selector">
+        <button 
+          className={`vista-btn ${vistaActual === 'lista' ? 'active' : ''}`}
+          onClick={() => setVistaActual('lista')}
+        >
+          📋 Lista
+        </button>
+        <button 
+          className={`vista-btn ${vistaActual === 'mapa' ? 'active' : ''}`}
+          onClick={() => setVistaActual('mapa')}
+        >
+          🗺️ Mapa
+        </button>
       </div>
+
+      {vistaActual === 'lista' ? (
+        <div className="barberias-list">
+          {cargando ? (
+            <div className="loading">
+              <p>Cargando barberías...</p>
+            </div>
+          ) : barberiasFiltradas.length === 0 ? (
+            <div className="empty-state">
+              <h3>No se encontraron barberías</h3>
+              <p>Intenta con una búsqueda diferente</p>
+            </div>
+          ) : (
+            barberiasFiltradas.map(barberia => (
+              <BarberiaCard
+                key={barberia.id}
+                barberia={barberia}
+                onVerDetalles={() => handleVerBarberia(barberia)}
+              />
+            ))
+          )}
+        </div>
+      ) : (
+        <MapaBarberias 
+          barberias={barberiasFiltradas}
+          onBarberiaSelect={handleBarberiaSelectFromMap}
+        />
+      )}
 
       {mostrarModal && barberiaSeleccionada && (
         <BarberiaModal

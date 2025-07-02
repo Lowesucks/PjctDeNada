@@ -1,7 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const CalificarModal = ({ barberia, onClose, onCalificacionEnviada }) => {
+  useEffect(() => {
+    // Bloquear scroll cuando el modal se abre
+    document.body.classList.add('modal-open');
+    
+    // Desbloquear scroll cuando el modal se cierra
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, []);
+
+  const handleClose = () => {
+    document.body.classList.remove('modal-open');
+    onClose();
+  };
   const [nombreUsuario, setNombreUsuario] = useState('');
   const [calificacion, setCalificacion] = useState(0);
   const [comentario, setComentario] = useState('');
@@ -50,11 +64,11 @@ const CalificarModal = ({ barberia, onClose, onCalificacionEnviada }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={handleClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Calificar {barberia.nombre}</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <button className="close-btn" onClick={handleClose}>×</button>
         </div>
 
         <form onSubmit={handleSubmit}>

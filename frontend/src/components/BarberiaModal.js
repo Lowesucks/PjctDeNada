@@ -1,6 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const BarberiaModal = ({ barberia, onClose, onCalificar }) => {
+  useEffect(() => {
+    // Bloquear scroll cuando el modal se abre
+    document.body.classList.add('modal-open');
+    
+    // Desbloquear scroll cuando el modal se cierra
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, []);
+
+  const handleClose = () => {
+    document.body.classList.remove('modal-open');
+    onClose();
+  };
   const renderStars = (rating) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -14,11 +28,11 @@ const BarberiaModal = ({ barberia, onClose, onCalificar }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={handleClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">{barberia.nombre}</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <button className="close-btn" onClick={handleClose}>×</button>
         </div>
 
         <div className="barberia-info">

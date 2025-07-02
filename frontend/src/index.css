@@ -4,6 +4,20 @@
   box-sizing: border-box;
 }
 
+/* Eliminar highlights en móviles para todos los elementos interactivos */
+button, 
+input, 
+textarea, 
+select,
+[role="button"],
+[tabindex] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  outline: none;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -14,6 +28,29 @@ body {
   background-attachment: fixed;
   color: #1e293b;
   line-height: 1.6;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Para iOS Safari - evitar el color negro en pull-to-refresh */
+html {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Mejorar la experiencia de scroll */
+body {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Asegurar que el contenedor principal tenga el fondo correcto */
+#root {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+  background-attachment: fixed;
   min-height: 100vh;
 }
 
@@ -132,6 +169,11 @@ body {
   justify-content: space-between;
   position: relative;
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  outline: none;
 }
 
 .barberia-card::before {
@@ -237,6 +279,11 @@ body {
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  outline: none;
 }
 
 .btn::before {
@@ -290,6 +337,14 @@ body {
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  overflow: hidden;
+}
+
+/* Bloquear scroll del body cuando el modal está abierto */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
 }
 
 .modal {
@@ -301,6 +356,8 @@ body {
   max-height: 85vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .modal-header {
@@ -327,6 +384,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  outline: none;
 }
 
 .form-group {
@@ -375,14 +437,27 @@ body {
   cursor: pointer;
   color: #d1d1d6;
   transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  outline: none;
 }
 
 .rating-btn.active {
-  color: #ff9500;
+  color: #f59e0b;
 }
 
 .rating-btn:hover {
-  color: #ff9500;
+  color: #f59e0b;
+}
+
+.rating-btn:focus {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .calificaciones-list {
@@ -544,10 +619,14 @@ body {
 @media (max-width: 767px) {
   .container {
     max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
   
   .header {
     padding: 40px 16px 16px;
+    border-radius: 0;
   }
   
   .header h1 {
@@ -556,6 +635,7 @@ body {
   
   .search-container {
     padding: 16px;
+    border-radius: 0;
   }
   
   .barberias-list {
@@ -567,10 +647,28 @@ body {
   .barberia-card {
     margin: 0;
     padding: 20px;
+    border-radius: 12px;
   }
   
   .modal {
     margin: 20px;
     padding: 20px;
+    border-radius: 16px;
+  }
+  
+  /* Mejorar la experiencia de scroll en móviles */
+  body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Mejorar el scroll en móviles */
+  html, body {
+    overflow-x: hidden;
+  }
+  
+  .container {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 } 

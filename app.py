@@ -18,6 +18,8 @@ class Barberia(db.Model):
     direccion = db.Column(db.String(200), nullable=False)
     telefono = db.Column(db.String(20))
     horario = db.Column(db.String(100))
+    latitud = db.Column(db.Float)
+    longitud = db.Column(db.Float)
     calificacion_promedio = db.Column(db.Float, default=0.0)
     total_calificaciones = db.Column(db.Integer, default=0)
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
@@ -43,6 +45,8 @@ def obtener_barberias():
         'direccion': b.direccion,
         'telefono': b.telefono,
         'horario': b.horario,
+        'latitud': b.latitud,
+        'longitud': b.longitud,
         'calificacion_promedio': round(b.calificacion_promedio, 1),
         'total_calificaciones': b.total_calificaciones
     } for b in barberias])
@@ -128,6 +132,8 @@ def buscar_barberias():
         'direccion': b.direccion,
         'telefono': b.telefono,
         'horario': b.horario,
+        'latitud': b.latitud,
+        'longitud': b.longitud,
         'calificacion_promedio': round(b.calificacion_promedio, 1),
         'total_calificaciones': b.total_calificaciones
     } for b in barberias])
@@ -140,9 +146,30 @@ def crear_tablas():
         # Agregar datos de ejemplo si la base está vacía
         if not Barberia.query.first():
             barberias_ejemplo = [
-                Barberia(nombre='Barbería Clásica', direccion='Av. Principal 123', telefono='555-0101', horario='Lun-Sáb 9:00-19:00'),
-                Barberia(nombre='Corte Moderno', direccion='Calle Central 456', telefono='555-0202', horario='Lun-Vie 8:00-18:00'),
-                Barberia(nombre='Estilo Urbano', direccion='Plaza Mayor 789', telefono='555-0303', horario='Mar-Dom 10:00-20:00'),
+                Barberia(
+                    nombre='Barbería Clásica', 
+                    direccion='Av. Principal 123', 
+                    telefono='555-0101', 
+                    horario='Lun-Sáb 9:00-19:00',
+                    latitud=19.4326,
+                    longitud=-99.1332
+                ),
+                Barberia(
+                    nombre='Corte Moderno', 
+                    direccion='Calle Central 456', 
+                    telefono='555-0202', 
+                    horario='Lun-Vie 8:00-18:00',
+                    latitud=19.4342,
+                    longitud=-99.1312
+                ),
+                Barberia(
+                    nombre='Estilo Urbano', 
+                    direccion='Plaza Mayor 789', 
+                    telefono='555-0303', 
+                    horario='Mar-Dom 10:00-20:00',
+                    latitud=19.4306,
+                    longitud=-99.1352
+                ),
             ]
             
             for barberia in barberias_ejemplo:

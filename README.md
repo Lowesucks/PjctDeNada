@@ -25,20 +25,45 @@ Una aplicación web moderna y minimalista para calificar barberías y lugares de
 - **Axios** - Cliente HTTP
 - **CSS3** - Estilos personalizados estilo iOS
 
-## 📦 Instalación
+## 📦 Instalación y Ejecución
 
-### Prerrequisitos
+### 🚀 Forma Más Simple (Recomendada)
+
+#### Windows
+```bash
+# Configuración inicial (solo la primera vez)
+setup.bat
+
+# Ejecutar la aplicación
+run.bat
+```
+
+#### Linux/Mac
+```bash
+# Dar permisos de ejecución
+chmod +x run.sh
+
+# Configuración inicial (solo la primera vez)
+./setup.sh
+
+# Ejecutar la aplicación
+./run.sh
+```
+
+### 📋 Instalación Manual
+
+#### Prerrequisitos
 - Python 3.8 o superior
 - Node.js 14 o superior
 - npm o yarn
 
-### 1. Clonar el repositorio
+#### 1. Clonar el repositorio
 ```bash
 git clone <tu-repositorio>
 cd barberias-app
 ```
 
-### 2. Configurar el Backend
+#### 2. Configurar el Backend
 ```bash
 # Crear entorno virtual
 python -m venv venv
@@ -58,7 +83,7 @@ python app.py
 
 El backend estará disponible en `http://localhost:5000`
 
-### 3. Configurar el Frontend
+#### 3. Configurar el Frontend
 ```bash
 # Navegar al directorio frontend
 cd frontend

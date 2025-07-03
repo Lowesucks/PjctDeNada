@@ -31,13 +31,19 @@ const BarberiaCard = ({ barberia, onVerDetalles }) => {
       </div>
       
       <div className="barberia-info">
-        {barberia.telefono && (
+        {barberia.telefono && barberia.telefono !== 'Teléfono no disponible' && (
           <span>📞 {barberia.telefono}</span>
         )}
-        {barberia.horario && (
+        {barberia.horario && barberia.horario !== 'Horario no disponible' && (
           <span>🕒 {barberia.horario}</span>
         )}
         <span>👥 {barberia.total_calificaciones} calificaciones</span>
+        {barberia.fuente === 'foursquare' && (
+          <span className="foursquare-badge">📍 Foursquare</span>
+        )}
+        {barberia.distancia && (
+          <span>📏 {(barberia.distancia / 1000).toFixed(1)} km</span>
+        )}
       </div>
       
       <button className="btn btn-secondary">

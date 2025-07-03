@@ -21,6 +21,7 @@ function App() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [drawerClosing, setDrawerClosing] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
+  const [foursquareAvailable, setFoursquareAvailable] = useState(false);
 
   useEffect(() => {
     cargarBarberias();
@@ -83,10 +84,30 @@ function App() {
   const cargarBarberias = async () => {
     try {
       setCargando(true);
-      const response = await axios.get('/api/barberias');
-      setBarberias(response.data);
+      // Siempre intentar cargar barberías cercanas primero (funciona con o sin API key)
+      if (userLocation) {
+        const response = await axios.get(`/api/barberias/cercanas?lat=${userLocation.lat}&lng=${userLocation.lng}&radio=5000`);
+        setBarberias(response.data);
+        
+        // Verificar si hay barberías de Foursquare en los resultados
+        const hasFoursquareData = response.data.some(barberia => barberia.fuente === 'foursquare');
+        setFoursquareAvailable(hasFoursquareData);
+      } else {
+        // Si no hay ubicación, cargar barberías locales
+        const response = await axios.get('/api/barberias');
+        setBarberias(response.data);
+        setFoursquareAvailable(false);
+      }
     } catch (error) {
       console.error('Error al cargar barberías:', error);
+      // Fallback a barberías locales
+      try {
+        const response = await axios.get('/api/barberias');
+        setBarberias(response.data);
+        setFoursquareAvailable(false);
+      } catch (fallbackError) {
+        console.error('Error al cargar barberías locales:', fallbackError);
+      }
     } finally {
       setCargando(false);
     }
@@ -160,7 +181,31 @@ function App() {
 
         {/* Header flotante */}
         <div className="header-sheet">
-          <h1>✂️ Barberías</h1>
+          <div>
+            <h1>✂️ Barberías</h1>
+            {!foursquareAvailable && userLocation && (
+              <div style={{ 
+                fontSize: '12px', 
+                color: '#6b7280', 
+                marginTop: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                📍 Solo barberías locales
+                <span style={{ 
+                  background: '#fef3c7', 
+                  color: '#92400e', 
+                  padding: '2px 6px', 
+                  borderRadius: '4px',
+                  fontSize: '10px',
+                  fontWeight: '600'
+                }}>
+                  Foursquare no configurado
+                </span>
+              </div>
+            )}
+          </div>
           <div className="header-sheet-btns">
             <button className="sheet-btn" onClick={() => { setSheetTipo('buscar'); setSheetAbierto(true); }}>🔍 Buscar</button>
             <button className="sheet-btn" onClick={() => { setSheetTipo('lista'); setSheetAbierto(true); }}>📋 Lista</button>
@@ -309,7 +354,31 @@ function App() {
         {/* Header flotante */}
         <header className="desktop-header overlay-header">
           <div className="header-content">
-            <h1>✂️ Barberías</h1>
+            <div>
+              <h1>✂️ Barberías</h1>
+              {!foursquareAvailable && userLocation && (
+                <div style={{ 
+                  fontSize: '12px', 
+                  color: '#6b7280', 
+                  marginTop: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  📍 Solo barberías locales
+                  <span style={{ 
+                    background: '#fef3c7', 
+                    color: '#92400e', 
+                    padding: '2px 6px', 
+                    borderRadius: '4px',
+                    fontSize: '10px',
+                    fontWeight: '600'
+                  }}>
+                    Foursquare no configurado
+                  </span>
+                </div>
+              )}
+            </div>
             <div className="search-container">
               <input
                 type="text"

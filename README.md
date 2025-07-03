@@ -8,6 +8,8 @@ Una aplicación web moderna y minimalista para calificar barberías y lugares de
 - **Responsive**: Funciona perfectamente en móviles, tablets y desktop
 - **Calificaciones**: Sistema de 5 estrellas con comentarios
 - **Búsqueda**: Busca barberías por nombre o dirección
+- **🗺️ Integración con Foursquare**: Busca barberías cercanas en tiempo real
+- **📍 Geolocalización**: Encuentra barberías cerca de tu ubicación
 - **API REST**: Backend robusto con Flask y SQLite
 - **PWA Ready**: Preparada para convertirse en aplicación móvil
 
@@ -19,6 +21,7 @@ Una aplicación web moderna y minimalista para calificar barberías y lugares de
 - **Flask-SQLAlchemy** - ORM para base de datos
 - **SQLite** - Base de datos ligera
 - **Flask-CORS** - Soporte para CORS
+- **Requests** - Cliente HTTP para APIs externas
 
 ### Frontend
 - **React 18** - Biblioteca de UI
@@ -147,7 +150,17 @@ Crea un archivo `.env` en la raíz del proyecto:
 FLASK_ENV=development
 FLASK_DEBUG=True
 DATABASE_URL=sqlite:///barberias.db
+FOURSQUARE_API_KEY=tu_api_key_foursquare
 ```
+
+### 🏪 Configuración de Foursquare API (Opcional)
+Para usar la funcionalidad de búsqueda de barberías cercanas en tiempo real:
+
+1. **Obtener API Key**: Regístrate en [Foursquare for Developers](https://developer.foursquare.com/)
+2. **Configurar**: Agrega tu API key en el archivo `.env` o directamente en `app.py`
+3. **Documentación completa**: Ver `FOURSQUARE_API_SETUP.md` para instrucciones detalladas
+
+**Sin API key**: La aplicación funcionará perfectamente mostrando barberías locales con un indicador visual sutil.
 
 ### Personalización de Estilos
 Los estilos están en `frontend/src/index.css` y siguen el sistema de diseño iOS:

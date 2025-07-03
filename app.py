@@ -3,6 +3,8 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
+import requests
+import json
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///barberias.db'
@@ -10,6 +12,71 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 CORS(app)
 
 db = SQLAlchemy(app)
+
+# Configuración de Foursquare API
+FOURSQUARE_API_KEY = os.environ.get('FOURSQUARE_API_KEY', 'TU_API_KEY_FOURSQUARE')
+FOURSQUARE_BASE_URL = 'https://api.foursquare.com/v3'
+
+def buscar_barberias_foursquare(lat, lng, radio=5000):
+    """
+    Busca barberías cercanas usando la API de Foursquare
+    """
+    if FOURSQUARE_API_KEY == 'TU_API_KEY_FOURSQUARE' or not FOURSQUARE_API_KEY:
+        print("API Key de Foursquare no configurada. Usando solo barberías locales.")
+        return []
+    
+    headers = {
+        'Authorization': FOURSQUARE_API_KEY,
+        'Accept': 'application/json'
+    }
+    
+    params = {
+        'query': 'barbería barberia barber shop',
+        'll': f'{lat},{lng}',
+        'radius': radio,
+        'categories': '10036',  # Categoría de barberías en Foursquare
+        'limit': 50,
+        'sort': 'RATING'
+    }
+    
+    try:
+        response = requests.get(
+            f'{FOURSQUARE_BASE_URL}/places/search',
+            headers=headers,
+            params=params,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            barberias = []
+            
+            for place in data.get('results', []):
+                location = place.get('location', {})
+                barberia = {
+                    'id': f"fs_{place.get('fsq_id', '')}",
+                    'nombre': place.get('name', 'Barbería'),
+                    'direccion': location.get('formatted_address', 'Dirección no disponible'),
+                    'telefono': place.get('tel', 'Teléfono no disponible'),
+                    'horario': 'Horario no disponible',
+                    'latitud': location.get('lat'),
+                    'longitud': location.get('lng'),
+                    'calificacion_promedio': place.get('rating', 0),
+                    'total_calificaciones': place.get('stats', {}).get('total_photos', 0),
+                    'foursquare_id': place.get('fsq_id'),
+                    'categoria': place.get('categories', [{}])[0].get('name', 'Barbería'),
+                    'distancia': place.get('distance', 0)
+                }
+                barberias.append(barberia)
+            
+            return barberias
+        else:
+            print(f"Error en API Foursquare: {response.status_code}")
+            return []
+            
+    except Exception as e:
+        print(f"Error al buscar en Foursquare: {str(e)}")
+        return []
 
 # Modelos de base de datos
 class Barberia(db.Model):
@@ -137,6 +204,77 @@ def buscar_barberias():
         'calificacion_promedio': round(b.calificacion_promedio, 1),
         'total_calificaciones': b.total_calificaciones
     } for b in barberias])
+
+@app.route('/api/barberias/cercanas', methods=['GET'])
+def buscar_barberias_cercanas():
+    """
+    Busca barberías cercanas usando la API de Foursquare
+    """
+    try:
+        lat = float(request.args.get('lat', 19.4326))  # Ciudad de México por defecto
+        lng = float(request.args.get('lng', -99.1332))
+        radio = int(request.args.get('radio', 5000))  # Radio en metros
+        
+        # Buscar en Foursquare (solo si hay API key configurada)
+        barberias_foursquare = buscar_barberias_foursquare(lat, lng, radio)
+        
+        # Obtener barberías locales
+        barberias_locales = Barberia.query.all()
+        barberias_comb = []
+        
+        # Agregar barberías de Foursquare (si las hay)
+        for barberia in barberias_foursquare:
+            barberias_comb.append({
+                'id': barberia['id'],
+                'nombre': barberia['nombre'],
+                'direccion': barberia['direccion'],
+                'telefono': barberia['telefono'],
+                'horario': barberia['horario'],
+                'latitud': barberia['latitud'],
+                'longitud': barberia['longitud'],
+                'calificacion_promedio': barberia['calificacion_promedio'],
+                'total_calificaciones': barberia['total_calificaciones'],
+                'fuente': 'foursquare',
+                'distancia': barberia['distancia'],
+                'categoria': barberia['categoria']
+            })
+        
+        # Agregar barberías locales (siempre disponibles)
+        for barberia in barberias_locales:
+            barberias_comb.append({
+                'id': barberia.id,
+                'nombre': barberia.nombre,
+                'direccion': barberia.direccion,
+                'telefono': barberia.telefono,
+                'horario': barberia.horario,
+                'latitud': barberia.latitud,
+                'longitud': barberia.longitud,
+                'calificacion_promedio': round(barberia.calificacion_promedio, 1),
+                'total_calificaciones': barberia.total_calificaciones,
+                'fuente': 'local'
+            })
+        
+        # Ordenar por distancia (si está disponible) o por calificación
+        barberias_comb.sort(key=lambda x: x.get('distancia', 999999))
+        
+        return jsonify(barberias_comb)
+        
+    except Exception as e:
+        print(f"Error al buscar barberías cercanas: {str(e)}")
+        # En caso de error, devolver solo barberías locales
+        barberias_locales = Barberia.query.all()
+        return jsonify([{
+            'id': barberia.id,
+            'nombre': barberia.nombre,
+            'direccion': barberia.direccion,
+            'telefono': barberia.telefono,
+            'horario': barberia.horario,
+            'latitud': barberia.latitud,
+            'longitud': barberia.longitud,
+            'calificacion_promedio': round(barberia.calificacion_promedio, 1),
+            'total_calificaciones': barberia.total_calificaciones,
+            'fuente': 'local'
+        } for barberia in barberias_locales])
 
 # Crear tablas y datos de ejemplo
 def crear_tablas():

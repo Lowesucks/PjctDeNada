@@ -564,6 +564,15 @@ body {
   border: 1px solid #e2e8f0;
 }
 
+.barberias-list .foursquare-badge {
+  background: #00b894 !important;
+  color: white !important;
+  font-weight: 600;
+  font-size: 12px;
+  border: none !important;
+  padding: 4px 8px !important;
+}
+
 .barberias-list .btn {
   width: 100%;
   padding: 14px 0;

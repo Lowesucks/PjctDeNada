@@ -37,11 +37,30 @@ const BarberiaModal = ({ barberia, onClose, onCalificar }) => {
 
         <div className="barberia-info">
           <p><strong>📍 Dirección:</strong> {barberia.direccion}</p>
-          {barberia.telefono && (
+          {barberia.telefono && barberia.telefono !== 'Teléfono no disponible' && (
             <p><strong>📞 Teléfono:</strong> {barberia.telefono}</p>
           )}
-          {barberia.horario && (
+          {barberia.horario && barberia.horario !== 'Horario no disponible' && (
             <p><strong>🕒 Horario:</strong> {barberia.horario}</p>
+          )}
+          {barberia.fuente === 'foursquare' && (
+            <div style={{ 
+              background: '#00b894', 
+              color: 'white', 
+              padding: '8px 12px', 
+              borderRadius: '8px', 
+              marginTop: '12px',
+              fontSize: '14px',
+              fontWeight: '600',
+              display: 'inline-block'
+            }}>
+              📍 Datos de Foursquare
+              {barberia.distancia && (
+                <span style={{ marginLeft: '8px', opacity: 0.9 }}>
+                  • {(barberia.distancia / 1000).toFixed(1)} km
+                </span>
+              )}
+            </div>
           )}
         </div>
 

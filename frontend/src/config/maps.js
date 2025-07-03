@@ -1,7 +1,7 @@
 // Configuración de OpenStreetMap con Leaflet
 export const MAP_CONFIG = {
-  defaultCenter: [19.4326, -99.1332], // Ciudad de México por defecto [lat, lng]
-  defaultZoom: 12,
+  defaultCenter: [20, 0], // Centro del mundo por defecto [lat, lng]
+  defaultZoom: 2, // Zoom mundial
   tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 };

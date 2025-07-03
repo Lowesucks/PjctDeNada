@@ -1000,4 +1000,20 @@ body {
 @keyframes slideOutDrawer {
   from { transform: translateX(0); }
   to { transform: translateX(100%); }
+}
+
+/* Estilos para los nuevos controles del mapa */
+.location-btn:hover,
+.center-location-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(59,130,246,0.4) !important;
+}
+
+.location-btn:active,
+.center-location-btn:active {
+  transform: scale(0.95);
+}
+
+.center-location-btn:hover {
+  box-shadow: 0 6px 16px rgba(16,185,129,0.4) !important;
 } 

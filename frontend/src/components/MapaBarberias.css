@@ -592,4 +592,16 @@
 
 .location-center-btn:active {
   transform: scale(0.95);
+}
+
+.leaflet-top.leaflet-left {
+  top: unset !important;
+  bottom: 90px !important; /* Deja espacio para el botón de ubicación */
+  left: unset !important;
+  right: 20px !important;
+  z-index: 3001 !important;
+}
+
+.leaflet-control-zoom {
+  margin-bottom: 10px !important;
 } 

@@ -52,7 +52,7 @@ REM Esperar un momento
 timeout /t 2 /nobreak > nul
 
 REM Iniciar frontend en una nueva ventana
-start "Frontend - Barberias" cmd /k "cd frontend && npm start"
+start "Frontend - Barberias" cmd /k "cd frontend && npm start -- --host 0.0.0.0"
 
 echo.
 echo ========================================

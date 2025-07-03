@@ -604,4 +604,32 @@
 
 .leaflet-control-zoom {
   margin-bottom: 10px !important;
-} 
+}
+
+.fade-in {
+  opacity: 1;
+  transition: opacity 0.8s;
+}
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.fade-out-marker {
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.fade-in-marker {
+  opacity: 0;
+  animation: markerFadeIn 0.8s forwards;
+}
+.fade-visible-marker {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+@keyframes markerFadeIn {
+  to { opacity: 1; }
+}
+
+/* Eliminar el overlay de desenfoque */ 

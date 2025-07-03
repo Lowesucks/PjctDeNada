@@ -19,9 +19,9 @@ const MapController = ({ userLocation, centerOnUser }) => {
 };
 
 // Crear icono personalizado para barberías
-const createBarberiaIcon = () => {
+const createBarberiaIcon = (extraClass = '') => {
   return L.divIcon({
-    html: `<div style="width: 32px; height: 32px; background: #f59e0b; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-size: 18px; color: white; font-weight: bold;">✂️</div>`,
+    html: `<div class="custom-marker ${extraClass}" style="width: 32px; height: 32px; background: #f59e0b; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3); font-size: 18px; color: white; font-weight: bold;">✂️</div>`,
     className: 'custom-marker',
     iconSize: [32, 32],
     iconAnchor: [16, 32],
@@ -97,6 +97,8 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
   const [mapReady, setMapReady] = useState(false);
   const [hasCentered, setHasCentered] = useState(false);
   const [pendingCenter, setPendingCenter] = useState(false);
+  const [showMarkers, setShowMarkers] = useState(true);
+  const [shouldFadeInMarkers, setShouldFadeInMarkers] = useState(false);
   const mapRef = useRef(null);
   const initialCenter = useRef(MAP_CONFIG.defaultCenter);
   const initialZoom = useRef(MAP_CONFIG.defaultZoom);
@@ -156,23 +158,32 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
   //   }
   // };
   const handleCenterOnUser = () => {
-    console.log("userLocation:", userLocation);
-    console.log("mapRef.current:", mapRef.current);
-    console.log("mapReady:", mapReady);
     if (userLocation && mapRef.current && mapReady) {
+      setShowMarkers(false); // Oculta marcadores
+      setShouldFadeInMarkers(true); // Solo animar tras centrado
       mapRef.current.flyTo(userLocation, 17, {
         animate: true,
         duration: 2
       });
+      setTimeout(() => {
+        setShowMarkers(true); // Muestra marcadores después de la animación
+        setTimeout(() => setShouldFadeInMarkers(false), 800); // Quita animación tras fade
+      }, 2000);
     }
   };
 
   useEffect(() => {
     if (pendingCenter && userLocation && mapRef.current && mapReady) {
+      setShowMarkers(false);
+      setShouldFadeInMarkers(true);
       mapRef.current.flyTo(userLocation, 17, {
         animate: true,
         duration: 2
       });
+      setTimeout(() => {
+        setShowMarkers(true);
+        setTimeout(() => setShouldFadeInMarkers(false), 800);
+      }, 2000);
       setPendingCenter(false);
     }
   }, [pendingCenter, userLocation, mapReady]);
@@ -228,11 +239,15 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
           const position = barberia.latitud && barberia.longitud 
             ? [barberia.latitud, barberia.longitud]
             : userLocation || initialCenter.current;
+          let markerClass = '';
+          if (!showMarkers) markerClass = 'fade-out-marker';
+          else if (shouldFadeInMarkers) markerClass = 'fade-in-marker';
+          else markerClass = 'fade-visible-marker';
           return (
             <Marker 
               key={barberia.id} 
               position={position} 
-              icon={createBarberiaIcon()}
+              icon={createBarberiaIcon(markerClass)}
               eventHandlers={{
                 click: () => {
                   if (onBarberiaSelect) {

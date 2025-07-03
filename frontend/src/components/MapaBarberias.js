@@ -11,7 +11,7 @@ const MapController = ({ userLocation, centerOnUser }) => {
   
   useEffect(() => {
     if (userLocation && centerOnUser) {
-      map.setView(userLocation, 15);
+      map.setView(userLocation, 17);
     }
   }, [userLocation, centerOnUser, map]);
   
@@ -34,58 +34,72 @@ const createUserIcon = () => {
   return L.divIcon({
     html: `
       <div style="
-        width: 44px;
-        height: 44px;
+        width: 48px;
+        height: 48px;
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 3000;
         position: relative;
-        box-shadow: 0 4px 16px rgba(59,130,246,0.25), 0 0 0 4px #fff;
+        box-shadow: 0 6px 20px rgba(59,130,246,0.4), 0 0 0 6px #fff;
         border-radius: 50%;
+        animation: pulse 2s infinite;
       ">
-        <svg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'>
-          <circle cx='16' cy='16' r='14' fill='#3b82f6' stroke='white' stroke-width='4'/>
-          <circle cx='16' cy='16' r='5' fill='white' stroke='#3b82f6' stroke-width='2'/>
+        <svg width='36' height='36' viewBox='0 0 36 36' fill='none' xmlns='http://www.w3.org/2000/svg'>
+          <circle cx='18' cy='18' r='16' fill='#3b82f6' stroke='white' stroke-width='4'/>
+          <circle cx='18' cy='18' r='6' fill='white' stroke='#3b82f6' stroke-width='2'/>
         </svg>
+        <style>
+          @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+        </style>
       </div>
     `,
     className: 'user-marker',
-    iconSize: [44, 44],
-    iconAnchor: [22, 44],
-    popupAnchor: [0, -44]
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
+    popupAnchor: [0, -48]
   });
 };
 
 const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
   const [userLocation, setUserLocation] = useState(null);
-  const [centerOnUser, setCenterOnUser] = useState(false);
+  const [mapCenter, setMapCenter] = useState(MAP_CONFIG.defaultCenter);
   const [loading, setLoading] = useState(true);
+  const [hasCentered, setHasCentered] = useState(false);
 
-  // Obtener ubicación del usuario
+  // Obtener ubicación del usuario y centrar el mapa automáticamente solo la primera vez
   useEffect(() => {
+    let cancelled = false;
     const getUserLocationAsync = async () => {
       try {
         setLoading(true);
         const location = await getCurrentLocation();
-        setUserLocation(location);
-        setCenterOnUser(true);
-        setTimeout(() => setCenterOnUser(false), 100);
+        if (!cancelled) {
+          setUserLocation(location);
+          if (!hasCentered) {
+            setMapCenter(location);
+            setHasCentered(true);
+          }
+        }
       } catch (error) {
-        setUserLocation(null);
+        if (!cancelled) setUserLocation(null);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     getUserLocationAsync();
-  }, []);
+    return () => { cancelled = true; };
+  }, [hasCentered]);
 
-  // Función para generar posiciones aleatorias cerca del centro
-  const getRandomPositionNearCenter = () => {
-    const center = userLocation || MAP_CONFIG.defaultCenter;
-    const lat = center[0] + (Math.random() - 0.5) * 0.01;
-    const lng = center[1] + (Math.random() - 0.5) * 0.01;
-    return [lat, lng];
+  // Botón para centrar en la ubicación del usuario
+  const handleCenterOnUser = () => {
+    if (userLocation) {
+      setMapCenter(userLocation);
+    }
   };
 
   if (loading) {
@@ -101,8 +115,16 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
   const userMarker = userLocation ? (
     <Marker position={userLocation} icon={createUserIcon()} zIndexOffset={1000}>
       <Popup>
-        <div style={{ textAlign: 'center', padding: '8px' }}>
-          <strong>📍 Tu ubicación</strong>
+        <div style={{ textAlign: 'center', padding: '12px', minWidth: '150px' }}>
+          <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#3b82f6', marginBottom: '4px' }}>
+            📍 Tu ubicación
+          </div>
+          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+            Lat: {userLocation[0].toFixed(6)}
+          </div>
+          <div style={{ fontSize: '12px', color: '#6b7280' }}>
+            Lng: {userLocation[1].toFixed(6)}
+          </div>
         </div>
       </Popup>
     </Marker>
@@ -111,31 +133,24 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
   return (
     <div className="mapa-simple">
       <MapContainer
-        center={userLocation || MAP_CONFIG.defaultCenter}
-        zoom={userLocation ? 15 : MAP_CONFIG.defaultZoom}
+        center={mapCenter}
+        zoom={userLocation ? 17 : MAP_CONFIG.defaultZoom}
         className="mapa-element"
         style={{ height: '100%', width: '100%', zIndex: 1 }}
         zoomControl={true}
+        key={mapCenter.join('-')}
       >
         <TileLayer
           url={MAP_CONFIG.tileLayer}
           attribution={MAP_CONFIG.attribution}
         />
-        
-        <MapController 
-          userLocation={userLocation} 
-          centerOnUser={centerOnUser}
-        />
-        
         {/* Marcador de ubicación del usuario */}
         {userMarker}
-        
         {/* Marcadores de barberías */}
         {barberias.map(barberia => {
           const position = barberia.latitud && barberia.longitud 
             ? [barberia.latitud, barberia.longitud]
-            : getRandomPositionNearCenter();
-          
+            : userLocation || MAP_CONFIG.defaultCenter;
           return (
             <Marker 
               key={barberia.id} 
@@ -190,10 +205,51 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
           );
         })}
       </MapContainer>
+      {/* Botón para centrar en ubicación del usuario */}
+      {userLocation && (
+        <button 
+          onClick={handleCenterOnUser}
+          className="location-center-btn"
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            right: 20,
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '50%',
+            width: '50px',
+            height: '50px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
+            cursor: 'pointer',
+            zIndex: 2000,
+            fontSize: '20px'
+          }}
+          title="Centrar en mi ubicación"
+        >
+          📍
+        </button>
+      )}
+      
       {/* Fallback visual si no hay ubicación */}
       {!userLocation && (
-        <div style={{position:'absolute',top:10,right:10,background:'#fff',padding:'8px 16px',borderRadius:'12px',boxShadow:'0 2px 8px rgba(0,0,0,0.08)',color:'#3b82f6',fontWeight:'bold',zIndex:2000}}>
-          Ubicación no disponible
+        <div style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          background: '#fff',
+          padding: '8px 16px',
+          borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          color: '#ef4444',
+          fontWeight: 'bold',
+          zIndex: 2000,
+          fontSize: '12px'
+        }}>
+          ⚠️ Ubicación no disponible
         </div>
       )}
     </div>

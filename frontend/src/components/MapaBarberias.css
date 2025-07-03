@@ -566,6 +566,7 @@
 
 .user-marker {
   animation: pulse 2s infinite;
+  z-index: 1200 !important;
 }
 
 @keyframes pulse {
@@ -577,4 +578,18 @@
     transform: scale(1.1);
     opacity: 0.8;
   }
+}
+
+/* Estilos para el botón de centrar ubicación */
+.location-center-btn {
+  transition: all 0.3s ease;
+}
+
+.location-center-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(59,130,246,0.4) !important;
+}
+
+.location-center-btn:active {
+  transform: scale(0.95);
 } 

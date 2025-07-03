@@ -76,12 +76,27 @@ const createUserLocationIcon = () => {
   });
 };
 
+// Componente para asegurar que mapRef y mapReady se setean correctamente
+const MapReadySetter = ({ setMapReady, mapRef }) => {
+  const map = useMap();
+  React.useEffect(() => {
+    if (map) {
+      mapRef.current = map;
+      setMapReady(true);
+      console.log("MapReadySetter: mapa listo", map);
+    }
+  }, [map, mapRef, setMapReady]);
+  return null;
+};
+
 const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
   const [userLocation, setUserLocation] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [geoError, setGeoError] = useState(null);
   const [mapReady, setMapReady] = useState(false);
+  const [hasCentered, setHasCentered] = useState(false);
+  const [pendingCenter, setPendingCenter] = useState(false);
   const mapRef = useRef(null);
   const initialCenter = useRef(MAP_CONFIG.defaultCenter);
   const initialZoom = useRef(MAP_CONFIG.defaultZoom);
@@ -130,21 +145,37 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
     );
   };
 
-  // Centrar automáticamente el mapa en la ubicación del usuario cuando se obtenga
-  useEffect(() => {
-    if (userLocation && mapReady && mapRef.current && typeof mapRef.current.setView === 'function') {
-      mapRef.current.setView(userLocation, 17);
+  // Permitir centrar manualmente al pulsar el botón
+  // SUGERENCIA: Usa flyTo para animar el viaje al centro del usuario
+  // const handleCenterOnUser = () => {
+  //   if (userLocation && mapRef.current) {
+  //     mapRef.current.flyTo(userLocation, 17, {
+  //       animate: true,
+  //       duration: 2 // segundos
+  //     });
+  //   }
+  // };
+  const handleCenterOnUser = () => {
+    console.log("userLocation:", userLocation);
+    console.log("mapRef.current:", mapRef.current);
+    console.log("mapReady:", mapReady);
+    if (userLocation && mapRef.current && mapReady) {
+      mapRef.current.flyTo(userLocation, 17, {
+        animate: true,
+        duration: 2
+      });
     }
-  }, [userLocation, mapReady]);
+  };
 
-  if (isLocating) {
-    return (
-      <div className="mapa-loading">
-        <div className="loading-spinner"></div>
-        <p>Obteniendo tu ubicación...</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (pendingCenter && userLocation && mapRef.current && mapReady) {
+      mapRef.current.flyTo(userLocation, 17, {
+        animate: true,
+        duration: 2
+      });
+      setPendingCenter(false);
+    }
+  }, [pendingCenter, userLocation, mapReady]);
 
   // Marcador de ubicación del usuario (coordenadas obtenidas)
   const userLocationMarker = userLocation ? (
@@ -167,8 +198,18 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
 
   return (
     <div className="mapa-simple">
+      {isLocating && (
+        <div className="mapa-loading" style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 3000}}>
+          <div className="loading-spinner"></div>
+          <p>Obteniendo tu ubicación...</p>
+        </div>
+      )}
       <MapContainer
-        whenCreated={mapInstance => { mapRef.current = mapInstance; setMapReady(true); }}
+        whenCreated={mapInstance => {
+          // console.log("MapContainer creado", mapInstance);
+          // mapRef.current = mapInstance;
+          // setMapReady(true);
+        }}
         center={initialCenter.current}
         zoom={initialZoom.current}
         className="mapa-element"
@@ -179,6 +220,7 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
           url={MAP_CONFIG.tileLayer}
           attribution={MAP_CONFIG.attribution}
         />
+        <MapReadySetter setMapReady={setMapReady} mapRef={mapRef} />
         {/* Marcador de ubicación del usuario */}
         {userLocationMarker}
         {/* Marcadores de barberías */}
@@ -252,7 +294,15 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
       }}>
         {/* Botón para obtener ubicación (siempre visible en desktop y móvil) */}
         <button 
-          onClick={handleGetLocation}
+          onClick={() => {
+            console.log("Botón de ubicación pulsado");
+            if (!userLocation) {
+              setPendingCenter(true);
+              handleGetLocation();
+            } else {
+              handleCenterOnUser();
+            }
+          }}
           className="location-btn"
           style={{
             background: '#3b82f6',
@@ -273,7 +323,7 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
             right: 20,
             zIndex: 2000
           }}
-          title={userLocation ? "Actualizar mi ubicación" : "Buscar mi ubicación"}
+          title={userLocation ? "Centrar en mi ubicación" : "Buscar mi ubicación"}
         >
           {isLocating ? '⏳' : '📍'}
         </button>

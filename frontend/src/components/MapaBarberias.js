@@ -89,11 +89,8 @@ const MapReadySetter = ({ setMapReady, mapRef }) => {
   return null;
 };
 
-const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
-  const [userLocation, setUserLocation] = useState(null);
-  const [isLocating, setIsLocating] = useState(false);
+const MapaBarberias = ({ barberias, onBarberiaSelect, onSolicitarUbicacion, userLocation, barberiasOSM = [] }) => {
   const [isMobile, setIsMobile] = useState(false);
-  const [geoError, setGeoError] = useState(null);
   const [mapReady, setMapReady] = useState(false);
   const [hasCentered, setHasCentered] = useState(false);
   const [pendingCenter, setPendingCenter] = useState(false);
@@ -112,40 +109,6 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  // Obtener ubicación del usuario manualmente
-  const handleGetLocation = async () => {
-    setIsLocating(true);
-    setGeoError(null);
-
-    if (!navigator.geolocation) {
-      setGeoError('Geolocalización no soportada en este navegador');
-      setIsLocating(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const location = [
-          position.coords.latitude,
-          position.coords.longitude
-        ];
-        console.log('Coordenadas obtenidas:', location[0], location[1]);
-        setUserLocation(location);
-        setGeoError(null);
-        setIsLocating(false);
-      },
-      (error) => {
-        setGeoError('Permiso de ubicación denegado o error de geolocalización.');
-        setIsLocating(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 60000
-      }
-    );
-  };
 
   // Permitir centrar manualmente al pulsar el botón
   // SUGERENCIA: Usa flyTo para animar el viaje al centro del usuario
@@ -173,20 +136,17 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
   };
 
   useEffect(() => {
-    if (pendingCenter && userLocation && mapRef.current && mapReady) {
+    if (userLocation && mapRef.current && mapReady) {
       setShowMarkers(false);
-      setShouldFadeInMarkers(true);
       mapRef.current.flyTo(userLocation, 17, {
         animate: true,
         duration: 2
       });
       setTimeout(() => {
         setShowMarkers(true);
-        setTimeout(() => setShouldFadeInMarkers(false), 800);
       }, 2000);
-      setPendingCenter(false);
     }
-  }, [pendingCenter, userLocation, mapReady]);
+  }, [userLocation, mapReady]);
 
   // Marcador de ubicación del usuario (coordenadas obtenidas)
   const userLocationMarker = userLocation ? (
@@ -197,24 +157,28 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
             ¡Aquí estás!
           </div>
           <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-            Lat: {userLocation[0].toFixed(6)}
+            Lat: {userLocation[0]?.toFixed(6) ?? '0.000000'}
           </div>
           <div style={{ fontSize: '12px', color: '#6b7280' }}>
-            Lng: {userLocation[1].toFixed(6)}
+            Lng: {userLocation[1]?.toFixed(6) ?? '0.000000'}
           </div>
         </div>
       </Popup>
     </Marker>
   ) : null;
 
+  // Agrega este useEffect después de la declaración de mapRef y mapReady
+  useEffect(() => {
+    if (userLocation && mapRef.current && mapReady) {
+      mapRef.current.flyTo(userLocation, 17, {
+        animate: true,
+        duration: 2
+      });
+    }
+  }, [userLocation, mapReady]);
+
   return (
     <div className="mapa-simple">
-      {isLocating && (
-        <div className="mapa-loading" style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 3000}}>
-          <div className="loading-spinner"></div>
-          <p>Obteniendo tu ubicación...</p>
-        </div>
-      )}
       <MapContainer
         whenCreated={mapInstance => {
           // console.log("MapContainer creado", mapInstance);
@@ -288,7 +252,7 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
                       fontSize: '12px', 
                       color: '#374151'
                     }}>
-                      {barberia.calificacion_promedio} ({barberia.total_calificaciones})
+                      {(barberia.calificacion_promedio ?? 0).toFixed(1)} ({barberia.total_calificaciones})
                     </span>
                   </div>
                 </div>
@@ -296,6 +260,31 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
             </Marker>
           );
         })}
+        {/* Marcadores de barberías OSM */}
+        {barberiasOSM.map(barberia => (
+          <Marker
+            key={barberia.id}
+            position={[barberia.latitud, barberia.longitud]}
+            icon={createBarberiaIcon('fade-visible-marker')}
+          >
+            <Popup>
+              <div style={{ padding: '8px', maxWidth: '200px' }}>
+                <h3 style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#1f2937', fontWeight: '600' }}>
+                  {barberia.nombre}
+                </h3>
+                {barberia.direccion && (
+                  <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#6b7280' }}>
+                    {barberia.direccion}
+                  </p>
+                )}
+                <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                  {barberia.tags && barberia.tags.shop && <span>Tipo: {barberia.tags.shop}</span>}
+                  {barberia.tags && barberia.tags.amenity && <span> Tipo: {barberia.tags.amenity}</span>}
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
       </MapContainer>
       {/* Controles del mapa */}
       <div style={{
@@ -309,15 +298,7 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
       }}>
         {/* Botón para obtener ubicación (siempre visible en desktop y móvil) */}
         <button 
-          onClick={() => {
-            console.log("Botón de ubicación pulsado");
-            if (!userLocation) {
-              setPendingCenter(true);
-              handleGetLocation();
-            } else {
-              handleCenterOnUser();
-            }
-          }}
+          onClick={onSolicitarUbicacion}
           className="location-btn"
           style={{
             background: '#3b82f6',
@@ -340,7 +321,7 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
           }}
           title={userLocation ? "Centrar en mi ubicación" : "Buscar mi ubicación"}
         >
-          {isLocating ? '⏳' : '📍'}
+          {userLocation ? '📍' : '📍'}
         </button>
 
         {/* Indicador de estado de ubicación */}
@@ -362,21 +343,6 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
             gap: '8px'
           }}>
             🌍 Vista mundial
-            <button 
-              onClick={handleGetLocation}
-              style={{
-                background: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '4px 8px',
-                fontSize: '10px',
-                cursor: 'pointer',
-                fontWeight: '600'
-              }}
-            >
-              Buscar ubicación
-            </button>
           </div>
         )}
       </div>
@@ -444,27 +410,6 @@ const MapaBarberias = ({ barberias, onBarberiaSelect }) => {
           >
             −
           </button>
-        </div>
-      )}
-
-      {/* Mensaje de error de geolocalización */}
-      {(!userLocation && geoError) && (
-        <div style={{
-          position: 'absolute',
-          bottom: 80,
-          right: 20,
-          background: '#fee2e2',
-          color: '#b91c1c',
-          padding: '10px 16px',
-          borderRadius: '8px',
-          fontWeight: 'bold',
-          zIndex: 3000,
-          fontSize: '14px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-        }}>
-          {geoError === 'Permiso de ubicación denegado. Por favor, habilita la ubicación en tu navegador.'
-            ? 'Debes permitir el acceso a tu ubicación para usar esta función.'
-            : geoError}
         </div>
       )}
     </div>

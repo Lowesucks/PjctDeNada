@@ -1,195 +1,162 @@
-# ✂️ Barberías - Aplicación de Calificaciones
+# 🚀 Barberías App - Aplicación Universal
 
-Una aplicación web moderna y minimalista para calificar barberías y lugares de corte de cabello. Diseñada con estilo iOS y completamente responsive para funcionar tanto en web como en dispositivos móviles.
+Una aplicación web moderna para encontrar y calificar barberías cercanas, con mapa interactivo y sistema de calificaciones.
 
-## 🚀 Características
+## ✨ Características
 
-- **Diseño Minimalista**: Interfaz limpia y moderna inspirada en iOS
-- **Responsive**: Funciona perfectamente en móviles, tablets y desktop
-- **Calificaciones**: Sistema de 5 estrellas con comentarios
-- **Búsqueda**: Busca barberías por nombre o dirección
-- **🗺️ Integración con Foursquare**: Busca barberías cercanas en tiempo real
-- **📍 Geolocalización**: Encuentra barberías cerca de tu ubicación
-- **API REST**: Backend robusto con Flask y SQLite
-- **PWA Ready**: Preparada para convertirse en aplicación móvil
+- 🗺️ **Mapa Interactivo**: Visualiza barberías en un mapa con Leaflet
+- 📍 **Ubicación en Tiempo Real**: Encuentra barberías cercanas a tu ubicación
+- ⭐ **Sistema de Calificaciones**: Califica y comenta sobre barberías
+- 🔍 **Búsqueda Avanzada**: Busca por nombre, dirección o ubicación
+- 📱 **Responsive Design**: Funciona perfectamente en móviles y desktop
+- 🌐 **Datos Reales**: Integración con OpenStreetMap para barberías reales
+- 🎨 **UI Moderna**: Interfaz elegante con sidebar colapsible
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Tecnologías
 
-### Backend
-- **Python 3.8+**
-- **Flask** - Framework web
-- **Flask-SQLAlchemy** - ORM para base de datos
-- **SQLite** - Base de datos ligera
-- **Flask-CORS** - Soporte para CORS
-- **Requests** - Cliente HTTP para APIs externas
+- **Backend**: Python Flask + SQLAlchemy
+- **Frontend**: React + Leaflet (mapas)
+- **Base de Datos**: SQLite
+- **APIs**: OpenStreetMap Overpass API
+- **Estilos**: CSS moderno con animaciones
 
-### Frontend
-- **React 18** - Biblioteca de UI
-- **Axios** - Cliente HTTP
-- **CSS3** - Estilos personalizados estilo iOS
+## 📋 Requisitos
 
-## 📦 Instalación y Ejecución
+- **Python 3.7+**
+- **Node.js 14+**
+- **npm** (incluido con Node.js)
 
-### 🚀 Forma Más Simple (Recomendada)
+## 🚀 Instalación y Uso
+
+### Opción 1: Script Universal (Recomendado)
+```bash
+python run.py
+```
+
+### Opción 2: Scripts Específicos por Plataforma
 
 #### Windows
-```bash
-# Configuración inicial (solo la primera vez)
-setup.bat
-
-# Ejecutar la aplicación
+```cmd
 run.bat
 ```
 
-#### Linux/Mac
+#### Linux/macOS
 ```bash
-# Dar permisos de ejecución
-chmod +x run.sh
-
-# Configuración inicial (solo la primera vez)
-./setup.sh
-
-# Ejecutar la aplicación
 ./run.sh
 ```
 
-### 📋 Instalación Manual
-
-#### Prerrequisitos
-- Python 3.8 o superior
-- Node.js 14 o superior
-- npm o yarn
-
-#### 1. Clonar el repositorio
+### Opción 3: Script de Shell Universal
 ```bash
-git clone <tu-repositorio>
-cd barberias-app
+./run
 ```
 
-#### 2. Configurar el Backend
+## 📱 Acceso a la Aplicación
+
+Una vez iniciada, la aplicación estará disponible en:
+
+### Desde tu computadora:
+- **Frontend**: http://localhost:3000
+- **Backend**: http://localhost:5000
+
+### Desde otros dispositivos en la misma red:
+- **Frontend**: http://[TU_IP_LOCAL]:3000
+- **Backend**: http://[TU_IP_LOCAL]:5000
+
+Para encontrar tu IP local:
 ```bash
-# Crear entorno virtual
-python -m venv venv
-
-# Activar entorno virtual
-# En Windows:
-venv\Scripts\activate
-# En macOS/Linux:
-source venv/bin/activate
-
-# Instalar dependencias
-pip install -r requirements.txt
-
-# Ejecutar el servidor backend
-python app.py
+python show_ip.py
 ```
 
-El backend estará disponible en `http://localhost:5000`
+## 🎯 Funcionalidades Principales
 
-#### 3. Configurar el Frontend
-```bash
-# Navegar al directorio frontend
-cd frontend
+### 🗺️ Mapa Interactivo
+- Visualización de barberías en el mapa
+- Marcadores con información detallada
+- Centrado automático en tu ubicación
+- Zoom y navegación intuitiva
 
-# Instalar dependencias
-npm install
+### 📍 Búsqueda de Barberías
+- **Búsqueda por ubicación**: Encuentra barberías cercanas
+- **Búsqueda por nombre**: Busca barberías específicas
+- **Filtros**: Por distancia, calificación, etc.
+- **Datos reales**: Integración con OpenStreetMap
 
-# Ejecutar el servidor de desarrollo
-npm start
-```
+### ⭐ Sistema de Calificaciones
+- Califica barberías del 1 al 5 estrellas
+- Agrega comentarios y reseñas
+- Promedio de calificaciones en tiempo real
+- Historial de calificaciones
 
-El frontend estará disponible en `http://localhost:3000`
-
-## 🎯 Uso de la Aplicación
-
-### Para Usuarios
-1. **Explorar Barberías**: Ve la lista de barberías disponibles
-2. **Buscar**: Usa la barra de búsqueda para encontrar barberías específicas
-3. **Ver Detalles**: Toca una barbería para ver información completa
-4. **Calificar**: Deja tu calificación y comentario sobre el servicio
-5. **Leer Comentarios**: Revisa las opiniones de otros usuarios
-
-### Para Desarrolladores
-- **API Endpoints**: Documentación de la API en el código
-- **Componentes React**: Estructura modular y reutilizable
-- **Estilos CSS**: Sistema de diseño consistente
-
-## 📱 Funcionalidades Móviles
-
-La aplicación está optimizada para dispositivos móviles con:
-- **Touch-friendly**: Botones y elementos táctiles
-- **Responsive Design**: Se adapta a cualquier tamaño de pantalla
-- **PWA Ready**: Puede instalarse como aplicación nativa
-- **Offline Capable**: Preparada para funcionalidad offline
-
-## 🗄️ Estructura de la Base de Datos
-
-### Tabla: Barberia
-- `id` - Identificador único
-- `nombre` - Nombre de la barbería
-- `direccion` - Dirección física
-- `telefono` - Número de contacto
-- `horario` - Horarios de atención
-- `calificacion_promedio` - Promedio de calificaciones
-- `total_calificaciones` - Número total de calificaciones
-- `fecha_creacion` - Fecha de registro
-
-### Tabla: Calificacion
-- `id` - Identificador único
-- `barberia_id` - Referencia a la barbería
-- `nombre_usuario` - Nombre del usuario que califica
-- `calificacion` - Puntuación de 1 a 5 estrellas
-- `comentario` - Comentario opcional
-- `fecha` - Fecha de la calificación
+### 🎨 Interfaz de Usuario
+- **Sidebar colapsible**: Menú lateral elegante
+- **Animaciones suaves**: Transiciones fluidas
+- **Diseño responsive**: Adaptable a cualquier pantalla
+- **Tema moderno**: UI limpia y profesional
 
 ## 🔧 Configuración Avanzada
 
 ### Variables de Entorno
 Crea un archivo `.env` en la raíz del proyecto:
+
 ```env
 FLASK_ENV=development
 FLASK_DEBUG=True
-DATABASE_URL=sqlite:///barberias.db
-FOURSQUARE_API_KEY=tu_api_key_foursquare
 ```
 
-### 🏪 Configuración de Foursquare API (Opcional)
-Para usar la funcionalidad de búsqueda de barberías cercanas en tiempo real:
+### Configuración de APIs
+La aplicación usa OpenStreetMap por defecto, pero puedes configurar otras APIs:
 
-1. **Obtener API Key**: Regístrate en [Foursquare for Developers](https://developer.foursquare.com/)
-2. **Configurar**: Agrega tu API key en el archivo `.env` o directamente en `app.py`
-3. **Documentación completa**: Ver `FOURSQUARE_API_SETUP.md` para instrucciones detalladas
+- **Google Places API**: Para datos más detallados
+- **Foursquare API**: Para información adicional
+- **OpenStreetMap**: Gratuito y sin límites
 
-**Sin API key**: La aplicación funcionará perfectamente mostrando barberías locales con un indicador visual sutil.
+## 📁 Estructura del Proyecto
 
-### Personalización de Estilos
-Los estilos están en `frontend/src/index.css` y siguen el sistema de diseño iOS:
-- Colores principales: `#007aff` (azul iOS)
-- Fondo: `#f2f2f7` (gris claro iOS)
-- Tipografía: San Francisco (sistema)
+```
+barberias-app/
+├── app.py                 # Backend Flask
+├── run.py                 # Script universal
+├── run.bat               # Script Windows
+├── run.sh                # Script Unix
+├── show_ip.py            # Mostrar IP local
+├── requirements.txt      # Dependencias Python
+├── frontend/             # Aplicación React
+│   ├── src/
+│   ├── public/
+│   └── package.json
+├── instance/             # Base de datos SQLite
+└── README.md
+```
 
-## 🚀 Despliegue
+## 🧪 Pruebas
 
-### Backend (Heroku/Vercel)
+### Prueba de Múltiples Usuarios
 ```bash
-# Crear Procfile
-echo "web: python app.py" > Procfile
-
-# Configurar variables de entorno
-heroku config:set FLASK_ENV=production
+python test_multiple_users.py
 ```
 
-### Frontend (Netlify/Vercel)
+### Demostración de Funcionalidades
 ```bash
-# Construir para producción
-npm run build
-
-# Desplegar la carpeta build/
+python demo_multiple_users.py
 ```
 
-## 📄 Licencia
+## 🛑 Detener la Aplicación
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+Presiona **Ctrl+C** en la terminal donde ejecutaste el script. Esto detendrá tanto el backend como el frontend de forma limpia.
+
+## 🔍 Solución de Problemas
+
+### Error: "Puerto ya en uso"
+- Detén otros procesos que usen los puertos 3000 o 5000
+- O cambia los puertos en la configuración
+
+### Error: "Dependencias no encontradas"
+- Ejecuta `pip install -r requirements.txt`
+- Ejecuta `npm install` en el directorio frontend
+
+### Error: "No se puede conectar"
+- Verifica que estés en la misma red WiFi
+- Usa `python show_ip.py` para obtener la IP correcta
 
 ## 🤝 Contribuir
 
@@ -199,13 +166,17 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
 
-## 📞 Soporte
+## 📄 Licencia
 
-Si tienes preguntas o problemas:
-- Abre un issue en GitHub
-- Contacta al equipo de desarrollo
-- Revisa la documentación de la API
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+
+## 🙏 Agradecimientos
+
+- **OpenStreetMap**: Por los datos de barberías
+- **Leaflet**: Por la librería de mapas
+- **React**: Por el framework frontend
+- **Flask**: Por el framework backend
 
 ---
 
-**¡Disfruta calificando las mejores barberías de tu ciudad! ✂️✨** 
+**¡Disfruta usando la aplicación de Barberías! 🎯** 

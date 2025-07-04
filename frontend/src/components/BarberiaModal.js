@@ -37,7 +37,7 @@ const BarberiaModal = ({ barberia, onClose, onCalificar }) => {
 
         <div className="barberia-info">
           <p><strong>📍 Dirección:</strong> {barberia.direccion}</p>
-          {barberia.telefono && barberia.telefono !== 'Teléfono no disponible' && (
+          {barberia.telefono && barberia.telefono !== 'No disponible' && (
             <p><strong>📞 Teléfono:</strong> {barberia.telefono}</p>
           )}
           {barberia.horario && barberia.horario !== 'Horario no disponible' && (
@@ -58,6 +58,25 @@ const BarberiaModal = ({ barberia, onClose, onCalificar }) => {
               {barberia.distancia && (
                 <span style={{ marginLeft: '8px', opacity: 0.9 }}>
                   • {(barberia.distancia / 1000).toFixed(1)} km
+                </span>
+              )}
+            </div>
+          )}
+          {barberia.fuente === 'osm' && (
+            <div style={{ 
+              background: '#3b82f6', 
+              color: 'white', 
+              padding: '8px 12px', 
+              borderRadius: '8px', 
+              marginTop: '12px',
+              fontSize: '14px',
+              fontWeight: '600',
+              display: 'inline-block'
+            }}>
+              🗺️ Datos de OpenStreetMap
+              {barberia.categoria && (
+                <span style={{ marginLeft: '8px', opacity: 0.9 }}>
+                  • {barberia.categoria}
                 </span>
               )}
             </div>
@@ -100,8 +119,13 @@ const BarberiaModal = ({ barberia, onClose, onCalificar }) => {
           )}
         </div>
 
-        <button className="btn" onClick={onCalificar} style={{ marginTop: '20px' }}>
-          ✨ Calificar esta barbería
+        <button 
+          className="btn" 
+          onClick={onCalificar} 
+          style={{ marginTop: '20px' }}
+          disabled={barberia.fuente === 'osm'}
+        >
+          {barberia.fuente === 'osm' ? '🗺️ Solo visualización (OSM)' : '✨ Calificar esta barbería'}
         </button>
       </div>
     </div>

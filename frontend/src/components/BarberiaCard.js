@@ -13,36 +13,57 @@ const BarberiaCard = ({ barberia, onVerDetalles }) => {
     return stars;
   };
 
+  // Detectar si es de OSM
+  const isOSM = barberia.fuente === 'osm';
+  // Adaptar campos si es OSM
+  const nombre = isOSM ? (barberia.nombre || 'Barbería / Estética') : barberia.nombre;
+  const direccion = isOSM ? (barberia.direccion || '') : barberia.direccion;
+  const calificacion = isOSM ? (barberia.calificacion_promedio || 0) : barberia.calificacion_promedio;
+  const totalCalificaciones = isOSM ? (barberia.total_calificaciones || 0) : barberia.total_calificaciones;
+
   return (
     <div className="barberia-card" onClick={onVerDetalles}>
       <div className="barberia-header">
         <div>
-          <div className="barberia-nombre">{barberia.nombre}</div>
-          <div className="barberia-direccion">{barberia.direccion}</div>
+          <div className="barberia-nombre">{nombre} {isOSM && <span style={{color:'#3b82f6', fontSize:'12px'}}>(OSM)</span>}</div>
+          <div className="barberia-direccion">{direccion}</div>
         </div>
         <div className="rating">
           <div className="stars">
-            {renderStars(Math.round(barberia.calificacion_promedio))}
+            {renderStars(Math.round(calificacion))}
           </div>
           <div className="rating-text">
-            {barberia.calificacion_promedio.toFixed(1)}
+            {calificacion.toFixed(1)}
           </div>
         </div>
       </div>
       
       <div className="barberia-info">
-        {barberia.telefono && barberia.telefono !== 'Teléfono no disponible' && (
+        {barberia.telefono && barberia.telefono !== 'No disponible' && (
           <span>📞 {barberia.telefono}</span>
         )}
         {barberia.horario && barberia.horario !== 'Horario no disponible' && (
           <span>🕒 {barberia.horario}</span>
         )}
-        <span>👥 {barberia.total_calificaciones} calificaciones</span>
+        <span>👥 {totalCalificaciones} calificaciones</span>
         {barberia.fuente === 'foursquare' && (
           <span className="foursquare-badge">📍 Foursquare</span>
         )}
-        {barberia.distancia && (
+        {barberia.fuente === 'osm' && (
+          <span className="osm-badge" style={{
+            background: '#3b82f6',
+            color: 'white',
+            padding: '2px 6px',
+            borderRadius: '4px',
+            fontSize: '10px',
+            fontWeight: '600'
+          }}>🗺️ OSM</span>
+        )}
+        {barberia.distancia && !isOSM && (
           <span>📏 {(barberia.distancia / 1000).toFixed(1)} km</span>
+        )}
+        {isOSM && barberia.categoria && (
+          <span style={{fontSize: '11px', color: '#6b7280'}}>🏷️ {barberia.categoria}</span>
         )}
       </div>
       

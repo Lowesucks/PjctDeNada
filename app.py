@@ -319,4 +319,11 @@ def crear_tablas():
 crear_tablas()
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000) 
+    # Configuración optimizada para múltiples usuarios
+    app.run(
+        debug=True, 
+        host='0.0.0.0', 
+        port=5000,
+        threaded=True,  # Habilitar múltiples hilos para conexiones simultáneas
+        processes=1     # Un proceso, múltiples hilos (mejor para desarrollo)
+    ) 

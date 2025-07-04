@@ -89,7 +89,7 @@ const MapReadySetter = ({ setMapReady, mapRef }) => {
   return null;
 };
 
-const MapaBarberias = ({ barberias, onBarberiaSelect, onSolicitarUbicacion, userLocation, barberiasOSM = [] }) => {
+const MapaBarberias = ({ barberias, onBarberiaSelect, onSolicitarUbicacion, userLocation, barberiasOSM = [], barberiaParaCentrar }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const [hasCentered, setHasCentered] = useState(false);
@@ -111,15 +111,6 @@ const MapaBarberias = ({ barberias, onBarberiaSelect, onSolicitarUbicacion, user
   }, []);
 
   // Permitir centrar manualmente al pulsar el botón
-  // SUGERENCIA: Usa flyTo para animar el viaje al centro del usuario
-  // const handleCenterOnUser = () => {
-  //   if (userLocation && mapRef.current) {
-  //     mapRef.current.flyTo(userLocation, 17, {
-  //       animate: true,
-  //       duration: 2 // segundos
-  //     });
-  //   }
-  // };
   const handleCenterOnUser = () => {
     if (userLocation && mapRef.current && mapReady) {
       setShowMarkers(false); // Oculta marcadores
@@ -135,18 +126,26 @@ const MapaBarberias = ({ barberias, onBarberiaSelect, onSolicitarUbicacion, user
     }
   };
 
+  // Solo aplicar fade cuando se centra en el usuario, no en barbería específica
   useEffect(() => {
     if (userLocation && mapRef.current && mapReady) {
-      setShowMarkers(false);
-      mapRef.current.flyTo(userLocation, 17, {
-        animate: true,
-        duration: 2
-      });
-      setTimeout(() => {
-        setShowMarkers(true);
-      }, 2000);
+      // Solo aplicar fade si se llama desde handleCenterOnUser
+      // No hacer nada aquí para evitar desfase al centrar en barbería
     }
   }, [userLocation, mapReady]);
+
+  // Nuevo efecto: centrar el mapa en la barbería seleccionada desde la carta
+  useEffect(() => {
+    if (barberiaParaCentrar && mapRef.current && mapReady) {
+      if (barberiaParaCentrar.latitud && barberiaParaCentrar.longitud) {
+        mapRef.current.flyTo([barberiaParaCentrar.latitud, barberiaParaCentrar.longitud], 18, {
+          animate: true,
+          duration: 2
+        });
+        // No ocultar ni animar marcadores aquí
+      }
+    }
+  }, [barberiaParaCentrar, mapReady]);
 
   // Marcador de ubicación del usuario (coordenadas obtenidas)
   const userLocationMarker = userLocation ? (

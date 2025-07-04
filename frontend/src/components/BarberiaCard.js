@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BarberiaCard = ({ barberia, onVerDetalles }) => {
+const BarberiaCard = ({ barberia, onVerDetalles, onVerEnMapa }) => {
   // Nombre y dirección robustos
   const nombre = barberia.nombre || 'Barbería / Estética';
   const direccion = barberia.direccion && barberia.direccion.trim() ? barberia.direccion : 'Dirección no disponible';
@@ -41,9 +41,14 @@ const BarberiaCard = ({ barberia, onVerDetalles }) => {
         )}
       </div>
       {isOSM ? (
-        <button className="btn btn-secondary" disabled style={{opacity:0.7, cursor:'not-allowed', marginTop:'10px'}}>
-          Solo visualización (OSM)
-        </button>
+        <div style={{display:'flex', flexDirection:'column', gap:'6px', marginTop:'10px'}}>
+          <button className="btn btn-secondary" disabled style={{opacity:0.7, cursor:'not-allowed'}}>
+            Solo visualización (OSM)
+          </button>
+          <button className="btn btn-primary" onClick={e => { e.stopPropagation(); onVerEnMapa && onVerEnMapa(); }} style={{marginTop:'0'}}>
+            Ver en mapa
+          </button>
+        </div>
       ) : (
         <button className="btn btn-secondary" onClick={onVerDetalles} style={{marginTop:'10px'}}>
           Ver detalles y calificar

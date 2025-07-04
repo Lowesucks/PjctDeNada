@@ -23,6 +23,7 @@ function App() {
   const [userLocation, setUserLocation] = useState(null);
   const [foursquareAvailable, setFoursquareAvailable] = useState(false);
   const [osmBarberias, setOsmBarberias] = useState([]);
+  const [barberiaParaCentrar, setBarberiaParaCentrar] = useState(null);
 
   useEffect(() => {
     cargarBarberias();
@@ -167,7 +168,7 @@ function App() {
   );
 
   // Función para consultar Overpass API
-  const fetchBarberiasOSM = async (center, radio = 2000) => {
+  const fetchBarberiasOSM = async (center, radio = 5000) => {
     if (center && !Array.isArray(center) && typeof center === 'object' && center.lat !== undefined && center.lng !== undefined) {
       center = [center.lat, center.lng];
     }
@@ -252,6 +253,12 @@ function App() {
     );
   };
 
+  // Función para centrar el mapa en la barbería seleccionada
+  const handleVerEnMapa = (barberia) => {
+    setBarberiaParaCentrar(barberia);
+    // Opcional: podrías cerrar el modal o sheet si quieres
+  };
+
   // Vista móvil (estilo Uber)
   if (isMobile) {
     return (
@@ -264,6 +271,7 @@ function App() {
           osmBarberias={barberiasOSMAdaptadas}
           onSolicitarUbicacion={handleSolicitarUbicacion}
           barberiasOSM={barberiasOSMAdaptadas}
+          barberiaParaCentrar={barberiaParaCentrar}
         />
 
         {/* Header flotante */}
@@ -346,6 +354,7 @@ function App() {
                         key={barberia.id}
                         barberia={barberia}
                         onVerDetalles={() => handleVerBarberia(barberia)}
+                        onVerEnMapa={() => handleVerEnMapa(barberia)}
                       />
                     ))}
                   </div>
@@ -414,6 +423,7 @@ function App() {
             osmBarberias={barberiasOSMAdaptadas}
             onSolicitarUbicacion={handleSolicitarUbicacion}
             barberiasOSM={barberiasOSMAdaptadas}
+            barberiaParaCentrar={barberiaParaCentrar}
           />
         </div>
 
@@ -451,6 +461,7 @@ function App() {
                         key={barberia.id}
                         barberia={barberia}
                         onVerDetalles={() => handleVerBarberia(barberia)}
+                        onVerEnMapa={() => handleVerEnMapa(barberia)}
                       />
                     ))}
                   </div>

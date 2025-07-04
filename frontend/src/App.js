@@ -23,7 +23,6 @@ function App() {
   const [userLocation, setUserLocation] = useState(null);
   const [foursquareAvailable, setFoursquareAvailable] = useState(false);
   const [osmBarberias, setOsmBarberias] = useState([]);
-  const [ubicacionSolicitada, setUbicacionSolicitada] = useState(false);
 
   useEffect(() => {
     cargarBarberias();
@@ -230,37 +229,14 @@ function App() {
   // Después de crear barberiasOSMAdaptadas, agrega este log:
   console.log('Barberías OSM adaptadas:', barberiasOSMAdaptadas);
 
-  // 2. barberiasOSMEnRango NO se filtra por búsqueda, solo por radio
-  const radioBusqueda = 2000; // metros (ajusta si usas otro valor)
-  function distanciaEnMetros(lat1, lon1, lat2, lon2) {
-    const R = 6371000; // Radio de la Tierra en metros
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  }
-  const barberiasOSMEnRango = ubicacionSolicitada && userLocation
-    ? barberiasOSMAdaptadas.filter(b => {
-        const dist = distanciaEnMetros(userLocation.lat, userLocation.lng, b.latitud, b.longitud);
-        const pasa = dist <= radioBusqueda;
-        console.log(`Lugar OSM: ${b.nombre} (${b.latitud}, ${b.longitud}) - Distancia: ${dist.toFixed(2)}m - Pasa filtro: ${pasa}`);
-        return pasa;
-      })
-    : [];
+  // 1. Loguea el contenido de barberiasOSMAdaptadas y userLocation
+  console.log('DEBUG - barberiasOSMAdaptadas:', barberiasOSMAdaptadas);
+  console.log('DEBUG - userLocation:', userLocation);
 
-  // 3. Combina ambas listas para la lista y el mapa
-  const todasLasBarberias = ubicacionSolicitada
-    ? [...barberiasLocalesFiltradas, ...barberiasOSMEnRango]
-    : barberiasLocalesFiltradas;
-
-  // 2. Agrega un log para barberiasOSMEnRango
-  console.log('Barberías OSM en rango:', barberiasOSMEnRango);
+  // CAMBIO: La lista y el mapa siempre muestran barberiasOSMAdaptadas
+  const todasLasBarberias = barberiasOSMAdaptadas;
 
   const handleSolicitarUbicacion = () => {
-    setUbicacionSolicitada(true);
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const loc = {
@@ -272,7 +248,6 @@ function App() {
       },
       (error) => {
         setUserLocation(null);
-        setUbicacionSolicitada(false);
       }
     );
   };
@@ -286,7 +261,7 @@ function App() {
           barberias={todasLasBarberias}
           onBarberiaSelect={handleBarberiaSelectFromMap}
           userLocation={userLocation}
-          osmBarberias={barberiasOSMEnRango}
+          osmBarberias={barberiasOSMAdaptadas}
           onSolicitarUbicacion={handleSolicitarUbicacion}
           barberiasOSM={barberiasOSMAdaptadas}
         />
@@ -317,7 +292,7 @@ function App() {
                 </span>
               </div>
             )}
-            {barberiasOSMEnRango.length > 0 && (
+            {barberiasOSMAdaptadas.length > 0 && (
               <div style={{ 
                 fontSize: '12px', 
                 color: '#3b82f6', 
@@ -326,7 +301,7 @@ function App() {
                 alignItems: 'center',
                 gap: '4px'
               }}>
-                🗺️ {barberiasOSMEnRango.length} barberías de OSM encontradas
+                🗺️ {barberiasOSMAdaptadas.length} barberías de OSM encontradas
               </div>
             )}
           </div>
@@ -436,7 +411,7 @@ function App() {
             barberias={todasLasBarberias}
             onBarberiaSelect={handleBarberiaSelectFromMap}
             userLocation={userLocation}
-            osmBarberias={barberiasOSMEnRango}
+            osmBarberias={barberiasOSMAdaptadas}
             onSolicitarUbicacion={handleSolicitarUbicacion}
             barberiasOSM={barberiasOSMAdaptadas}
           />
@@ -450,9 +425,9 @@ function App() {
                 <h2>Barberías cercanas</h2>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px'}}>
                   <span className="results-count">{todasLasBarberias.length} resultados</span>
-                  {barberiasOSMEnRango.length > 0 && (
+                  {barberiasOSMAdaptadas.length > 0 && (
                     <span style={{color: '#3b82f6', fontSize: '12px', fontWeight: '500'}}>
-                      🗺️ {barberiasOSMEnRango.length} de OpenStreetMap
+                      🗺️ {barberiasOSMAdaptadas.length} de OpenStreetMap
                     </span>
                   )}
                 </div>
@@ -526,9 +501,9 @@ function App() {
               <span className="stat-item">
                 <strong>{todasLasBarberias.length}</strong> barberías
               </span>
-              {barberiasOSMEnRango.length > 0 && (
+              {barberiasOSMAdaptadas.length > 0 && (
                 <span className="stat-item" style={{color: '#3b82f6', fontSize: '12px'}}>
-                  🗺️ {barberiasOSMEnRango.length} de OSM
+                  🗺️ {barberiasOSMAdaptadas.length} de OSM
                 </span>
               )}
             </div>

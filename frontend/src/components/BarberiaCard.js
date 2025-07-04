@@ -1,75 +1,54 @@
 import React from 'react';
 
 const BarberiaCard = ({ barberia, onVerDetalles }) => {
-  const renderStars = (rating) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <span key={i} className={`star ${i <= rating ? '' : 'empty'}`}>
-          ★
-        </span>
-      );
-    }
-    return stars;
-  };
-
-  // Detectar si es de OSM
+  // Nombre y dirección robustos
+  const nombre = barberia.nombre || 'Barbería / Estética';
+  const direccion = barberia.direccion && barberia.direccion.trim() ? barberia.direccion : 'Dirección no disponible';
+  const categoria = barberia.categoria || '';
   const isOSM = barberia.fuente === 'osm';
-  // Adaptar campos si es OSM
-  const nombre = isOSM ? (barberia.nombre || 'Barbería / Estética') : barberia.nombre;
-  const direccion = isOSM ? (barberia.direccion || '') : barberia.direccion;
-  const calificacion = isOSM ? (barberia.calificacion_promedio || 0) : barberia.calificacion_promedio;
-  const totalCalificaciones = isOSM ? (barberia.total_calificaciones || 0) : barberia.total_calificaciones;
 
   return (
-    <div className="barberia-card" onClick={onVerDetalles}>
+    <div className="barberia-card" onClick={onVerDetalles} style={{cursor: isOSM ? 'default' : 'pointer'}}>
       <div className="barberia-header">
         <div>
           <div className="barberia-nombre">{nombre} {isOSM && <span style={{color:'#3b82f6', fontSize:'12px'}}>(OSM)</span>}</div>
           <div className="barberia-direccion">{direccion}</div>
-        </div>
-        <div className="rating">
-          <div className="stars">
-            {renderStars(Math.round(calificacion))}
-          </div>
-          <div className="rating-text">
-            {calificacion.toFixed(1)}
-          </div>
+          {isOSM && categoria && (
+            <div style={{fontSize: '11px', color: '#6b7280', marginTop: '2px'}}>🏷️ {categoria}</div>
+          )}
         </div>
       </div>
-      
       <div className="barberia-info">
-        {barberia.telefono && barberia.telefono !== 'No disponible' && (
+        {!isOSM && barberia.telefono && barberia.telefono !== 'No disponible' && (
           <span>📞 {barberia.telefono}</span>
         )}
-        {barberia.horario && barberia.horario !== 'Horario no disponible' && (
+        {!isOSM && barberia.horario && barberia.horario !== 'Horario no disponible' && (
           <span>🕒 {barberia.horario}</span>
         )}
-        <span>👥 {totalCalificaciones} calificaciones</span>
-        {barberia.fuente === 'foursquare' && (
-          <span className="foursquare-badge">📍 Foursquare</span>
+        {!isOSM && (
+          <span>👥 {barberia.total_calificaciones ?? 0} calificaciones</span>
         )}
-        {barberia.fuente === 'osm' && (
+        {isOSM && (
           <span className="osm-badge" style={{
             background: '#3b82f6',
             color: 'white',
             padding: '2px 6px',
             borderRadius: '4px',
             fontSize: '10px',
-            fontWeight: '600'
+            fontWeight: '600',
+            marginLeft: '8px'
           }}>🗺️ OSM</span>
         )}
-        {barberia.distancia && !isOSM && (
-          <span>📏 {(barberia.distancia / 1000).toFixed(1)} km</span>
-        )}
-        {isOSM && barberia.categoria && (
-          <span style={{fontSize: '11px', color: '#6b7280'}}>🏷️ {barberia.categoria}</span>
-        )}
       </div>
-      
-      <button className="btn btn-secondary">
-        Ver detalles y calificar
-      </button>
+      {isOSM ? (
+        <button className="btn btn-secondary" disabled style={{opacity:0.7, cursor:'not-allowed', marginTop:'10px'}}>
+          Solo visualización (OSM)
+        </button>
+      ) : (
+        <button className="btn btn-secondary" onClick={onVerDetalles} style={{marginTop:'10px'}}>
+          Ver detalles y calificar
+        </button>
+      )}
     </div>
   );
 };

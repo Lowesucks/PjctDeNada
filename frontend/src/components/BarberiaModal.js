@@ -44,38 +44,20 @@ const BarberiaModal = ({ barberia, onClose, onCalificar }) => {
             <p><strong>🕒 Horario:</strong> {barberia.horario}</p>
           )}
           {barberia.fuente === 'foursquare' && (
-            <div style={{ 
-              background: '#00b894', 
-              color: 'white', 
-              padding: '8px 12px', 
-              borderRadius: '8px', 
-              marginTop: '12px',
-              fontSize: '14px',
-              fontWeight: '600',
-              display: 'inline-block'
-            }}>
+            <div className="source-badge foursquare">
               📍 Datos de Foursquare
               {barberia.distancia && (
-                <span style={{ marginLeft: '8px', opacity: 0.9 }}>
+                <span className="source-badge-detail">
                   • {(barberia.distancia / 1000).toFixed(1)} km
                 </span>
               )}
             </div>
           )}
           {barberia.fuente === 'osm' && (
-            <div style={{ 
-              background: '#3b82f6', 
-              color: 'white', 
-              padding: '8px 12px', 
-              borderRadius: '8px', 
-              marginTop: '12px',
-              fontSize: '14px',
-              fontWeight: '600',
-              display: 'inline-block'
-            }}>
+            <div className="source-badge osm">
               🗺️ Datos de OpenStreetMap
               {barberia.categoria && (
-                <span style={{ marginLeft: '8px', opacity: 0.9 }}>
+                <span className="source-badge-detail">
                   • {barberia.categoria}
                 </span>
               )}
@@ -83,20 +65,20 @@ const BarberiaModal = ({ barberia, onClose, onCalificar }) => {
           )}
         </div>
 
-        <div className="rating" style={{ marginBottom: '20px' }}>
+        <div className="rating-section">
           <div className="stars">
             {renderStars(Math.round(barberia.calificacion_promedio))}
           </div>
           <div className="rating-text">
             {barberia.calificacion_promedio.toFixed(1)} de 5 estrellas
           </div>
-          <div style={{ marginLeft: '10px', color: '#86868b' }}>
+          <div className="total-ratings-modal">
             ({barberia.total_calificaciones} calificaciones)
           </div>
         </div>
 
         <div className="calificaciones-list">
-          <h3 style={{ marginBottom: '16px', fontSize: '18px' }}>Comentarios recientes</h3>
+          <h3 className="recent-comments-title">Comentarios recientes</h3>
           {barberia.calificaciones && barberia.calificaciones.length > 0 ? (
             barberia.calificaciones.slice(0, 5).map(calificacion => (
               <div key={calificacion.id} className="calificacion-item">

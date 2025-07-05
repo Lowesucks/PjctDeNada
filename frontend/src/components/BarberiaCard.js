@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 
 const StarRating = ({ rating = 0 }) => {
   const totalStars = 5;
@@ -13,7 +14,25 @@ const StarRating = ({ rating = 0 }) => {
   return <div className="star-rating">{stars}</div>;
 };
 
-function BarberiaCard({ barberia, onVerDetalles, onVerEnMapa, isFavorite, onToggleFavorite }) {
+function BarberiaCard({ barberia, onVerDetalles, onVerEnMapa, isFavorite, onToggleFavorite, isDetailView }) {
+  const { theme } = useContext(ThemeContext);
+
+  if (isDetailView) {
+    return (
+      <div className="barberia-card-detail">
+        <div className="card-header">
+          <h3 className="card-title">{barberia.nombre}</h3>
+        </div>
+        <div className="card-rating">
+          <span className="total-ratings">({barberia.total_calificaciones} calificaciones)</span>
+        </div>
+        <p className="card-description">
+          {barberia.descripcion || barberia.direccion}
+        </p>
+      </div>
+    );
+  }
+
   const handleFavoriteClick = (e) => {
     e.stopPropagation(); // Evitar que se abra el modal de detalles
     onToggleFavorite();
@@ -40,8 +59,8 @@ function BarberiaCard({ barberia, onVerDetalles, onVerEnMapa, isFavorite, onTogg
       </div>
       
       <div className="card-actions">
-        <button className="card-btn" onClick={onVerDetalles}>Ver detalles</button>
-        <button className="card-btn-secondary" onClick={(e) => { e.stopPropagation(); onVerEnMapa(); }}>Ver en mapa</button>
+        <button onClick={(e) => { e.stopPropagation(); onVerDetalles(); }} className="card-btn">Ver detalles</button>
+        <button onClick={(e) => { e.stopPropagation(); onVerEnMapa(); }} className="card-btn-secondary">Ver en mapa</button>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useContext, useMemo } from 'react';
 import axios from 'axios';
 import BarberiaCard from './components/BarberiaCard';
 import BarberiaModal from './components/BarberiaModal';
@@ -37,6 +37,15 @@ function App() {
   const [currentView, setCurrentView] = useState('cercanos'); // 'cercanos', 'favoritos', 'configuracion'
   const [mobileListVisible, setMobileListVisible] = useState(false);
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const [barberiaSeleccionadaParaSheet, setBarberiaSeleccionadaParaSheet] = useState(null);
+  const [sortOrder, setSortOrder] = useState('distancia'); // 'distancia', 'calificacion', 'reseñas'
+  const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
+
+  const sortLabels = {
+    distancia: 'Cercanía',
+    calificacion: 'Calificación',
+    reseñas: 'Reseñas',
+  };
 
   useEffect(() => {
     // Al montar el componente, solo solicitamos la ubicación una vez.
@@ -123,16 +132,30 @@ function App() {
 
   const handleVerBarberia = async (barberia) => {
     try {
-      // Si es una barbería OSM, usar los datos directamente
-      if (barberia.fuente === 'osm') {
-        setBarberiaSeleccionada(barberia);
-        setMostrarModal(true);
-        return;
+      let barberiaConDireccion = { ...barberia };
+
+      // Si la dirección no está disponible y tenemos coordenadas, la buscamos.
+      if ((!barberia.direccion || barberia.direccion === 'Dirección no disponible') && barberia.lat && barberia.lng) {
+        try {
+          const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+          const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${barberia.lat},${barberia.lng}&key=${apiKey}`);
+          if (response.data.results && response.data.results[0]) {
+            barberiaConDireccion.direccion = response.data.results[0].formatted_address;
+          }
+        } catch (geoError) {
+          console.error('Error en Geocoding API:', geoError);
+          // Si falla, no hacemos nada y dejamos la dirección que ya tenía.
+        }
+      }
+
+      // Si es una barbería local, obtener detalles completos de la API
+      if (barberia.fuente !== 'osm') {
+        const response = await axios.get(`/api/barberias/${barberia.id}`);
+        // Combinamos los datos, manteniendo la dirección que ya obtuvimos si era necesaria
+        barberiaConDireccion = { ...response.data, direccion: barberiaConDireccion.direccion };
       }
       
-      // Si es una barbería local, obtener detalles completos de la API
-      const response = await axios.get(`/api/barberias/${barberia.id}`);
-      setBarberiaSeleccionada(response.data);
+      setBarberiaSeleccionada(barberiaConDireccion);
       setMostrarModal(true);
     } catch (error) {
       console.error('Error al cargar detalles de la barbería:', error);
@@ -156,8 +179,8 @@ function App() {
   };
 
   const handleBarberiaSelectFromMap = (barberia) => {
-    setBarberiaSeleccionada(barberia);
-    setMostrarModal(true);
+    // Llamamos a la función principal que ya tiene la lógica de geocoding
+    handleVerBarberia(barberia);
   };
 
   // Función para consultar Overpass API
@@ -235,10 +258,53 @@ function App() {
   });
   const todasLasBarberias = Array.from(uniquePlaces.values());
 
+  // Lógica de ordenamiento
+  const getDistance = (lat1, lon1, lat2, lon2) => {
+      if ((lat1 === lat2) && (lon1 === lon2)) {
+          return 0;
+      }
+      const radlat1 = Math.PI * lat1/180;
+      const radlat2 = Math.PI * lat2/180;
+      const theta = lon1-lon2;
+      const radtheta = Math.PI * theta/180;
+      let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+      if (dist > 1) {
+          dist = 1;
+      }
+      dist = Math.acos(dist);
+      dist = dist * 180/Math.PI;
+      dist = dist * 60 * 1.1515 * 1.609344;
+      return dist; // en KM
+  }
+
+  const sortedBarberias = useMemo(() => {
+    const listToSort = [...todasLasBarberias];
+
+    if (userLocation) {
+        listToSort.forEach(b => {
+            if (b.lat && b.lng) {
+                b.distancia = getDistance(userLocation.lat, userLocation.lng, b.lat, b.lng);
+            } else {
+                b.distancia = Infinity;
+            }
+        });
+    }
+
+    switch (sortOrder) {
+        case 'calificacion':
+            return listToSort.sort((a, b) => (b.calificacion_promedio || 0) - (a.calificacion_promedio || 0));
+        case 'reseñas':
+            return listToSort.sort((a, b) => (b.total_calificaciones || 0) - (a.total_calificaciones || 0));
+        case 'distancia':
+        default:
+            return listToSort.sort((a, b) => a.distancia - b.distancia);
+    }
+  }, [todasLasBarberias, sortOrder, userLocation]);
+
   // Filtrar la lista de barberías según la vista actual
   const displayedBarberias = currentView === 'favoritos'
-    ? todasLasBarberias.filter(b => favorites.has(b.id))
-    : todasLasBarberias;
+    ? sortedBarberias.filter(b => favorites.has(b.id))
+    : sortedBarberias;
 
   const handleSolicitarUbicacion = () => {
     if (navigator.geolocation) {
@@ -304,7 +370,10 @@ function App() {
       <div className="app-mobile-redesign">
         <div 
           className="map-container-mobile" 
-          onClick={() => { if (mobileListVisible) setMobileListVisible(false); }}
+          onClick={() => { 
+            if (mobileListVisible) setMobileListVisible(false);
+            if (barberiaSeleccionadaParaSheet) setBarberiaSeleccionadaParaSheet(null);
+          }}
         >
           <MapaBarberias 
             barberias={todasLasBarberias}
@@ -320,16 +389,43 @@ function App() {
           />
         </div>
 
-        <div className="mobile-search-container">
-          <input
-            type="text"
-            className="mobile-search-input"
-            placeholder="Buscar..."
-            value={busqueda}
-            onChange={handleBusqueda}
-          />
+        {/* --- NUEVA BARRA SUPERIOR --- */}
+        <div className="mobile-header-redesign">
+          <div className="mobile-header-top">
+            <span className="mobile-header-title">Cuts</span>
+            <button className="mobile-profile-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+            </button>
+          </div>
+          <div className="mobile-search-wrapper">
+            <input
+              type="text"
+              className="mobile-search-input-redesign"
+              placeholder="Search"
+              value={busqueda}
+              onChange={handleBusqueda}
+            />
+             <div className="search-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
+             </div>
+          </div>
         </div>
         
+        {/* --- TARJETA DE DETALLE INFERIOR --- */}
+        {barberiaSeleccionadaParaSheet && (
+          <div className="mobile-detail-sheet">
+            <BarberiaCard
+              barberia={barberiaSeleccionadaParaSheet}
+              onVerDetalles={() => handleVerBarberia(barberiaSeleccionadaParaSheet)}
+              onVerEnMapa={() => handleVerEnMapa(barberiaSeleccionadaParaSheet)}
+              isFavorite={favorites.has(barberiaSeleccionadaParaSheet.id)}
+              onToggleFavorite={() => handleToggleFavorite(barberiaSeleccionadaParaSheet.id)}
+              isDetailView={true} // Prop para un renderizado diferente en la tarjeta
+            />
+          </div>
+        )}
+        
+        {/* --- LISTA DE RESULTADOS (BOTTOM SHEET) --- */}
         {mobileListVisible && (
           <div className="bottom-sheet-mobile" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-handle" onClick={() => setMobileListVisible(false)}></div>
@@ -369,6 +465,21 @@ function App() {
                 </div>
               ) : (
                 <div className="results-list-mobile">
+                  <div className="sort-container mobile">
+                    <button onClick={() => setIsSortMenuOpen(!isSortMenuOpen)} className="sort-button">
+                      <span>Ordenar por: <strong>{sortLabels[sortOrder]}</strong></span>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
+                    </button>
+                    {isSortMenuOpen && (
+                      <div className="sort-dropdown">
+                        {Object.keys(sortLabels).map(key => (
+                          <button key={key} onClick={() => { setSortOrder(key); setIsSortMenuOpen(false); }}>
+                            {sortLabels[key]}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   {displayedBarberias.map(barberia => (
                     <BarberiaCard
                       key={barberia.id}
@@ -422,7 +533,12 @@ function App() {
         {/* Panel Izquierdo Fijo */}
         <div className="left-panel">
           <header className="left-panel-header">
-            <h1>✂️ Cuts</h1>
+            <div className="left-panel-header-top">
+              <h1>✂️ Cuts</h1>
+              <button className="desktop-profile-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+              </button>
+            </div>
             <div className="view-switcher">
               <button onClick={() => setCurrentView('cercanos')} className={currentView === 'cercanos' ? 'active' : ''}>Cercanos</button>
               <button onClick={() => setCurrentView('favoritos')} className={currentView === 'favoritos' ? 'active' : ''}>Favoritos</button>
@@ -437,6 +553,23 @@ function App() {
                   value={busqueda}
                   onChange={handleBusqueda}
                 />
+              </div>
+            )}
+            {currentView !== 'configuracion' && (
+              <div className="sort-container">
+                <button onClick={() => setIsSortMenuOpen(!isSortMenuOpen)} className="sort-button">
+                  <span>Ordenar por: <strong>{sortLabels[sortOrder]}</strong></span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
+                </button>
+                {isSortMenuOpen && (
+                  <div className="sort-dropdown">
+                    {Object.keys(sortLabels).map(key => (
+                      <button key={key} onClick={() => { setSortOrder(key); setIsSortMenuOpen(false); }}>
+                        {sortLabels[key]}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </header>

@@ -10,7 +10,7 @@ import { mapStyles } from './config/mapStyles';
 
 const ICON_CONFIG = {
   url: '/icono_ubicaciones.png',
-  scaledSize: { width: 80, height: 107 }, 
+  scaledSize: { width: 80, height: 110 }, 
   anchor: { x: 70, y: 70 },
 };
 

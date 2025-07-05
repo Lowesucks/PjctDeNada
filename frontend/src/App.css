@@ -1,3 +1,192 @@
+/* ==========================================================================
+   VARIABLES DE TEMA (MODO CLARO Y OSCURO)
+   ========================================================================== */
+:root {
+  --color-text: #1a202c;
+  --color-text-secondary: #718096;
+  --color-background: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-switch-bg: #e9ecef;
+  --color-shadow: rgba(0,0,0,0.1);
+}
+
+body.dark {
+  --color-text: #e2e8f0;
+  --color-text-secondary: #a0aec0;
+  --color-background: #1a202c;
+  --color-surface: #2d3748;
+  --color-border: #4a5568;
+  --color-primary: #60a5fa;
+  --color-primary-hover: #3b82f6;
+  --color-switch-bg: #4a5568;
+  --color-shadow: rgba(0,0,0,0.4);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* ==========================================================================
+   APLICACIÓN DE VARIABLES A COMPONENTES EXISTENTES
+   ========================================================================== */
+
+.app-desktop-redesign {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--color-background);
+}
+
+.left-panel {
+  width: 380px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--color-surface) !important;
+  border-right: 1px solid var(--color-border);
+  box-shadow: 2px 0 8px var(--color-shadow);
+  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+  z-index: 10;
+}
+
+.left-panel-header {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.left-panel-header h1 {
+  color: var(--color-text);
+}
+
+.view-switcher {
+  display: flex;
+  padding: 4px;
+  background-color: var(--color-background);
+  border-radius: 8px;
+  margin: 16px 16px 0;
+}
+
+.view-switcher button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.view-switcher button.active {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 1px 3px var(--color-shadow);
+}
+
+.search-container {
+  padding: 0 16px 16px;
+  background-color: var(--color-surface);
+  transition: background-color 0.3s;
+}
+
+.search-input-redesign {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.search-input-redesign:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background-color: var(--color-surface);
+}
+
+.search-input-redesign::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+/* ==========================================================================
+   ESTILOS PARA EL INTERRUPTOR DE TEMA (SETTINGS)
+   ========================================================================== */
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: var(--color-surface);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: var(--color-primary);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--color-primary);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
 /* Reset y estilos base */
 * {
   margin: 0;
@@ -5,18 +194,12 @@
   box-sizing: border-box;
 }
 
-body, html, #root, .app-sheet-container, .app-desktop {
+body, html, #root {
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-body {
-  background: #f8f9fa;
-  color: #333;
 }
 
 /* ===== VISTA MÓVIL (ESTILO UBER) ===== */
@@ -1055,23 +1238,53 @@ body {
   gap: 8px;
 }
 
+.view-switcher {
+  display: flex;
+  padding: 4px;
+  background-color: var(--color-background);
+  border-radius: 8px;
+  margin: 16px 16px 0;
+}
+
+.view-switcher button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.view-switcher button.active {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 1px 3px var(--color-shadow);
+}
+
 .search-container {
-  position: relative;
+  padding: 0 16px 16px;
+  background-color: var(--color-surface);
+  transition: background-color 0.3s;
 }
 
 .search-input-redesign {
   width: 100%;
   padding: 12px 16px;
+  font-size: 1rem;
   border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-  transition: all 0.2s ease;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color 0.2s, background-color 0.2s;
 }
 
 .search-input-redesign:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+  border-color: var(--color-primary);
+  background-color: var(--color-surface);
 }
 
 /* Lista de Resultados */
@@ -1135,20 +1348,20 @@ body {
    ========================================================================== */
 
 .barberia-card {
-  background-color: #fff;
-  border: 1px solid #e2e8f0;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px var(--color-shadow);
 }
 
 .barberia-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  border-color: #cbd5e0;
+  box-shadow: 0 4px 12px var(--color-shadow);
+  border-color: var(--color-text-secondary);
 }
 
 .card-header {
@@ -1162,13 +1375,13 @@ body {
   font-size: 18px;
   font-weight: 600;
   margin: 0;
-  color: #1a202c;
+  color: var(--color-text);
   flex-grow: 1;
 }
 
 .card-address {
   font-size: 14px;
-  color: #718096;
+  color: var(--color-text-secondary);
   margin: 0 0 12px 0;
 }
 
@@ -1182,7 +1395,7 @@ body {
 .rating-value {
   font-weight: 600;
   font-size: 16px;
-  color: #2d3748;
+  color: var(--color-text);
 }
 
 .star-rating .star {
@@ -1196,7 +1409,7 @@ body {
 
 .total-ratings {
   font-size: 14px;
-  color: #718096;
+  color: var(--color-text-secondary);
 }
 
 .favorite-btn {
@@ -1204,7 +1417,7 @@ body {
   border: none;
   cursor: pointer;
   font-size: 28px;
-  color: #cbd5e0; /* Corazón gris */
+  color: var(--color-text-secondary);
   transition: all 0.2s ease;
   padding: 0;
   line-height: 1;
@@ -1234,22 +1447,184 @@ body {
 }
 
 .card-btn {
-  background-color: #3b82f6;
+  background-color: var(--color-primary);
   color: white;
-  border: 1px solid #3b82f6;
+  border: 1px solid var(--color-primary);
 }
 
 .card-btn:hover {
-  background-color: #2563eb;
+  background-color: var(--color-primary-hover);
 }
 
 .card-btn-secondary {
-  background-color: #fff;
-  color: #4a5568;
-  border: 1px solid #e2e8f0;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
 }
 
 .card-btn-secondary:hover {
-  background-color: #f7fafc;
-  border-color: #cbd5e0;
-} 
+  background-color: var(--color-switch-bg);
+  border-color: var(--color-text-secondary);
+}
+
+.settings-view {
+  padding: 24px;
+  text-align: center;
+  color: var(--color-text);
+  margin-bottom: 16px;
+}
+
+.settings-view h2 {
+  margin-bottom: 16px;
+}
+
+/* ==========================================================================
+   NUEVO DISEÑO MÓVIL
+   ========================================================================== */
+
+.app-mobile-redesign {
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+
+.map-container-mobile {
+  width: 100%;
+  height: 100%;
+}
+
+.mobile-search-container {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
+.mobile-search-input {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  font-size: 16px;
+  box-shadow: 0 4px 12px var(--color-shadow);
+}
+
+.mobile-nav {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  background-color: var(--color-surface);
+  border-radius: 999px;
+  padding: 8px;
+  box-shadow: 0 4px 20px var(--color-shadow);
+  z-index: 10;
+}
+
+.mobile-nav button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav button svg {
+  width: 28px;
+  height: 28px;
+  color: var(--color-text-secondary);
+}
+
+.mobile-nav button.active svg {
+  color: var(--color-primary);
+}
+
+.mobile-nav button.active {
+  background-color: var(--color-switch-bg);
+}
+
+.bottom-sheet-mobile {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 75%;
+  background: var(--color-surface);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -4px 20px var(--color-shadow);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 5px;
+  background-color: var(--color-border);
+  border-radius: 3px;
+  margin: 8px auto;
+  cursor: pointer;
+}
+
+.sheet-content {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.results-list-mobile {
+  padding: 0 8px;
+}
+
+/* Estilos de los modales */
+.modal-overlay {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+.modal {
+  background-color: var(--color-surface);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px var(--color-shadow);
+  width: 90%;
+  max-width: 500px;
+  z-index: 101;
+  border: 1px solid var(--color-border);
+}
+.modal-title { 
+  color: var(--color-text); 
+  margin-bottom: 8px;
+  font-size: 1.5rem;
+}
+.close-btn { 
+  color: var(--color-text-secondary);
+  transition: background-color 0.2s;
+ }
+.close-btn:hover { background-color: var(--color-switch-bg); }
+
+/* Estilos del formulario en el modal */
+.form-label { color: var(--color-text-secondary); }
+.form-input {
+  background-color: var(--color-switch-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+.form-input:focus {
+  border-color: var(--color-primary);
+  background-color: var(--color-surface);
+}
+
+/* Estilos de la lista de calificaciones */
+.calificacion-item { border-bottom: 1px solid var(--color-border); }
+.calificacion-usuario { color: var(--color-text); }
+.calificacion-texto { color: var(--color-text-secondary); }
+.calificacion-fecha { color: var(--color-text-secondary); } 

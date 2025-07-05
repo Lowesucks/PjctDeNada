@@ -11,7 +11,7 @@ const defaultCenter = {
   lng: -99.133209,
 };
 
-function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom }) {
+function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom, onMapDoubleClick, mapStyle, iconConfig }) {
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
@@ -34,6 +34,14 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
       mapContainerStyle={containerStyle}
       center={mapCenter}
       zoom={zoom || 13}
+      onDblClick={onMapDoubleClick}
+      options={{
+        styles: mapStyle,
+        disableDoubleClickZoom: true,
+        fullscreenControl: false,
+        streetViewControl: false,
+        mapTypeControl: false,
+      }}
     >
       {/* Marcador para la ubicación del usuario */}
       {userLocation && (
@@ -51,14 +59,24 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
         />
       )}
 
-      {barberias.map((barberia) => (
-        <MarkerF
-            key={barberia.id}
-          position={{ lat: barberia.latitud, lng: barberia.longitud }}
-          onClick={() => handleMarkerClick(barberia)}
-          title={barberia.nombre}
-        />
-      ))}
+      {barberias.map((barberia) => {
+        // Asegurarse de que `window.google` esté disponible y la config también.
+        const finalIcon = isLoaded && iconConfig ? {
+          url: iconConfig.url,
+          scaledSize: new window.google.maps.Size(iconConfig.scaledSize.width, iconConfig.scaledSize.height),
+          anchor: new window.google.maps.Point(iconConfig.anchor.x, iconConfig.anchor.y),
+        } : undefined;
+
+        return (
+          <MarkerF
+              key={barberia.id}
+            position={{ lat: barberia.lat, lng: barberia.lng }}
+            onClick={() => handleMarkerClick(barberia)}
+            title={barberia.nombre}
+            icon={finalIcon}
+          />
+        );
+      })}
     </GoogleMap>
   ) : (
     <div>Cargando mapa...</div>

@@ -1,10 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import axios from 'axios';
 import BarberiaCard from './components/BarberiaCard';
 import BarberiaModal from './components/BarberiaModal';
 import CalificarModal from './components/CalificarModal';
 import MapaBarberias from './components/MapaBarberias';
 import './App.css';
+import { ThemeContext } from './context/ThemeContext';
+import { mapStyles } from './config/mapStyles';
+
+const ICON_CONFIG = {
+  url: '/icono_ubicaciones.png',
+  scaledSize: { width: 80, height: 107 }, 
+  anchor: { x: 70, y: 70 },
+};
 
 function App() {
   const [barberias, setBarberias] = useState([]);
@@ -26,6 +34,9 @@ function App() {
   const [mapCenter, setMapCenter] = useState(null);
   const [mapZoom, setMapZoom] = useState(12);
   const [favorites, setFavorites] = useState(new Set());
+  const [currentView, setCurrentView] = useState('cercanos'); // 'cercanos', 'favoritos', 'configuracion'
+  const [mobileListVisible, setMobileListVisible] = useState(false);
+  const { theme, toggleTheme } = useContext(ThemeContext);
 
   useEffect(() => {
     // Al montar el componente, solo solicitamos la ubicación una vez.
@@ -38,6 +49,19 @@ function App() {
     return () => window.removeEventListener('resize', handleResize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // El array vacío asegura que esto se ejecute solo una vez.
+
+  useEffect(() => {
+    // Bloquea el scroll del body en la vista móvil para una experiencia de app nativa.
+    if (isMobile) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    // Función de limpieza para restaurar el scroll si el componente se desmonta.
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isMobile]);
 
   useEffect(() => {
     // Este efecto se dispara SOLO cuando tenemos la ubicación del usuario.
@@ -185,8 +209,8 @@ function App() {
     ].join(' ').trim() || 'Dirección no disponible',
     telefono: lugar.tags?.phone || lugar.tags?.['contact:phone'] || 'No disponible',
     horario: lugar.tags?.opening_hours || 'Horario no disponible',
-    latitud: lugar.lat,
-    longitud: lugar.lon,
+    lat: lugar.lat,
+    lng: lugar.lon,
     calificacion_promedio: 0,
     total_calificaciones: 0,
     categoria: lugar.tags?.shop || lugar.tags?.amenity || 'Barbería'
@@ -210,6 +234,11 @@ function App() {
     }
   });
   const todasLasBarberias = Array.from(uniquePlaces.values());
+
+  // Filtrar la lista de barberías según la vista actual
+  const displayedBarberias = currentView === 'favoritos'
+    ? todasLasBarberias.filter(b => favorites.has(b.id))
+    : todasLasBarberias;
 
   const handleSolicitarUbicacion = () => {
     if (navigator.geolocation) {
@@ -240,8 +269,21 @@ function App() {
   // Función para centrar el mapa en la barbería seleccionada
   const handleVerEnMapa = (barberia) => {
     setBarberiaParaCentrar(barberia);
-    setMapCenter({ lat: barberia.latitud, lng: barberia.longitud });
+    setMapCenter({ lat: barberia.lat, lng: barberia.lng });
     setMapZoom(17); // Zoom más cercano al seleccionar una barbería
+    setMobileListVisible(false); // Ocultar lista al seleccionar en mapa
+  };
+
+  const handleCenterOnUser = () => {
+    if (userLocation) {
+      setMapCenter(userLocation);
+      setMapZoom(15);
+    }
+  };
+
+  const handleMobileNavClick = (view) => {
+    setCurrentView(view);
+    setMobileListVisible(true);
   };
 
   const handleToggleFavorite = (barberiaId) => {
@@ -259,112 +301,102 @@ function App() {
   // Vista móvil (estilo Uber)
   if (isMobile) {
     return (
-      <div className="app-sheet-container">
-        {/* Mapa de fondo */}
-        <MapaBarberias 
-          barberias={todasLasBarberias}
-          onBarberiaSelect={handleBarberiaSelectFromMap}
-          userLocation={userLocation}
-          center={mapCenter}
-          zoom={mapZoom}
-          onSolicitarUbicacion={handleSolicitarUbicacion}
-          barberiasOSM={barberiasOSMAdaptadas}
-          barberiaParaCentrar={barberiaParaCentrar}
-        />
-
-        {/* Header flotante */}
-        <div className="header-sheet">
-          <div>
-            <h1>✂️ Barberías</h1>
-            {!foursquareAvailable && userLocation && (
-              <div style={{ 
-                fontSize: '12px', 
-                color: '#6b7280', 
-                marginTop: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                📍 Solo barberías locales
-                <span style={{ 
-                  background: '#fef3c7', 
-                  color: '#92400e', 
-                  padding: '2px 6px', 
-                  borderRadius: '4px',
-                  fontSize: '10px',
-                  fontWeight: '600'
-                }}>
-                  Foursquare no configurado
-                </span>
-              </div>
-            )}
-            {barberiasOSMAdaptadas.length > 0 && (
-              <div style={{ 
-                fontSize: '12px', 
-                color: '#3b82f6', 
-                marginTop: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}>
-                🗺️ {barberiasOSMAdaptadas.length} barberías de OSM encontradas
-              </div>
-            )}
-          </div>
-          <div className="header-sheet-btns">
-            <button className="sheet-btn" onClick={() => { setSheetTipo('buscar'); setSheetAbierto(true); }}>🔍 Buscar</button>
-            <button className="sheet-btn" onClick={() => { setSheetTipo('lista'); setSheetAbierto(true); }}>📋 Lista</button>
-          </div>
+      <div className="app-mobile-redesign">
+        <div 
+          className="map-container-mobile" 
+          onClick={() => { if (mobileListVisible) setMobileListVisible(false); }}
+        >
+          <MapaBarberias 
+            barberias={todasLasBarberias}
+            onBarberiaSelect={handleBarberiaSelectFromMap}
+            userLocation={userLocation}
+            center={mapCenter}
+            zoom={mapZoom}
+            onSolicitarUbicacion={handleSolicitarUbicacion}
+            onMapDoubleClick={handleCenterOnUser}
+            barberiaParaCentrar={barberiaParaCentrar}
+            mapStyle={theme === 'dark' ? mapStyles.dark : mapStyles.light}
+            iconConfig={ICON_CONFIG}
+          />
         </div>
 
-        {/* Bottom sheet */}
-        {sheetAbierto && (
-          <div className="bottom-sheet">
-            <div className="sheet-bar"></div>
-            <button className="sheet-close" onClick={() => setSheetAbierto(false)}>✕</button>
-            {sheetTipo === 'buscar' && (
-              <div className="sheet-content">
-                <input
-                  type="text"
-                  className="search-input"
-                  placeholder="Buscar barberías..."
-                  value={busqueda}
-                  onChange={handleBusqueda}
-                  autoFocus
-                />
-              </div>
-            )}
-            {sheetTipo === 'lista' && (
-              <div className="sheet-content">
-                {cargando ? (
-                  <div className="loading">
-                    <p>Cargando barberías...</p>
-                  </div>
-                ) : todasLasBarberias.length === 0 ? (
-                  <div className="empty-state">
-                    <h3>No se encontraron barberías</h3>
-                    <p>Intenta con una búsqueda diferente</p>
-                  </div>
-                ) : (
-                  <div className="barberias-grid">
-                    {todasLasBarberias.map(barberia => (
-                      <BarberiaCard
-                        key={barberia.id}
-                        barberia={barberia}
-                        onVerDetalles={() => handleVerBarberia(barberia)}
-                        onVerEnMapa={() => handleVerEnMapa(barberia)}
-                        isFavorite={favorites.has(barberia.id)}
-                        onToggleFavorite={() => handleToggleFavorite(barberia.id)}
+        <div className="mobile-search-container">
+          <input
+            type="text"
+            className="mobile-search-input"
+            placeholder="Buscar..."
+            value={busqueda}
+            onChange={handleBusqueda}
+          />
+        </div>
+        
+        {mobileListVisible && (
+          <div className="bottom-sheet-mobile" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-handle" onClick={() => setMobileListVisible(false)}></div>
+            <div className="sheet-content">
+              {cargando ? (
+                <div className="loading-redesign">
+                  <div className="loading-spinner"></div>
+                  <p>Buscando...</p>
+                </div>
+              ) : currentView === 'configuracion' ? (
+                <div className="settings-view">
+                  <h2>Configuración</h2>
+                  <div className="settings-item">
+                    <span>Modo Oscuro</span>
+                    <label className="switch">
+                      <input 
+                        type="checkbox" 
+                        onChange={toggleTheme} 
+                        checked={theme === 'dark'}
                       />
-                    ))}
+                      <span className="slider round"></span>
+                    </label>
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              ) : displayedBarberias.length === 0 ? (
+                <div className="empty-state-redesign">
+                  <h3>
+                    {currentView === 'favoritos' 
+                      ? 'No tienes favoritos' 
+                      : 'No se encontraron lugares'}
+                  </h3>
+                  <p>
+                    {currentView === 'favoritos' 
+                      ? 'Usa el icono del corazón ❤ para guardar lugares.' 
+                      : 'Prueba a moverte por el mapa.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="results-list-mobile">
+                  {displayedBarberias.map(barberia => (
+                    <BarberiaCard
+                      key={barberia.id}
+                      barberia={barberia}
+                      onVerDetalles={() => handleVerBarberia(barberia)}
+                      onVerEnMapa={() => handleVerEnMapa(barberia)}
+                      isFavorite={favorites.has(barberia.id)}
+                      onToggleFavorite={() => handleToggleFavorite(barberia.id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Modales */}
+        <nav className="mobile-nav">
+          <button onClick={() => handleMobileNavClick('cercanos')} className={currentView === 'cercanos' ? 'active' : ''}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"></path></svg>
+          </button>
+          <button onClick={() => handleMobileNavClick('favoritos')} className={currentView === 'favoritos' ? 'active' : ''}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+          </button>
+          <button onClick={() => handleMobileNavClick('configuracion')} className={currentView === 'configuracion' ? 'active' : ''}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2 3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"></path></svg>
+          </button>
+        </nav>
+
         {mostrarModal && barberiaSeleccionada && (
           <BarberiaModal
             barberia={barberiaSeleccionada}
@@ -372,7 +404,6 @@ function App() {
             onCalificar={handleCalificar}
           />
         )}
-
         {mostrarCalificar && barberiaSeleccionada && (
           <CalificarModal
             barberia={barberiaSeleccionada}
@@ -391,17 +422,23 @@ function App() {
         {/* Panel Izquierdo Fijo */}
         <div className="left-panel">
           <header className="left-panel-header">
-            <h1>✂️ Barberías</h1>
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Buscar por nombre o dirección..."
-                className="search-input-redesign"
-                value={busqueda}
-                onChange={handleBusqueda}
-              />
+            <h1>✂️ Cuts</h1>
+            <div className="view-switcher">
+              <button onClick={() => setCurrentView('cercanos')} className={currentView === 'cercanos' ? 'active' : ''}>Cercanos</button>
+              <button onClick={() => setCurrentView('favoritos')} className={currentView === 'favoritos' ? 'active' : ''}>Favoritos</button>
+              <button onClick={() => setCurrentView('configuracion')} className={currentView === 'configuracion' ? 'active' : ''}>Ajustes</button>
             </div>
-            {/* Aquí podríamos agregar filtros en el futuro */}
+            {currentView !== 'configuracion' && (
+              <div className="search-container">
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre..."
+                  className="search-input-redesign"
+                  value={busqueda}
+                  onChange={handleBusqueda}
+                />
+              </div>
+            )}
           </header>
 
           <div className="results-list">
@@ -410,13 +447,36 @@ function App() {
                 <div className="loading-spinner"></div>
                 <p>Buscando barberías...</p>
               </div>
-            ) : todasLasBarberias.length === 0 ? (
+            ) : currentView === 'configuracion' ? (
+              <div className="settings-view">
+                <h2>Ajustes</h2>
+                <div className="settings-item">
+                  <span>Modo Oscuro</span>
+                  <label className="switch">
+                    <input 
+                      type="checkbox" 
+                      onChange={toggleTheme} 
+                      checked={theme === 'dark'}
+                    />
+                    <span className="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            ) : displayedBarberias.length === 0 ? (
               <div className="empty-state-redesign">
-                <h3>No se encontraron barberías</h3>
-                <p>Intenta buscar tu ciudad o activa la ubicación.</p>
+                <h3>
+                  {currentView === 'favoritos' 
+                    ? 'No tienes favoritos' 
+                    : 'No se encontraron barberías'}
+                </h3>
+                <p>
+                  {currentView === 'favoritos' 
+                    ? 'Usa el icono del corazón ❤ para guardar lugares.' 
+                    : 'Intenta mover el mapa o realizar otra búsqueda.'}
+                </p>
               </div>
             ) : (
-              todasLasBarberias.map(barberia => (
+              displayedBarberias.map(barberia => (
                 <BarberiaCard
                   key={barberia.id}
                   barberia={barberia}
@@ -441,6 +501,8 @@ function App() {
             onSolicitarUbicacion={handleSolicitarUbicacion}
             barberiasOSM={barberiasOSMAdaptadas}
             barberiaParaCentrar={barberiaParaCentrar}
+            mapStyle={theme === 'dark' ? mapStyles.dark : mapStyles.light}
+            iconConfig={ICON_CONFIG}
           />
         </div>
 

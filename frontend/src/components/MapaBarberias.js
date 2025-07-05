@@ -11,7 +11,7 @@ const defaultCenter = {
   lng: -99.133209,
 };
 
-function MapaBarberias({ barberias, onBarberiaSelect, center, zoom }) {
+function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom }) {
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
@@ -35,6 +35,22 @@ function MapaBarberias({ barberias, onBarberiaSelect, center, zoom }) {
       center={mapCenter}
       zoom={zoom || 13}
     >
+      {/* Marcador para la ubicación del usuario */}
+      {userLocation && (
+        <MarkerF
+          position={userLocation}
+          title={"Tu Ubicación"}
+          icon={{
+            path: window.google.maps.SymbolPath.CIRCLE,
+            fillColor: '#4285F4',
+            fillOpacity: 1,
+            strokeColor: 'white',
+            strokeWeight: 2,
+            scale: 8
+          }}
+        />
+      )}
+
       {barberias.map((barberia) => (
         <MarkerF
             key={barberia.id}

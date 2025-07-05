@@ -37,43 +37,39 @@ def buscar_barberias_google_places(lat, lng, radio=5000):
     try:
         gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
         
-        # Tipos de lugares a buscar. Incluimos varios para mayor cobertura.
-        tipos_de_lugar = ['barber_shop', 'hair_salon', 'beauty_salon']
+        # Se realiza una única búsqueda por palabras clave para mayor precisión
+        places_result = gmaps.places_nearby(
+            location=(lat, lng),
+            radius=radio,
+            keyword='barbería OR peluquería OR "salón de belleza"',
+            language='es'
+        )
         
         barberias_encontradas = []
-        
-        for tipo in tipos_de_lugar:
-            places_result = gmaps.places_nearby(
-                location=(lat, lng),
-                radius=radio,
-                type=tipo,
-                language='es'  # Pedimos resultados en español
-            )
+        for place in places_result.get('results', []):
+            # Evitar duplicados por ID de lugar
+            if any(b['google_place_id'] == place.get('place_id') for b in barberias_encontradas):
+                continue
+
+            location = place.get('geometry', {}).get('location', {})
+            calificacion = place.get('rating', 0)
+            total_calificaciones = place.get('user_ratings_total', 0)
+
+            barberia = {
+                'id': f"gm_{place.get('place_id')}",
+                'nombre': place.get('name', 'Establecimiento'),
+                'direccion': place.get('vicinity', 'Dirección no disponible'),
+                'latitud': location.get('lat'),
+                'longitud': location.get('lng'),
+                'calificacion_promedio': float(calificacion) if calificacion else 0.0,
+                'total_calificaciones': total_calificaciones if total_calificaciones else 0,
+                'fuente': 'google',
+                'google_place_id': place.get('place_id'),
+                'telefono': 'No disponible', # Places Nearby no da teléfono, se necesitaría Place Details
+                'horario': 'No disponible', # Igual que el teléfono
+            }
+            barberias_encontradas.append(barberia)
             
-            for place in places_result.get('results', []):
-                # Evitar duplicados por ID de lugar
-                if any(b['google_place_id'] == place.get('place_id') for b in barberias_encontradas):
-                    continue
-
-                location = place.get('geometry', {}).get('location', {})
-                calificacion = place.get('rating', 0)
-                total_calificaciones = place.get('user_ratings_total', 0)
-
-                barberia = {
-                    'id': f"gm_{place.get('place_id')}",
-                    'nombre': place.get('name', 'Establecimiento'),
-                    'direccion': place.get('vicinity', 'Dirección no disponible'),
-                    'latitud': location.get('lat'),
-                    'longitud': location.get('lng'),
-                    'calificacion_promedio': float(calificacion) if calificacion else 0.0,
-                    'total_calificaciones': total_calificaciones if total_calificaciones else 0,
-                    'fuente': 'google',
-                    'google_place_id': place.get('place_id'),
-                    'telefono': 'No disponible', # Places Nearby no da teléfono, se necesitaría Place Details
-                    'horario': 'No disponible', # Igual que el teléfono
-                }
-                barberias_encontradas.append(barberia)
-                
         return barberias_encontradas
 
     except Exception as e:

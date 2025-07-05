@@ -7,7 +7,7 @@ import MapaBarberias from './components/MapaBarberias';
 import './App.css';
 
 function App() {
-  const [barberias, setBarberias] = useState([]); // eslint-disable-line no-unused-vars
+  const [barberias, setBarberias] = useState([]);
   const [barberiaSeleccionada, setBarberiaSeleccionada] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [mostrarCalificar, setMostrarCalificar] = useState(false);
@@ -23,52 +23,55 @@ function App() {
   const [foursquareAvailable, setFoursquareAvailable] = useState(false);
   const [osmBarberias, setOsmBarberias] = useState([]);
   const [barberiaParaCentrar, setBarberiaParaCentrar] = useState(null);
-
-  const cargarBarberias = useCallback(async () => {
-    try {
-      setCargando(true);
-      // Siempre intentar cargar barberías cercanas primero (funciona con o sin API key)
-      if (userLocation) {
-        const response = await axios.get(`/api/barberias/cercanas?lat=${userLocation.lat}&lng=${userLocation.lng}&radio=5000`);
-        setBarberias(response.data);
-        
-        // Verificar si hay barberías de Foursquare en los resultados
-        const hasFoursquareData = response.data.some(barberia => barberia.fuente === 'foursquare');
-        setFoursquareAvailable(hasFoursquareData);
-      } else {
-        // Si no hay ubicación, cargar barberías locales
-        const response = await axios.get('/api/barberias');
-        setBarberias(response.data);
-        setFoursquareAvailable(false);
-      }
-    } catch (error) {
-      console.error('Error al cargar barberías:', error);
-      // Fallback a barberías locales
-      try {
-        const response = await axios.get('/api/barberias');
-        setBarberias(response.data);
-        setFoursquareAvailable(false);
-      } catch (fallbackError) {
-        console.error('Error al cargar barberías locales:', fallbackError);
-      }
-    } finally {
-      setCargando(false);
-    }
-  }, [userLocation]);
+  const [mapCenter, setMapCenter] = useState(null);
+  const [mapZoom, setMapZoom] = useState(12);
+  const [favorites, setFavorites] = useState(new Set());
 
   useEffect(() => {
-    cargarBarberias();
+    // Al montar el componente, solo solicitamos la ubicación una vez.
+    handleSolicitarUbicacion();
     checkScreenSize();
-    
-    const handleResize = () => {
-      checkScreenSize();
-    };
+
+    const handleResize = () => checkScreenSize();
     window.addEventListener('resize', handleResize);
+
     return () => window.removeEventListener('resize', handleResize);
-  }, [cargarBarberias]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // El array vacío asegura que esto se ejecute solo una vez.
+
+  useEffect(() => {
+    // Este efecto se dispara SOLO cuando tenemos la ubicación del usuario.
+    if (userLocation) {
+      const fetchAllData = async () => {
+        setCargando(true);
+        // Hacemos todas las peticiones en paralelo para más eficiencia.
+        await Promise.all([
+          cargarBarberias(userLocation),
+          fetchBarberiasOSM(userLocation)
+        ]);
+        setCargando(false);
+      };
+      fetchAllData();
+    }
+    // El warning de dependencias se puede ignorar aquí de forma segura.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userLocation]); // Se ejecuta solo cuando userLocation cambia.
 
   const checkScreenSize = () => {
     setIsMobile(window.innerWidth <= 768);
+  };
+
+  const cargarBarberias = async (location) => {
+    // Si no hay ubicación, no hacemos nada.
+    if (!location) return;
+    try {
+      // Pasamos la ubicación como argumento para evitar depender del estado.
+      const response = await axios.get(`/api/barberias/cercanas?lat=${location.lat}&lng=${location.lng}&radio=5000`);
+      setBarberias(response.data);
+    } catch (error) {
+      console.error('Error al cargar barberías del backend:', error);
+      setBarberias([]); // En caso de error, vaciamos la lista para evitar datos viejos.
+    }
   };
 
   const buscarBarberias = async (query) => {
@@ -78,7 +81,8 @@ function App() {
         const response = await axios.get(`/api/barberias/buscar?q=${encodeURIComponent(query)}`);
         setBarberias(response.data);
       } else {
-        await cargarBarberias();
+        // Si la búsqueda se vacía, volvemos a cargar las barberías cercanas.
+        await cargarBarberias(userLocation);
       }
     } catch (error) {
       console.error('Error al buscar barberías:', error);
@@ -124,7 +128,7 @@ function App() {
     if (barberiaSeleccionada) {
       await handleVerBarberia({ id: barberiaSeleccionada.id });
     }
-    await cargarBarberias();
+    await cargarBarberias(userLocation);
   };
 
   const handleBarberiaSelectFromMap = (barberia) => {
@@ -133,32 +137,28 @@ function App() {
   };
 
   // Función para consultar Overpass API
-  const fetchBarberiasOSM = async (center, radio = 5000) => {
-    if (center && !Array.isArray(center) && typeof center === 'object' && center.lat !== undefined && center.lng !== undefined) {
-      center = [center.lat, center.lng];
-    }
-    if (!Array.isArray(center) || center.length !== 2 || isNaN(center[0]) || isNaN(center[1])) {
-      console.warn('fetchBarberiasOSM: center inválido', center);
-      return;
-    }
-    let lat = center[0];
-    let lon = center[1];
+  const fetchBarberiasOSM = async (location) => {
+    if (!location) return;
+    const center = [location.lat, location.lng];
+    const radio = 5000; // 5km
+    
     const latDiff = radio / 111320;
-    const lonDiff = radio / (40075000 * Math.cos((lat * Math.PI) / 180) / 360);
-    const s = lat - latDiff;
-    const w = lon - lonDiff;
-    const n = lat + latDiff;
-    const e = lon + lonDiff;
+    const lonDiff = radio / (40075000 * Math.cos((center[0] * Math.PI) / 180) / 360);
+    const s = center[0] - latDiff;
+    const w = center[1] - lonDiff;
+    const n = center[0] + latDiff;
+    const e = center[1] + lonDiff;
+
+    // --- Consulta a OSM más estricta ---
     const query = `
       [out:json][timeout:25];
       (
-        node["shop"="hairdresser"](${s},${w},${n},${e});
-        node["shop"="barber"](${s},${w},${n},${e});
-        node["shop"="beauty"](${s},${w},${n},${e});
-        node["amenity"="hairdresser"](${s},${w},${n},${e});
-        node["amenity"="beauty"](${s},${w},${n},${e});
+        node["shop"~"barber|hairdresser|beauty"](${s},${w},${n},${e});
+        way["shop"~"barber|hairdresser|beauty"](${s},${w},${n},${e});
       );
       out body;
+      >;
+      out skel qt;
     `;
     try {
       const res = await fetch('https://overpass-api.de/api/interpreter', {
@@ -199,29 +199,61 @@ function App() {
   console.log('DEBUG - barberiasOSMAdaptadas:', barberiasOSMAdaptadas);
   console.log('DEBUG - userLocation:', userLocation);
 
-  // CAMBIO: La lista y el mapa siempre muestran barberiasOSMAdaptadas
-  const todasLasBarberias = barberiasOSMAdaptadas;
+  // COMBINAR Y DE-DUPLICAR FUENTES DE DATOS
+  const uniquePlaces = new Map();
+  // Primero añadimos los de Google/backend, que suelen ser de mayor calidad
+  barberias.forEach(p => uniquePlaces.set(p.google_place_id || p.id, p));
+  // Luego añadimos los de OSM, solo si no existe un ID similar
+  barberiasOSMAdaptadas.forEach(p => {
+    if (!uniquePlaces.has(p.id)) {
+      uniquePlaces.set(p.id, p);
+    }
+  });
+  const todasLasBarberias = Array.from(uniquePlaces.values());
 
   const handleSolicitarUbicacion = () => {
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const loc = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-        setUserLocation(loc);
-        await fetchBarberiasOSM([loc.lat, loc.lng]);
-      },
-      (error) => {
-        setUserLocation(null);
-      }
-    );
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const loc = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          setUserLocation(loc);
+          setMapCenter(loc); // Centrar mapa en el usuario
+          setMapZoom(15); // Acercar el mapa
+        },
+        (error) => {
+          console.error("Error al obtener la ubicación:", error);
+          // Si el usuario niega el permiso, no podemos hacer nada automáticamente.
+          setCargando(false);
+          setUserLocation(null);
+        }
+      );
+    } else {
+      console.log("Geolocalización no es soportada por este navegador.");
+      // Si no hay geolocalización, la carga se detiene.
+      setCargando(false);
+    }
   };
 
   // Función para centrar el mapa en la barbería seleccionada
   const handleVerEnMapa = (barberia) => {
     setBarberiaParaCentrar(barberia);
-    // Opcional: podrías cerrar el modal o sheet si quieres
+    setMapCenter({ lat: barberia.latitud, lng: barberia.longitud });
+    setMapZoom(17); // Zoom más cercano al seleccionar una barbería
+  };
+
+  const handleToggleFavorite = (barberiaId) => {
+    setFavorites(prevFavorites => {
+      const newFavorites = new Set(prevFavorites);
+      if (newFavorites.has(barberiaId)) {
+        newFavorites.delete(barberiaId);
+      } else {
+        newFavorites.add(barberiaId);
+      }
+      return newFavorites;
+    });
   };
 
   // Vista móvil (estilo Uber)
@@ -233,7 +265,8 @@ function App() {
           barberias={todasLasBarberias}
           onBarberiaSelect={handleBarberiaSelectFromMap}
           userLocation={userLocation}
-          osmBarberias={barberiasOSMAdaptadas}
+          center={mapCenter}
+          zoom={mapZoom}
           onSolicitarUbicacion={handleSolicitarUbicacion}
           barberiasOSM={barberiasOSMAdaptadas}
           barberiaParaCentrar={barberiaParaCentrar}
@@ -320,6 +353,8 @@ function App() {
                         barberia={barberia}
                         onVerDetalles={() => handleVerBarberia(barberia)}
                         onVerEnMapa={() => handleVerEnMapa(barberia)}
+                        isFavorite={favorites.has(barberia.id)}
+                        onToggleFavorite={() => handleToggleFavorite(barberia.id)}
                       />
                     ))}
                   </div>
@@ -387,6 +422,8 @@ function App() {
                   barberia={barberia}
                   onVerDetalles={() => handleVerBarberia(barberia)}
                   onVerEnMapa={() => handleVerEnMapa(barberia)}
+                  isFavorite={favorites.has(barberia.id)}
+                  onToggleFavorite={() => handleToggleFavorite(barberia.id)}
                 />
               ))
             )}
@@ -399,7 +436,8 @@ function App() {
             barberias={todasLasBarberias}
             onBarberiaSelect={handleBarberiaSelectFromMap}
             userLocation={userLocation}
-            osmBarberias={barberiasOSMAdaptadas}
+            center={mapCenter}
+            zoom={mapZoom}
             onSolicitarUbicacion={handleSolicitarUbicacion}
             barberiasOSM={barberiasOSMAdaptadas}
             barberiaParaCentrar={barberiaParaCentrar}

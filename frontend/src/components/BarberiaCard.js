@@ -1,61 +1,50 @@
 import React from 'react';
 
-const BarberiaCard = ({ barberia, onVerDetalles, onVerEnMapa }) => {
-  // Nombre y dirección robustos
-  const nombre = barberia.nombre || 'Barbería / Estética';
-  const direccion = barberia.direccion && barberia.direccion.trim() ? barberia.direccion : 'Dirección no disponible';
-  const categoria = barberia.categoria || '';
-  const isOSM = barberia.fuente === 'osm';
+const StarRating = ({ rating = 0 }) => {
+  const totalStars = 5;
+  let stars = [];
+  for (let i = 1; i <= totalStars; i++) {
+    if (i <= rating) {
+      stars.push(<span key={i} className="star filled">★</span>);
+    } else {
+      stars.push(<span key={i} className="star">☆</span>);
+    }
+  }
+  return <div className="star-rating">{stars}</div>;
+};
+
+function BarberiaCard({ barberia, onVerDetalles, onVerEnMapa, isFavorite, onToggleFavorite }) {
+  const handleFavoriteClick = (e) => {
+    e.stopPropagation(); // Evitar que se abra el modal de detalles
+    onToggleFavorite();
+  };
 
   return (
-    <div className="barberia-card" onClick={onVerDetalles} style={{cursor: isOSM ? 'default' : 'pointer'}}>
-      <div className="barberia-header">
-        <div>
-          <div className="barberia-nombre">{nombre} {isOSM && <span style={{color:'#3b82f6', fontSize:'12px'}}>(OSM)</span>}</div>
-          <div className="barberia-direccion">{direccion}</div>
-          {isOSM && categoria && (
-            <div style={{fontSize: '11px', color: '#6b7280', marginTop: '2px'}}>🏷️ {categoria}</div>
-          )}
-        </div>
-      </div>
-      <div className="barberia-info">
-        {!isOSM && barberia.telefono && barberia.telefono !== 'No disponible' && (
-          <span>📞 {barberia.telefono}</span>
-        )}
-        {!isOSM && barberia.horario && barberia.horario !== 'Horario no disponible' && (
-          <span>🕒 {barberia.horario}</span>
-        )}
-        {!isOSM && (
-          <span>👥 {barberia.total_calificaciones ?? 0} calificaciones</span>
-        )}
-        {isOSM && (
-          <span className="osm-badge" style={{
-            background: '#3b82f6',
-            color: 'white',
-            padding: '2px 6px',
-            borderRadius: '4px',
-            fontSize: '10px',
-            fontWeight: '600',
-            marginLeft: '8px'
-          }}>🗺️ OSM</span>
-        )}
-      </div>
-      {isOSM ? (
-        <div style={{display:'flex', flexDirection:'column', gap:'6px', marginTop:'10px'}}>
-          <button className="btn btn-secondary" disabled style={{opacity:0.7, cursor:'not-allowed'}}>
-            Solo visualización (OSM)
-          </button>
-          <button className="btn btn-primary" onClick={e => { e.stopPropagation(); onVerEnMapa && onVerEnMapa(); }} style={{marginTop:'0'}}>
-            Ver en mapa
-          </button>
-        </div>
-      ) : (
-        <button className="btn btn-secondary" onClick={onVerDetalles} style={{marginTop:'10px'}}>
-          Ver detalles y calificar
+    <div className="barberia-card" onClick={onVerDetalles}>
+      <div className="card-header">
+        <h3 className="card-title">{barberia.nombre}</h3>
+        <button 
+          className={`favorite-btn ${isFavorite ? 'favorited' : ''}`}
+          onClick={handleFavoriteClick}
+          aria-label="Añadir a favoritos"
+        >
+          ❤
         </button>
-      )}
+      </div>
+      <p className="card-address">{barberia.direccion}</p>
+      
+      <div className="card-rating">
+        <span className="rating-value">{barberia.calificacion_promedio?.toFixed(1) || 'N/A'}</span>
+        <StarRating rating={barberia.calificacion_promedio} />
+        <span className="total-ratings">({barberia.total_calificaciones || 0} calificaciones)</span>
+      </div>
+      
+      <div className="card-actions">
+        <button className="card-btn" onClick={onVerDetalles}>Ver detalles</button>
+        <button className="card-btn-secondary" onClick={(e) => { e.stopPropagation(); onVerEnMapa(); }}>Ver en mapa</button>
+      </div>
     </div>
   );
-};
+}
 
 export default BarberiaCard; 

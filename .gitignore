@@ -62,3 +62,8 @@ Thumbs.db
 .env.development.local
 .env.test.local
 .env.production.local
+
+# SSL Certificates
+*.pem
+*.key
+*.crt

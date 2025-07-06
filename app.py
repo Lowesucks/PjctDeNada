@@ -7,11 +7,16 @@ import requests
 import json
 import googlemaps
 from functools import lru_cache
+import ssl
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///barberias.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 CORS(app)
+
+# Configuración SSL para HTTPS
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+ssl_context.load_cert_chain('cert.pem', 'key.pem')
 
 db = SQLAlchemy(app)
 

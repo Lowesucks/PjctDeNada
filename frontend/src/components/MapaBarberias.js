@@ -1,5 +1,6 @@
 import React from 'react';
 import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
+import '../config/suppressWarnings'; // Suprimir advertencias de deprecación
 
 const containerStyle = {
   width: '100%',
@@ -77,7 +78,7 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
 
         return (
           <MarkerF
-              key={barberia.id}
+            key={barberia.id}
             position={{ lat, lng }}
             onClick={() => handleMarkerClick(barberia)}
             title={barberia.nombre}

@@ -35,7 +35,8 @@ function BarberiaCard({ barberia, onVerDetalles, onVerEnMapa, isFavorite, onTogg
 
   const handleFavoriteClick = (e) => {
     e.stopPropagation(); // Evitar que se abra el modal de detalles
-    onToggleFavorite();
+    console.log('Favorite button clicked for barberia:', barberia.id);
+    onToggleFavorite(barberia.id);
   };
 
   return (
@@ -47,7 +48,7 @@ function BarberiaCard({ barberia, onVerDetalles, onVerEnMapa, isFavorite, onTogg
           onClick={handleFavoriteClick}
           aria-label="Añadir a favoritos"
         >
-          ❤
+          {isFavorite ? '❤️' : '🤍'}
         </button>
       </div>
       <p className="card-address">{barberia.direccion}</p>

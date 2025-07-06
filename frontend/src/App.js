@@ -229,6 +229,13 @@ function App() {
     }
   };
 
+  // Adaptar barberías para que tengan lat y lng
+  const barberiasAdaptadas = barberias.map(b => ({
+    ...b,
+    lat: b.lat || b.latitud,
+    lng: b.lng || b.longitud,
+  }));
+
   // Vista móvil (estilo Uber)
   if (isMobile) {
     return (
@@ -241,7 +248,7 @@ function App() {
           }}
         >
           <MapaBarberias 
-            barberias={barberias}
+            barberias={barberiasAdaptadas}
             onBarberiaSelect={handleBarberiaSelectFromMap}
             userLocation={userLocation}
             center={mapCenter}
@@ -491,7 +498,7 @@ function App() {
         {/* Contenedor del Mapa */}
         <div className="map-container-redesign">
           <MapaBarberias 
-            barberias={barberias}
+            barberias={barberiasAdaptadas}
             onBarberiaSelect={handleBarberiaSelectFromMap}
             userLocation={userLocation}
             center={mapCenter}

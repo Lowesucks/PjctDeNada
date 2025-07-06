@@ -138,18 +138,14 @@ function App() {
         }
       }
 
-      // Si es una barbería local, obtener detalles completos de la API
-      if (barberia.fuente !== 'osm') {
-        const response = await axios.get(`/api/barberias/${barberia.id}`);
-        // Combinamos los datos, manteniendo la dirección que ya obtuvimos si era necesaria
-        barberiaConDireccion = { ...response.data, direccion: barberiaConDireccion.direccion };
+      // Solo mostrar detalles para barberías de Google
+      if (barberia.fuente === 'google') {
+        setBarberiaSeleccionada(barberiaConDireccion);
+        setMostrarModal(true);
       }
-      
-      setBarberiaSeleccionada(barberiaConDireccion);
-      setMostrarModal(true);
+      // Si no es de Google, no hacer nada
     } catch (error) {
       console.error('Error al cargar detalles de la barbería:', error);
-      // Fallback: usar los datos básicos disponibles
       setBarberiaSeleccionada(barberia);
       setMostrarModal(true);
     }
@@ -175,6 +171,10 @@ function App() {
 
   // Función para centrar el mapa en la barbería seleccionada
   const handleVerEnMapa = (barberia) => {
+    if (!barberia || typeof barberia.lat === 'undefined' || typeof barberia.lng === 'undefined') {
+      console.warn("Barbería sin lat/lng:", barberia);
+      return;
+    }
     setBarberiaParaCentrar(barberia);
     setMapCenter({ lat: barberia.lat, lng: barberia.lng });
     setMapZoom(17); // Zoom más cercano al seleccionar una barbería
@@ -236,6 +236,10 @@ function App() {
     lng: b.lng || b.longitud,
   }));
 
+  // Filtrar solo barberías de Google con lat y lng válidos para mostrar en el mapa y la lista
+  const barberiasGoogle = barberiasAdaptadas
+    .filter(b => b.fuente === 'google' && typeof b.lat === 'number' && typeof b.lng === 'number' && !isNaN(b.lat) && !isNaN(b.lng));
+
   // Vista móvil (estilo Uber)
   if (isMobile) {
     return (
@@ -248,7 +252,7 @@ function App() {
           }}
         >
           <MapaBarberias 
-            barberias={barberiasAdaptadas}
+            barberias={barberiasGoogle}
             onBarberiaSelect={handleBarberiaSelectFromMap}
             userLocation={userLocation}
             center={mapCenter}
@@ -322,7 +326,7 @@ function App() {
                     </label>
                   </div>
                 </div>
-              ) : barberias.length === 0 ? (
+              ) : barberiasGoogle.length === 0 ? (
                 <div className="empty-state-redesign">
                   <h3>
                     {currentView === 'favoritos' 
@@ -352,14 +356,16 @@ function App() {
                       </div>
                     )}
                   </div>
-                  {barberias.map(barberia => (
+                  {barberiasGoogle.map(barberia => (
                     <BarberiaCard
                       key={barberia.id}
                       barberia={barberia}
-                      onVerDetalles={() => handleVerBarberia(barberia)}
-                      onVerEnMapa={() => handleVerEnMapa(barberia)}
+                      onVerDetalles={handleVerBarberia}
+                      onVerEnMapa={handleVerEnMapa}
+                      onToggleFavorite={handleToggleFavorite}
                       isFavorite={favorites.has(barberia.id)}
-                      onToggleFavorite={() => handleToggleFavorite(barberia.id)}
+                      isMobile={isMobile}
+                      onCalificar={handleCalificar}
                     />
                   ))}
                 </div>
@@ -467,7 +473,7 @@ function App() {
                   </label>
                 </div>
               </div>
-            ) : barberias.length === 0 ? (
+            ) : barberiasGoogle.length === 0 ? (
               <div className="empty-state-redesign">
                 <h3>
                   {currentView === 'favoritos' 
@@ -481,14 +487,16 @@ function App() {
                 </p>
               </div>
             ) : (
-              barberias.map(barberia => (
+              barberiasGoogle.map(barberia => (
                 <BarberiaCard
                   key={barberia.id}
                   barberia={barberia}
-                  onVerDetalles={() => handleVerBarberia(barberia)}
-                  onVerEnMapa={() => handleVerEnMapa(barberia)}
+                  onVerDetalles={handleVerBarberia}
+                  onVerEnMapa={handleVerEnMapa}
+                  onToggleFavorite={handleToggleFavorite}
                   isFavorite={favorites.has(barberia.id)}
-                  onToggleFavorite={() => handleToggleFavorite(barberia.id)}
+                  isMobile={isMobile}
+                  onCalificar={handleCalificar}
                 />
               ))
             )}
@@ -498,7 +506,7 @@ function App() {
         {/* Contenedor del Mapa */}
         <div className="map-container-redesign">
           <MapaBarberias 
-            barberias={barberiasAdaptadas}
+            barberias={barberiasGoogle}
             onBarberiaSelect={handleBarberiaSelectFromMap}
             userLocation={userLocation}
             center={mapCenter}

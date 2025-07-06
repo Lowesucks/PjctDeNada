@@ -60,7 +60,7 @@ function BarberiaCard({ barberia, onVerDetalles, onVerEnMapa, isFavorite, onTogg
       
       <div className="card-actions">
         <button onClick={(e) => { e.stopPropagation(); onVerDetalles(); }} className="card-btn">Ver detalles</button>
-        <button onClick={(e) => { e.stopPropagation(); onVerEnMapa(); }} className="card-btn-secondary">Ver en mapa</button>
+        <button onClick={(e) => { e.stopPropagation(); onVerEnMapa(barberia); }} className="card-btn-secondary">Ver en mapa</button>
       </div>
     </div>
   );

@@ -60,7 +60,15 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
       )}
 
       {barberias.map((barberia) => {
-        // Asegurarse de que `window.google` esté disponible y la config también.
+        const lat = Number(barberia.lat);
+        const lng = Number(barberia.lng);
+
+        // Solo renderiza el marcador si ambos son números válidos
+        if (isNaN(lat) || isNaN(lng)) {
+          console.warn("Barbería con lat/lng inválido:", barberia);
+          return null;
+        }
+
         const finalIcon = isLoaded && iconConfig ? {
           url: iconConfig.url,
           scaledSize: new window.google.maps.Size(iconConfig.scaledSize.width, iconConfig.scaledSize.height),
@@ -70,7 +78,7 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
         return (
           <MarkerF
               key={barberia.id}
-            position={{ lat: barberia.lat, lng: barberia.lng }}
+            position={{ lat, lng }}
             onClick={() => handleMarkerClick(barberia)}
             title={barberia.nombre}
             icon={finalIcon}

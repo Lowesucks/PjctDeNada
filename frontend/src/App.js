@@ -29,7 +29,6 @@ function App() {
 
   const [userLocation, setUserLocation] = useState(null);
   const [foursquareAvailable, setFoursquareAvailable] = useState(false);
-  const [osmBarberias, setOsmBarberias] = useState([]);
   const [barberiaParaCentrar, setBarberiaParaCentrar] = useState(null);
   const [mapCenter, setMapCenter] = useState(null);
   const [mapZoom, setMapZoom] = useState(12);
@@ -75,18 +74,9 @@ function App() {
   useEffect(() => {
     // Este efecto se dispara SOLO cuando tenemos la ubicación del usuario.
     if (userLocation) {
-      const fetchAllData = async () => {
-        setCargando(true);
-        // Hacemos todas las peticiones en paralelo para más eficiencia.
-        await Promise.all([
-          cargarBarberias(userLocation),
-          fetchBarberiasOSM(userLocation)
-        ]);
-        setCargando(false);
-      };
-      fetchAllData();
+      setCargando(true);
+      cargarBarberias(userLocation).finally(() => setCargando(false));
     }
-    // El warning de dependencias se puede ignorar aquí de forma segura.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLocation]); // Se ejecuta solo cuando userLocation cambia.
 
@@ -183,155 +173,6 @@ function App() {
     handleVerBarberia(barberia);
   };
 
-  // Función para consultar Overpass API
-  const fetchBarberiasOSM = async (location) => {
-    if (!location) return;
-    const center = [location.lat, location.lng];
-    const radio = 5000; // 5km
-    
-    const latDiff = radio / 111320;
-    const lonDiff = radio / (40075000 * Math.cos((center[0] * Math.PI) / 180) / 360);
-    const s = center[0] - latDiff;
-    const w = center[1] - lonDiff;
-    const n = center[0] + latDiff;
-    const e = center[1] + lonDiff;
-
-    // --- Consulta a OSM más estricta ---
-    const query = `
-      [out:json][timeout:25];
-      (
-        node["shop"~"barber|hairdresser|beauty"](${s},${w},${n},${e});
-        way["shop"~"barber|hairdresser|beauty"](${s},${w},${n},${e});
-      );
-      out body;
-      >;
-      out skel qt;
-    `;
-    try {
-      const res = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        body: query,
-      });
-      const data = await res.json();
-      console.log('Respuesta OSM:', data.elements);
-      setOsmBarberias(data.elements || []);
-    } catch (err) {
-      setOsmBarberias([]);
-      console.error('Error al consultar OSM:', err);
-    }
-  };
-
-  // Adaptar los lugares OSM al formato esperado por BarberiaCard
-  const barberiasOSMAdaptadas = osmBarberias.map(lugar => ({
-    id: 'osm-' + lugar.id,
-    fuente: 'osm',
-    nombre: lugar.tags?.name || 'Barbería / Estética',
-    direccion: [
-      lugar.tags?.['addr:street'] || '',
-      lugar.tags?.['addr:housenumber'] || ''
-    ].join(' ').trim() || 'Dirección no disponible',
-    telefono: lugar.tags?.phone || lugar.tags?.['contact:phone'] || 'No disponible',
-    horario: lugar.tags?.opening_hours || 'Horario no disponible',
-    lat: lugar.lat,
-    lng: lugar.lon,
-    calificacion_promedio: 0,
-    total_calificaciones: 0,
-    categoria: lugar.tags?.shop || lugar.tags?.amenity || 'Barbería'
-  }));
-
-  // Después de crear barberiasOSMAdaptadas, agrega este log:
-  console.log('Barberías OSM adaptadas:', barberiasOSMAdaptadas);
-
-  // 1. Loguea el contenido de barberiasOSMAdaptadas y userLocation
-  console.log('DEBUG - barberiasOSMAdaptadas:', barberiasOSMAdaptadas);
-  console.log('DEBUG - userLocation:', userLocation);
-
-  // COMBINAR Y DE-DUPLICAR FUENTES DE DATOS
-  const uniquePlaces = new Map();
-  // Primero añadimos los de Google/backend, que suelen ser de mayor calidad
-  barberias.forEach(p => uniquePlaces.set(p.google_place_id || p.id, p));
-  // Luego añadimos los de OSM, solo si no existe un ID similar
-  barberiasOSMAdaptadas.forEach(p => {
-    if (!uniquePlaces.has(p.id)) {
-      uniquePlaces.set(p.id, p);
-    }
-  });
-  const todasLasBarberias = Array.from(uniquePlaces.values());
-
-  // Lógica de ordenamiento
-  const getDistance = (lat1, lon1, lat2, lon2) => {
-      if ((lat1 === lat2) && (lon1 === lon2)) {
-          return 0;
-      }
-      const radlat1 = Math.PI * lat1/180;
-      const radlat2 = Math.PI * lat2/180;
-      const theta = lon1-lon2;
-      const radtheta = Math.PI * theta/180;
-      let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-      if (dist > 1) {
-          dist = 1;
-      }
-      dist = Math.acos(dist);
-      dist = dist * 180/Math.PI;
-      dist = dist * 60 * 1.1515 * 1.609344;
-      return dist; // en KM
-  }
-
-  const sortedBarberias = useMemo(() => {
-    const listToSort = [...todasLasBarberias];
-
-    if (userLocation) {
-        listToSort.forEach(b => {
-            if (b.lat && b.lng) {
-                b.distancia = getDistance(userLocation.lat, userLocation.lng, b.lat, b.lng);
-            } else {
-                b.distancia = Infinity;
-            }
-        });
-    }
-
-    switch (sortOrder) {
-        case 'calificacion':
-            return listToSort.sort((a, b) => (b.calificacion_promedio || 0) - (a.calificacion_promedio || 0));
-        case 'reseñas':
-            return listToSort.sort((a, b) => (b.total_calificaciones || 0) - (a.total_calificaciones || 0));
-        case 'distancia':
-        default:
-            return listToSort.sort((a, b) => a.distancia - b.distancia);
-    }
-  }, [todasLasBarberias, sortOrder, userLocation]);
-
-  // Filtrar la lista de barberías según la vista actual
-  const displayedBarberias = currentView === 'favoritos'
-    ? sortedBarberias.filter(b => favorites.has(b.id))
-    : sortedBarberias;
-
-  const handleSolicitarUbicacion = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const loc = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          setUserLocation(loc);
-          setMapCenter(loc); // Centrar mapa en el usuario
-          setMapZoom(15); // Acercar el mapa
-        },
-        (error) => {
-          console.error("Error al obtener la ubicación:", error);
-          // Si el usuario niega el permiso, no podemos hacer nada automáticamente.
-          setCargando(false);
-          setUserLocation(null);
-        }
-      );
-    } else {
-      console.log("Geolocalización no es soportada por este navegador.");
-      // Si no hay geolocalización, la carga se detiene.
-      setCargando(false);
-    }
-  };
-
   // Función para centrar el mapa en la barbería seleccionada
   const handleVerEnMapa = (barberia) => {
     setBarberiaParaCentrar(barberia);
@@ -364,6 +205,30 @@ function App() {
     });
   };
 
+  const handleSolicitarUbicacion = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const loc = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          setUserLocation(loc);
+          setMapCenter(loc); // Centrar mapa en el usuario
+          setMapZoom(15); // Acercar el mapa
+        },
+        (error) => {
+          console.error("Error al obtener la ubicación:", error);
+          setCargando(false);
+          setUserLocation(null);
+        }
+      );
+    } else {
+      console.log("Geolocalización no es soportada por este navegador.");
+      setCargando(false);
+    }
+  };
+
   // Vista móvil (estilo Uber)
   if (isMobile) {
     return (
@@ -376,7 +241,7 @@ function App() {
           }}
         >
           <MapaBarberias 
-            barberias={todasLasBarberias}
+            barberias={barberias}
             onBarberiaSelect={handleBarberiaSelectFromMap}
             userLocation={userLocation}
             center={mapCenter}
@@ -450,7 +315,7 @@ function App() {
                     </label>
                   </div>
                 </div>
-              ) : displayedBarberias.length === 0 ? (
+              ) : barberias.length === 0 ? (
                 <div className="empty-state-redesign">
                   <h3>
                     {currentView === 'favoritos' 
@@ -480,7 +345,7 @@ function App() {
                       </div>
                     )}
                   </div>
-                  {displayedBarberias.map(barberia => (
+                  {barberias.map(barberia => (
                     <BarberiaCard
                       key={barberia.id}
                       barberia={barberia}
@@ -595,7 +460,7 @@ function App() {
                   </label>
                 </div>
               </div>
-            ) : displayedBarberias.length === 0 ? (
+            ) : barberias.length === 0 ? (
               <div className="empty-state-redesign">
                 <h3>
                   {currentView === 'favoritos' 
@@ -609,7 +474,7 @@ function App() {
                 </p>
               </div>
             ) : (
-              displayedBarberias.map(barberia => (
+              barberias.map(barberia => (
                 <BarberiaCard
                   key={barberia.id}
                   barberia={barberia}
@@ -626,13 +491,12 @@ function App() {
         {/* Contenedor del Mapa */}
         <div className="map-container-redesign">
           <MapaBarberias 
-            barberias={todasLasBarberias}
+            barberias={barberias}
             onBarberiaSelect={handleBarberiaSelectFromMap}
             userLocation={userLocation}
             center={mapCenter}
             zoom={mapZoom}
             onSolicitarUbicacion={handleSolicitarUbicacion}
-            barberiasOSM={barberiasOSMAdaptadas}
             barberiaParaCentrar={barberiaParaCentrar}
             mapStyle={theme === 'dark' ? mapStyles.dark : mapStyles.light}
             iconConfig={ICON_CONFIG}

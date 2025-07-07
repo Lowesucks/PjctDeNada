@@ -12,13 +12,15 @@ import time
 import signal
 import threading
 from pathlib import Path
+import types
+from typing import cast
 
 class BarberiasApp:
     def __init__(self):
-        self.system = platform.system().lower()
-        self.backend_process = None
-        self.frontend_process = None
-        self.running = True
+        self.system: str = platform.system().lower()
+        self.backend_process: subprocess.Popen[bytes] | None = None
+        self.frontend_process: subprocess.Popen[bytes] | None = None
+        self.running: bool = True
         
     def print_header(self):
         """Imprime el encabezado de la aplicación"""
@@ -97,7 +99,7 @@ class BarberiasApp:
         if not venv_path.exists():
             print("📦 Instalando dependencias de Python...")
             try:
-                subprocess.run([sys.executable, "-m", "venv", "venv"], check=True)
+                _ = subprocess.run([sys.executable, "-m", "venv", "venv"], check=True)
                 print("✓ Entorno virtual creado")
             except subprocess.CalledProcessError as e:
                 print(f"❌ Error creando entorno virtual: {e}")
@@ -105,16 +107,14 @@ class BarberiasApp:
                 
         # Activar entorno virtual
         if self.system == "windows":
-            activate_script = venv_path / "Scripts" / "activate.bat"
             pip_path = venv_path / "Scripts" / "pip.exe"
         else:
-            activate_script = venv_path / "bin" / "activate"
             pip_path = venv_path / "bin" / "pip"
             
         # Instalar dependencias
         if Path("requirements.txt").exists():
             try:
-                subprocess.run([str(pip_path), "install", "-r", "requirements.txt"], check=True)
+                _ = subprocess.run([str(pip_path), "install", "-r", "requirements.txt"], check=True)
                 print("✓ Dependencias de Python instaladas")
             except subprocess.CalledProcessError as e:
                 print(f"❌ Error instalando dependencias: {e}")
@@ -130,7 +130,7 @@ class BarberiasApp:
         if not node_modules_path.exists():
             print("📦 Instalando dependencias de Node.js...")
             try:
-                subprocess.run(["npm", "install"], cwd=frontend_path, check=True)
+                _ = subprocess.run(["npm", "install"], cwd=frontend_path, check=True)
                 print("✓ Dependencias de Node.js instaladas")
             except subprocess.CalledProcessError as e:
                 print(f"❌ Error instalando dependencias de Node.js: {e}")
@@ -221,7 +221,7 @@ class BarberiasApp:
             print(f"❌ Error general iniciando frontend: {e}")
             return False
             
-    def cleanup(self, signum=None, frame=None):
+    def cleanup(self, _signum: int | None = None, _frame: types.FrameType | None = None):
         """Limpia los procesos al salir"""
         print("\n🛑 Deteniendo servicios...")
         self.running = False
@@ -229,19 +229,18 @@ class BarberiasApp:
         if self.backend_process:
             try:
                 self.backend_process.terminate()
-                self.backend_process.wait(timeout=5)
+                _ = self.backend_process.wait(timeout=5)
             except:
                 self.backend_process.kill()
                 
         if self.frontend_process:
             try:
                 self.frontend_process.terminate()
-                self.frontend_process.wait(timeout=5)
+                _ = self.frontend_process.wait(timeout=5)
             except:
                 self.frontend_process.kill()
                 
         print("✓ Servicios detenidos")
-        sys.exit(0)
         
     def open_browser(self):
         """Abre el navegador después de un delay"""
@@ -249,11 +248,11 @@ class BarberiasApp:
         
         try:
             if self.system == "windows":
-                os.startfile("http://localhost:3000")
+                _ = os.startfile("http://localhost:3000")
             elif self.system == "darwin":  # macOS
-                subprocess.run(["open", "http://localhost:3000"])
+                _ = subprocess.run(["open", "http://localhost:3000"])
             else:  # Linux
-                subprocess.run(["xdg-open", "http://localhost:3000"])
+                _ = subprocess.run(["xdg-open", "http://localhost:3000"])
         except:
             print("⚠️  No se pudo abrir el navegador automáticamente")
             
@@ -276,9 +275,9 @@ class BarberiasApp:
         print("\n🚀 Iniciando servicios...\n")
         
         # Configurar manejo de señales para limpieza
-        signal.signal(signal.SIGINT, self.cleanup)
+        _ = signal.signal(signal.SIGINT, self.cleanup)
         if self.system != "windows":
-            signal.signal(signal.SIGTERM, self.cleanup)
+            _ = signal.signal(signal.SIGTERM, self.cleanup)
             
         # Iniciar servicios
         if not self.start_backend():
@@ -300,7 +299,7 @@ class BarberiasApp:
             import socket
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             s.connect(("8.8.8.8", 80))
-            local_ip = s.getsockname()[0]
+            local_ip = cast(str, s.getsockname()[0])
             s.close()
             
             print("\n" + "=" * 50)
@@ -343,7 +342,7 @@ def main():
     success = app.run()
     if not success:
         print("\n❌ Error al iniciar la aplicación")
-        input("Presiona Enter para salir...")
+        _ = input("Presiona Enter para salir...")
         sys.exit(1)
 
 if __name__ == "__main__":

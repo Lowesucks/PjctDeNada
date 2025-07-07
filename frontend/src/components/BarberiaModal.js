@@ -43,16 +43,6 @@ const BarberiaModal = ({ barberia, onClose, onCalificar }) => {
           {barberia.horario && barberia.horario !== 'Horario no disponible' && (
             <p><strong>🕒 Horario:</strong> {barberia.horario}</p>
           )}
-          {barberia.fuente === 'foursquare' && (
-            <div className="source-badge foursquare">
-              📍 Datos de Foursquare
-              {barberia.distancia && (
-                <span className="source-badge-detail">
-                  • {(barberia.distancia / 1000).toFixed(1)} km
-                </span>
-              )}
-            </div>
-          )}
           {barberia.fuente === 'osm' && (
             <div className="source-badge osm">
               🗺️ Datos de OpenStreetMap

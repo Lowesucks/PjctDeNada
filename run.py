@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Script universal para iniciar la aplicación de Barberías
-Funciona en Windows, Linux y macOS
+Script original para iniciar la aplicación de Barberías
+Versión simplificada y funcional
 """
 
 import os
@@ -23,7 +23,7 @@ class BarberiasApp:
     def print_header(self):
         """Imprime el encabezado de la aplicación"""
         print("=" * 50)
-        print("   Barberias App - Iniciador Universal")
+        print("   Barberias App - Iniciador Original")
         print("=" * 50)
         print()
         
@@ -36,35 +36,24 @@ class BarberiasApp:
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             print("❌ ERROR: Python no está instalado o no está en el PATH")
-            print("Por favor instala Python desde https://python.org")
             return False
             
     def check_node(self):
         """Verifica si Node.js está instalado"""
         try:
-            # En Windows, usar shell=True para mejor compatibilidad
             if self.system == "windows":
                 result = subprocess.run("node --version", 
                                       shell=True, capture_output=True, text=True, check=True)
                 print(f"✓ Node.js detectado: {result.stdout.strip()}")
                 
-                # Verificar también npm
                 try:
                     npm_result = subprocess.run("npm --version", 
                                                shell=True, capture_output=True, text=True, check=True)
                     print(f"✓ npm detectado: {npm_result.stdout.strip()}")
                 except subprocess.CalledProcessError:
-                    print("⚠️  npm no detectado, intentando con npx...")
-                    try:
-                        npx_result = subprocess.run("npx --version", 
-                                                   shell=True, capture_output=True, text=True, check=True)
-                        print(f"✓ npx detectado: {npx_result.stdout.strip()}")
-                    except subprocess.CalledProcessError:
-                        print("❌ ERROR: npm y npx no están disponibles")
-                        print("Por favor instala Node.js desde https://nodejs.org")
-                        return False
+                    print("❌ ERROR: npm no está disponible")
+                    return False
             else:
-                # En Unix, usar subprocess normal
                 result = subprocess.run(["node", "--version"], 
                                       capture_output=True, text=True, check=True)
                 print(f"✓ Node.js detectado: {result.stdout.strip()}")
@@ -74,20 +63,12 @@ class BarberiasApp:
                                                capture_output=True, text=True, check=True)
                     print(f"✓ npm detectado: {npm_result.stdout.strip()}")
                 except (subprocess.CalledProcessError, FileNotFoundError):
-                    print("⚠️  npm no detectado, intentando con npx...")
-                    try:
-                        npx_result = subprocess.run(["npx", "--version"], 
-                                                   capture_output=True, text=True, check=True)
-                        print(f"✓ npx detectado: {npx_result.stdout.strip()}")
-                    except (subprocess.CalledProcessError, FileNotFoundError):
-                        print("❌ ERROR: npm y npx no están disponibles")
-                        print("Por favor instala Node.js desde https://nodejs.org")
-                        return False
+                    print("❌ ERROR: npm no está disponible")
+                    return False
             
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             print("❌ ERROR: Node.js no está instalado o no está en el PATH")
-            print("Por favor instala Node.js desde https://nodejs.org")
             return False
             
     def setup_python_dependencies(self):
@@ -105,10 +86,8 @@ class BarberiasApp:
                 
         # Activar entorno virtual
         if self.system == "windows":
-            activate_script = venv_path / "Scripts" / "activate.bat"
             pip_path = venv_path / "Scripts" / "pip.exe"
         else:
-            activate_script = venv_path / "bin" / "activate"
             pip_path = venv_path / "bin" / "pip"
             
         # Instalar dependencias
@@ -144,26 +123,14 @@ class BarberiasApp:
         """Inicia el backend"""
         print("🚀 Iniciando Backend...")
         
-        # Configurar el entorno para el backend
-        env = os.environ.copy()
-        if self.system == "windows":
-            venv_activate = Path("venv") / "Scripts" / "activate.bat"
-            python_path = Path("venv") / "Scripts" / "python.exe"
-        else:
-            venv_activate = Path("venv") / "bin" / "activate"
-            python_path = Path("venv") / "bin" / "python"
-            
-        # Iniciar backend
         try:
             if self.system == "windows":
-                # En Windows, usar cmd para activar el entorno virtual
+                venv_activate = Path("venv") / "Scripts" / "activate.bat"
                 cmd = f'cmd /c "call {venv_activate} && python app.py"'
                 self.backend_process = subprocess.Popen(cmd, shell=True)
             else:
-                # En Unix, activar el entorno virtual directamente
-                env["VIRTUAL_ENV"] = str(Path("venv").absolute())
-                env["PATH"] = f"{Path('venv') / 'bin'}:{env.get('PATH', '')}"
-                self.backend_process = subprocess.Popen([str(python_path), "app.py"], env=env)
+                python_path = Path("venv") / "bin" / "python"
+                self.backend_process = subprocess.Popen([str(python_path), "app.py"])
                 
             print("✓ Backend iniciado")
             return True
@@ -176,49 +143,18 @@ class BarberiasApp:
         print("🚀 Iniciando Frontend...")
         
         try:
-            # Intentar diferentes comandos para iniciar el frontend
-            commands_to_try = [
-                ["npm", "start", "--", "--host", "0.0.0.0"],
-                ["npx", "react-scripts", "start", "--", "--host", "0.0.0.0"]
-            ]
+            if self.system == "windows":
+                # Iniciar frontend sin argumentos problemáticos
+                shell_cmd = f'cd frontend && npm start'
+                self.frontend_process = subprocess.Popen(shell_cmd, shell=True)
+            else:
+                self.frontend_process = subprocess.Popen(["npm", "start"], cwd="frontend")
             
-            frontend_started = False
-            
-            for cmd in commands_to_try:
-                try:
-                    print(f"Intentando con: {' '.join(cmd)}")
-                    
-                    if self.system == "windows":
-                        # En Windows, usar shell=True para mejor compatibilidad
-                        if cmd[0] == "npm":
-                            shell_cmd = f'cd frontend && npm start -- --host 0.0.0.0'
-                        else:
-                            shell_cmd = f'cd frontend && npx react-scripts start -- --host 0.0.0.0'
-                        self.frontend_process = subprocess.Popen(shell_cmd, shell=True)
-                    else:
-                        # En Unix, usar subprocess normal
-                        self.frontend_process = subprocess.Popen(cmd, cwd="frontend")
-                    
-                    print("✓ Frontend iniciado")
-                    frontend_started = True
-                    break
-                    
-                except (subprocess.CalledProcessError, FileNotFoundError) as e:
-                    print(f"❌ Falló con {' '.join(cmd)}: {e}")
-                    continue
-                except Exception as e:
-                    print(f"❌ Error inesperado con {' '.join(cmd)}: {e}")
-                    continue
-            
-            if not frontend_started:
-                print("❌ No se pudo iniciar el frontend con ningún comando disponible")
-                print("Verifica que npm/npx esté instalado y en el PATH")
-                return False
-                
+            print("✓ Frontend iniciado")
             return True
             
         except Exception as e:
-            print(f"❌ Error general iniciando frontend: {e}")
+            print(f"❌ Error iniciando frontend: {e}")
             return False
             
     def cleanup(self, signum=None, frame=None):
@@ -245,7 +181,7 @@ class BarberiasApp:
         
     def open_browser(self):
         """Abre el navegador después de un delay"""
-        time.sleep(3)  # Esperar a que los servicios estén listos
+        time.sleep(3)
         
         try:
             if self.system == "windows":
@@ -284,7 +220,7 @@ class BarberiasApp:
         if not self.start_backend():
             return False
             
-        time.sleep(2)  # Esperar a que el backend se inicie
+        time.sleep(2)
         
         if not self.start_frontend():
             self.cleanup()
@@ -295,38 +231,15 @@ class BarberiasApp:
         browser_thread.daemon = True
         browser_thread.start()
         
-        # Mostrar información de red para acceso desde teléfonos
-        try:
-            import socket
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(("8.8.8.8", 80))
-            local_ip = s.getsockname()[0]
-            s.close()
-            
-            print("\n" + "=" * 50)
-            print("   ¡Servicios iniciados!")
-            print("=" * 50)
-            print("Backend:  http://localhost:5000")
-            print("Frontend: http://localhost:3000")
-            print()
-            print("📱 Acceso desde teléfonos:")
-            print(f"Frontend: http://{local_ip}:3000")
-            print(f"Backend:  http://{local_ip}:5000")
-            print()
-            print("💡 Asegúrate de que tu teléfono esté en la misma red WiFi")
-            print("Las aplicaciones se abrirán automáticamente en tu navegador.")
-            print("Presiona Ctrl+C para detener todos los servicios.")
-            print()
-        except:
-            print("\n" + "=" * 50)
-            print("   ¡Servicios iniciados!")
-            print("=" * 50)
-            print("Backend:  http://localhost:5000")
-            print("Frontend: http://localhost:3000")
-            print()
-            print("Las aplicaciones se abrirán automáticamente en tu navegador.")
-            print("Presiona Ctrl+C para detener todos los servicios.")
-            print()
+        print("\n" + "=" * 50)
+        print("   ¡Servicios iniciados!")
+        print("=" * 50)
+        print("Backend:  http://localhost:5000")
+        print("Frontend: http://localhost:3000")
+        print()
+        print("Las aplicaciones se abrirán automáticamente en tu navegador.")
+        print("Presiona Ctrl+C para detener todos los servicios.")
+        print()
         
         # Mantener el script ejecutándose
         try:

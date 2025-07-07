@@ -4,10 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 import requests
-import json
 import googlemaps
 from functools import lru_cache
-import ssl
+from typing import Any, Dict, cast
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///barberias.db'
@@ -15,14 +14,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 CORS(app)
 
 # Configuración SSL para HTTPS (solo si los certificados existen)
-ssl_context = None
-try:
-    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-    ssl_context.load_cert_chain('cert.pem', 'key.pem')
-    print("✓ Certificados SSL cargados - HTTPS habilitado")
-except FileNotFoundError:
-    print("⚠️  Certificados SSL no encontrados - Ejecutando en modo HTTP")
-    ssl_context = None
+# ssl_context = ssl.create_default_context()
+# try:
+#     ssl_context.load_cert_chain('cert.pem', 'key.pem')
+#     print("✓ Certificados SSL cargados - HTTPS habilitado")
+# except FileNotFoundError:
+#     print("⚠️  Certificados SSL no encontrados - Ejecutando en modo HTTP")
+#     ssl_context = None
 
 db = SQLAlchemy(app)
 
@@ -49,7 +47,7 @@ def buscar_barberias_google_places(lat, lng, radio=5000):
         gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
         
         # Se realiza una única búsqueda por palabras clave para mayor precisión
-        places_result = gmaps.places_nearby(
+        places_result = cast(Any, gmaps).places_nearby(
             location=(lat, lng),
             radius=radio,
             keyword='barbería OR peluquería OR "salón de belleza"',
@@ -370,18 +368,13 @@ if __name__ == '__main__':
             init_db()
 
     # Configurar parámetros de ejecución
-    run_kwargs = {
+    run_kwargs: Dict[str, Any] = {
         'debug': True,
         'host': '0.0.0.0',
         'port': 5000,
-        'threaded': True
+        'threaded': True,
+        'use_reloader': False  # Evitar doble inicio en desarrollo
     }
     
-    # Agregar SSL solo si los certificados están disponibles
-    if ssl_context:
-        run_kwargs['ssl_context'] = ssl_context
-        print("🚀 Iniciando servidor en modo HTTPS...")
-    else:
-        print("🚀 Iniciando servidor en modo HTTP...")
-    
+    print("🚀 Iniciando servidor en modo HTTP...")
     app.run(**run_kwargs) 

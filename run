@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Script universal para iniciar la aplicación de Barberías
+# Detecta automáticamente el sistema operativo y ejecuta el script correspondiente
+
+echo "========================================"
+echo "   Barberias App - Iniciador Universal"
+echo "========================================"
+echo
+
+# Detectar el sistema operativo
+if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "win32" ]]; then
+    # Windows (Git Bash, Cygwin, etc.)
+    echo "Sistema detectado: Windows"
+    if [ -f "run.bat" ]; then
+        echo "Ejecutando script de Windows..."
+        cmd //c run.bat
+    else
+        echo "❌ Error: No se encontró run.bat"
+        exit 1
+    fi
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    echo "Sistema detectado: macOS"
+    if [ -f "run.sh" ]; then
+        echo "Ejecutando script de Unix..."
+        chmod +x run.sh
+        ./run.sh
+    else
+        echo "❌ Error: No se encontró run.sh"
+        exit 1
+    fi
+elif [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "linux"* ]]; then
+    # Linux
+    echo "Sistema detectado: Linux"
+    if [ -f "run.sh" ]; then
+        echo "Ejecutando script de Unix..."
+        chmod +x run.sh
+        ./run.sh
+    else
+        echo "❌ Error: No se encontró run.sh"
+        exit 1
+    fi
+else
+    # Sistema no reconocido, intentar con Python
+    echo "Sistema no reconocido: $OSTYPE"
+    echo "Intentando ejecutar con Python..."
+    if command -v python3 &> /dev/null; then
+        python3 run.py
+    elif command -v python &> /dev/null; then
+        python run.py
+    else
+        echo "❌ Error: No se pudo detectar el sistema operativo ni encontrar Python"
+        echo "Por favor ejecuta manualmente:"
+        echo "  - En Windows: run.bat"
+        echo "  - En Linux/macOS: ./run.sh"
+        echo "  - Universal: python run.py"
+        exit 1
+    fi
+fi 

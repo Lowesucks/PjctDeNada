@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext, useMemo } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import axios from 'axios';
 import BarberiaCard from './components/BarberiaCard';
 import BarberiaModal from './components/BarberiaModal';
@@ -23,12 +23,7 @@ function App() {
   const [cargando, setCargando] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   
-  // Estados para la vista móvil (bottom sheet)
-  const [sheetAbierto, setSheetAbierto] = useState(false);
-  const [sheetTipo, setSheetTipo] = useState('lista'); // 'lista' o 'buscar'
-
   const [userLocation, setUserLocation] = useState(null);
-  const [foursquareAvailable, setFoursquareAvailable] = useState(false);
   const [barberiaParaCentrar, setBarberiaParaCentrar] = useState(null);
   const [mapCenter, setMapCenter] = useState(null);
   const [mapZoom, setMapZoom] = useState(12);

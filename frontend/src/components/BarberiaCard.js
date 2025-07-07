@@ -15,8 +15,6 @@ const StarRating = ({ rating = 0 }) => {
 };
 
 function BarberiaCard({ barberia, onVerDetalles, onVerEnMapa, isFavorite, onToggleFavorite, isDetailView }) {
-  const { theme } = useContext(ThemeContext);
-
   if (isDetailView) {
     return (
       <div className="barberia-card-detail">

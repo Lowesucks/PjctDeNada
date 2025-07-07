@@ -23,7 +23,7 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
   const handleMarkerClick = (barberia) => {
     if (onBarberiaSelect) {
       onBarberiaSelect(barberia);
-      }
+    }
   };
 
   if (loadError) {
@@ -60,6 +60,7 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
         />
       )}
 
+      {/* Marcadores para las barberías */}
       {barberias.map((barberia) => {
         const lat = Number(barberia.lat);
         const lng = Number(barberia.lng);

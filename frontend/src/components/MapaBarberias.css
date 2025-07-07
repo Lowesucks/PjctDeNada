@@ -632,4 +632,93 @@
   to { opacity: 1; }
 }
 
-/* Eliminar el overlay de desenfoque */ 
+/* Eliminar el overlay de desenfoque */
+
+/* Configuraciones optimizadas para navegación táctil en móviles */
+.mapa-container,
+.mapa-wrapper,
+.mapa-simple,
+.mapa-element {
+  /* Permitir gestos táctiles naturales */
+  touch-action: pan-x pan-y pinch-zoom;
+  /* Mejorar la respuesta táctil */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Optimizar para dispositivos táctiles */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Configuraciones específicas para el contenedor del mapa de Google */
+.mapa-container .mapa-simple > div,
+.mapa-container .mapa-element > div {
+  touch-action: pan-x pan-y pinch-zoom !important;
+}
+
+/* Optimizaciones para marcadores en móviles */
+.custom-marker {
+  transition: all 0.3s ease;
+  /* Mejorar la respuesta táctil de los marcadores */
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.custom-marker:hover {
+  transform: scale(1.1);
+}
+
+/* Configuraciones específicas para móviles */
+@media (max-width: 768px) {
+  .mapa-container,
+  .mapa-wrapper,
+  .mapa-simple,
+  .mapa-element {
+    /* Configuraciones optimizadas para móviles */
+    touch-action: pan-x pan-y pinch-zoom;
+    /* Desactivar selección de texto en móviles */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    /* Mejorar el rendimiento táctil */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Optimizar controles del mapa para touch */
+  .leaflet-control-zoom a {
+    /* Hacer los botones más grandes para touch */
+    min-width: 44px;
+    min-height: 44px;
+    /* Mejorar la respuesta táctil */
+    touch-action: manipulation;
+  }
+  
+  /* Optimizar marcadores para touch */
+  .custom-marker {
+    /* Área de toque más grande */
+    min-width: 44px;
+    min-height: 44px;
+    /* Mejorar la respuesta táctil */
+    touch-action: manipulation;
+  }
+}
+
+/* Configuraciones para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .mapa-container,
+  .mapa-wrapper,
+  .mapa-simple,
+  .mapa-element {
+    /* Configuraciones específicas para pantallas pequeñas */
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+  
+  /* Hacer los controles aún más grandes en pantallas pequeñas */
+  .leaflet-control-zoom a {
+    min-width: 48px;
+    min-height: 48px;
+    font-size: 18px;
+  }
+} 

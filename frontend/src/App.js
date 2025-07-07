@@ -5,8 +5,13 @@ import BarberiaModal from './components/BarberiaModal';
 import CalificarModal from './components/CalificarModal';
 import MapaBarberias from './components/MapaBarberias';
 import './App.css';
+import './styles/mobileOptimization.css';
+import './styles/scrollControl.css';
 import { ThemeContext } from './context/ThemeContext';
 import { mapStyles } from './config/mapStyles';
+import { initTouchVerification } from './utils/touchTest';
+import { initDeviceDetection } from './utils/mobileDetection';
+import { applyScrollConfig, initScrollControl } from './utils/scrollControl';
 
 const ICON_CONFIG = {
   url: '/icono_ubicaciones.png',
@@ -45,8 +50,21 @@ function App() {
     // Al montar el componente, solo solicitamos la ubicación una vez.
     handleSolicitarUbicacion();
     checkScreenSize();
+    
+    // Inicializar verificaciones táctiles
+    initTouchVerification();
+    
+    // Inicializar detección de dispositivos móviles
+    initDeviceDetection();
+    
+    // Inicializar control de scroll para prevenir scroll no deseado
+    initScrollControl();
+    applyScrollConfig();
 
-    const handleResize = () => checkScreenSize();
+    const handleResize = () => {
+      checkScreenSize();
+      applyScrollConfig(); // Reaplicar configuración de scroll al cambiar tamaño
+    };
     window.addEventListener('resize', handleResize);
 
     return () => window.removeEventListener('resize', handleResize);
@@ -54,15 +72,14 @@ function App() {
   }, []); // El array vacío asegura que esto se ejecute solo una vez.
 
   useEffect(() => {
-    // Bloquea el scroll del body en la vista móvil para una experiencia de app nativa.
-    if (isMobile) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
+    // Aplicar configuración de scroll según el dispositivo
+    applyScrollConfig();
+    
     // Función de limpieza para restaurar el scroll si el componente se desmonta.
     return () => {
+      // Restaurar scroll al desmontar
       document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = 'auto';
     };
   }, [isMobile]);
 
@@ -284,7 +301,7 @@ function App() {
             <input
               type="text"
               className="mobile-search-input-redesign"
-              placeholder="Search"
+              placeholder="Buscar barberías..."
               value={busqueda}
               onChange={handleBusqueda}
             />
@@ -389,7 +406,11 @@ function App() {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
           </button>
           <button onClick={() => handleMobileNavClick('configuracion')} className={currentView === 'configuracion' ? 'active' : ''}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2 3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+              <path d="M19.14 12.94c.04-.31.07-.63.07-.94s-.03-.63-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.42-.49-.42h-3.84c-.25 0-.45.18-.49.42l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22l-1.92 3.32c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.07.63-.07.94s.03.63.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.24.42.49.42h3.84c.25 0 .45-.18.49-.42l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.21.08-.47-.12-.61l-2.01-1.58z"/>
+              <circle cx="12" cy="12" r="1.3" fill="var(--color-background)"/>
+            </svg>
           </button>
         </nav>
 

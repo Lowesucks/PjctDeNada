@@ -1,6 +1,7 @@
 import React from 'react';
 import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
 import '../config/suppressWarnings'; // Suprimir advertencias de deprecación
+import { getOptimizedConfig, markerTouchOptions, applyTouchConfig, isTouchDevice } from '../config/mapTouchConfig';
 
 const containerStyle = {
   width: '100%',
@@ -26,6 +27,15 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
     }
   };
 
+  // Obtener configuraciones optimizadas según el dispositivo
+  const optimizedMapOptions = getOptimizedConfig();
+
+  // Combinar con el estilo del mapa
+  const finalMapOptions = {
+    ...optimizedMapOptions,
+    styles: mapStyle,
+  };
+
   if (loadError) {
     return <div>Error al cargar el mapa. Asegúrate de que la clave de API sea correcta.</div>;
   }
@@ -36,12 +46,16 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
       center={mapCenter}
       zoom={zoom || 13}
       onDblClick={onMapDoubleClick}
-      options={{
-        styles: mapStyle,
-        disableDoubleClickZoom: true,
-        fullscreenControl: false,
-        streetViewControl: false,
-        mapTypeControl: false,
+      options={finalMapOptions}
+      onLoad={(map) => {
+        // Aplicar configuraciones táctiles adicionales cuando el mapa se carga
+        if (isTouchDevice()) {
+          // Configurar el mapa para mejor experiencia táctil
+          map.setOptions({
+            gestureHandling: 'greedy',
+            zoomControl: true,
+          });
+        }
       }}
     >
       {/* Marcador para la ubicación del usuario */}
@@ -57,6 +71,7 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
             strokeWeight: 2,
             scale: 8
           }}
+          {...markerTouchOptions}
         />
       )}
 
@@ -84,6 +99,7 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
             onClick={() => handleMarkerClick(barberia)}
             title={barberia.nombre}
             icon={finalIcon}
+            {...markerTouchOptions}
           />
         );
       })}

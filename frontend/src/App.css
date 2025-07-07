@@ -197,6 +197,17 @@ body, html, #root {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Bloquear scroll vertical no deseado en móviles */
+  overflow-x: hidden;
+  overflow-y: hidden;
+  /* Prevenir scroll en dispositivos táctiles */
+  -webkit-overflow-scrolling: auto;
+  /* Bloquear scroll del body */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 /* ===== VISTA MÓVIL (ESTILO UBER) ===== */
@@ -1104,6 +1115,8 @@ body, html, #root {
   justify-content: flex-end;
   align-items: stretch;
   animation: fadeInDrawerBg 0.3s;
+  overflow: hidden !important;
+  touch-action: none;
 }
 @keyframes fadeInDrawerBg {
   from { background: rgba(30,41,59,0); }
@@ -1119,7 +1132,8 @@ body, html, #root {
   display: flex;
   flex-direction: column;
   animation: slideInDrawer 0.35s cubic-bezier(.4,1.4,.6,1);
-  overflow-y: auto;
+  overflow: hidden !important;
+  touch-action: none;
 }
 @keyframes slideInDrawer {
   from { transform: translateX(100%); }
@@ -1136,6 +1150,8 @@ body, html, #root {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 .barberias-list {
   display: flex;
@@ -1472,11 +1488,20 @@ body, html, #root {
   width: 100vw;
   overflow: hidden;
   position: relative;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 .map-container-mobile {
   width: 100%;
   height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .mobile-search-container {
@@ -1485,21 +1510,46 @@ body, html, #root {
   left: 16px;
   right: 16px;
   z-index: 10;
+  overflow: hidden !important;
+  touch-action: none;
 }
 
 .mobile-search-input {
   width: 100%;
-  padding: 16px;
-  border-radius: 12px;
+  padding: 14px 16px 14px 16px;
+  text-indent: 40px;
+  border-radius: 999px;
   border: 1px solid var(--color-border);
   background-color: var(--color-surface);
   font-size: 16px;
   box-shadow: 0 4px 12px var(--color-shadow);
+  color: var(--color-text);
+  touch-action: manipulation;
+}
+
+.mobile-search-input::placeholder {
+  color: var(--color-text-secondary);
+  text-indent: 40px;
+}
+
+.search-icon-wrapper {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.search-icon-wrapper svg {
+  width: 20px;
+  height: 20px;
 }
 
 .mobile-nav {
   position: absolute;
-  bottom: 24px;
+  bottom: max(24px, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -1509,6 +1559,9 @@ body, html, #root {
   padding: 8px;
   box-shadow: 0 4px 20px var(--color-shadow);
   z-index: 10;
+  margin-bottom: env(safe-area-inset-bottom);
+  overflow: hidden !important;
+  touch-action: none;
 }
 
 .mobile-nav button {
@@ -1551,6 +1604,9 @@ body, html, #root {
   z-index: 20;
   display: flex;
   flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+  overflow: hidden !important;
+  touch-action: none;
 }
 
 .sheet-handle {
@@ -1565,6 +1621,8 @@ body, html, #root {
 .sheet-content {
   flex-grow: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .results-list-mobile {
@@ -1574,6 +1632,8 @@ body, html, #root {
 /* Estilos de los modales */
 .modal-overlay {
   background-color: rgba(0, 0, 0, 0.6);
+  overflow: hidden !important;
+  touch-action: none;
 }
 .modal {
   background-color: var(--color-surface);
@@ -1584,6 +1644,8 @@ body, html, #root {
   max-width: 500px;
   z-index: 101;
   border: 1px solid var(--color-border);
+  overflow: hidden !important;
+  touch-action: none;
 }
 .modal-title { 
   color: var(--color-text); 
@@ -1620,12 +1682,14 @@ body, html, #root {
   left: 0;
   right: 0;
   padding: 16px;
-  padding-top: max(16px, env(safe-area-inset-top)); /* Para el notch del iPhone */
+  padding-top: max(16px, env(safe-area-inset-top));
   z-index: 10;
   display: flex;
   flex-direction: column;
   gap: 16px;
   background: linear-gradient(to bottom, var(--color-background) 70%, transparent);
+  overflow: hidden !important;
+  touch-action: none;
 }
 
 .mobile-header-top {
@@ -1660,21 +1724,26 @@ body, html, #root {
 
 .mobile-search-wrapper {
   position: relative;
+  overflow: hidden !important;
+  touch-action: none;
 }
 
 .mobile-search-input-redesign {
   width: 100%;
-  padding: 14px 16px 14px 48px; /* Espacio para el icono */
-  border-radius: 999px; /* Totalmente redondeado */
+  padding: 14px 16px 14px 16px;
+  text-indent: 40px;
+  border-radius: 999px;
   border: 1px solid var(--color-border);
   background-color: var(--color-surface);
   font-size: 16px;
   box-shadow: 0 4px 12px var(--color-shadow);
   color: var(--color-text);
+  touch-action: manipulation;
 }
 
 .mobile-search-input-redesign::placeholder {
   color: var(--color-text-secondary);
+  text-indent: 40px;
 }
 
 .search-icon-wrapper {
@@ -1683,15 +1752,18 @@ body, html, #root {
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-text-secondary);
+  pointer-events: none;
+  z-index: 1;
 }
+
 .search-icon-wrapper svg {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 
 .mobile-detail-sheet {
   position: absolute;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 90px); /* Arriba de la nav + safe area */
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 90px);
   left: 12px;
   right: 12px;
   z-index: 10;
@@ -1773,7 +1845,7 @@ body, html, #root {
   gap: 8px;
   padding: 16px;
   background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-border); /* Line between sort and results */
+  border-bottom: 1px solid var(--color-border);
 }
 
 .sort-options.mobile {
@@ -1898,4 +1970,364 @@ body, html, #root {
   margin-bottom: 16px;
   font-size: 18px;
   color: var(--color-text);
+}
+
+/* Configuraciones optimizadas para navegación táctil en móviles */
+.map-container-redesign,
+.map-container-mobile,
+.mapa-container {
+  touch-action: pan-x pan-y pinch-zoom;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-overflow-scrolling: touch;
+  overflow: hidden !important;
+  /* Permitir solo gestos del mapa */
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+/* Configuraciones específicas para el área del mapa */
+.map-container-redesign > div,
+.map-container-mobile > div,
+.mapa-container > div {
+  touch-action: pan-x pan-y pinch-zoom !important;
+}
+
+/* Optimizaciones para controles del mapa */
+.location-btn,
+.center-location-btn,
+.sheet-btn,
+.mobile-nav button,
+.card-btn,
+.card-btn-secondary,
+.favorite-btn {
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+  /* Prevenir scroll accidental */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Configuraciones específicas para móviles */
+@media (max-width: 768px) {
+  body, html, #root {
+    /* Bloquear completamente el scroll en móviles */
+    overflow: hidden !important;
+    /* Prevenir scroll con gestos táctiles */
+    touch-action: none;
+    /* Asegurar que no haya scroll */
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+  }
+  
+  /* Permitir scroll solo en elementos específicos */
+  .sheet-content,
+  .drawer-content,
+  .results-list,
+  .results-list-mobile {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+  
+  /* Bloquear scroll en el contenedor principal */
+  .app-mobile-redesign {
+    overflow: hidden !important;
+    /* Prevenir scroll con gestos */
+    touch-action: none;
+    /* Asegurar que ocupe toda la pantalla */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+  }
+  
+  /* Bloquear scroll en el mapa */
+  .map-container-mobile {
+    overflow: hidden !important;
+    /* Permitir solo gestos del mapa */
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+  
+  /* Bloquear scroll en el overlay del drawer */
+  .drawer-overlay {
+    overflow: hidden !important;
+    touch-action: none;
+  }
+  
+  /* Bloquear scroll en el bottom sheet */
+  .bottom-sheet-mobile {
+    overflow: hidden !important;
+    touch-action: none;
+  }
+  
+  /* Permitir scroll solo en el contenido del sheet */
+  .bottom-sheet-mobile .sheet-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+}
+
+/* Configuraciones para pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .map-container-redesign,
+  .map-container-mobile,
+  .mapa-container {
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+  
+  .location-btn,
+  .center-location-btn,
+  .sheet-btn,
+  .mobile-nav button {
+    min-width: 52px;
+    min-height: 52px;
+  }
+}
+
+/* Optimizaciones para el drawer móvil */
+.drawer-barberias {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+/* Optimizaciones para las tarjetas de barberías */
+.barberia-card {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Optimizaciones para botones en tarjetas */
+.card-btn,
+.card-btn-secondary,
+.favorite-btn {
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== OPTIMIZACIONES PARA PANTALLAS MÓVILES MODERNAS ===== */
+
+/* Configuraciones base para dispositivos móviles */
+.app-mobile-redesign {
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Optimizar contenedor del mapa para móviles */
+.map-container-mobile {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Optimizar header móvil para dispositivos con notch */
+.mobile-header-redesign {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: linear-gradient(to bottom, var(--color-background) 70%, transparent);
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+/* Optimizar navegación móvil para dispositivos con barra de navegación */
+.mobile-nav {
+  position: absolute;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  background-color: var(--color-surface);
+  border-radius: 999px;
+  padding: 8px;
+  box-shadow: 0 4px 20px var(--color-shadow);
+  z-index: 10;
+  margin-bottom: env(safe-area-inset-bottom);
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+/* Optimizar bottom sheet para dispositivos con barra de navegación */
+.bottom-sheet-mobile {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 75%;
+  background: var(--color-surface);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -4px 20px var(--color-shadow);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+/* Configuraciones específicas para diferentes tamaños de pantalla móvil */
+@media (max-width: 480px) {
+  .app-mobile-redesign {
+    height: 100dvh;
+  }
+  
+  .mobile-nav {
+    bottom: max(16px, env(safe-area-inset-bottom));
+    padding: 12px;
+  }
+  
+  .mobile-nav button {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .mobile-nav button svg {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Configuraciones para dispositivos con notch específico */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .app-mobile-redesign {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .mobile-header-redesign {
+    padding-top: max(16px, env(safe-area-inset-top));
+  }
+  
+  .mobile-nav {
+    bottom: max(24px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Configuraciones para dispositivos sin soporte para áreas seguras */
+@supports not (padding-top: env(safe-area-inset-top)) {
+  .app-mobile-redesign {
+    height: 100vh;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  
+  .mobile-header-redesign {
+    padding-top: 16px;
+  }
+  
+  .mobile-nav {
+    bottom: 24px;
+  }
+}
+
+/* Optimizaciones para orientación landscape en móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+  .app-mobile-redesign {
+    height: 100dvh;
+  }
+  
+  .mobile-header-redesign {
+    padding: 8px 16px;
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+  
+  .mobile-nav {
+    bottom: max(16px, env(safe-area-inset-bottom));
+    padding: 6px;
+  }
+  
+  .mobile-nav button {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .mobile-nav button svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Configuraciones específicas para dispositivos con barra de navegación gestual */
+@media (max-width: 768px) {
+  .app-mobile-redesign {
+    min-height: 100dvh;
+  }
+  
+  .map-container-mobile {
+    height: 100%;
+  }
+}
+
+/* Estilos responsivos para la barra de búsqueda móvil */
+@media (max-width: 480px) {
+  .mobile-search-input-redesign {
+    padding: 12px 16px 12px 16px;
+    text-indent: 36px;
+    font-size: 15px;
+  }
+  
+  .mobile-search-input-redesign::placeholder {
+    text-indent: 36px;
+  }
+  
+  .search-icon-wrapper {
+    left: 16px;
+  }
+  
+  .search-icon-wrapper svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .mobile-search-input-redesign {
+    padding: 10px 14px 10px 14px;
+    text-indent: 32px;
+    font-size: 14px;
+  }
+  
+  .mobile-search-input-redesign::placeholder {
+    text-indent: 32px;
+  }
+  
+  .search-icon-wrapper {
+    left: 14px;
+  }
+  
+  .search-icon-wrapper svg {
+    width: 16px;
+    height: 16px;
+  }
 } 

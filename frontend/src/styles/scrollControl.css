@@ -1,0 +1,339 @@
+/**
+ * Control de Scroll - Previene scroll no deseado en móviles
+ */
+
+/* Bloquear scroll en body y html para móviles */
+@media (max-width: 768px) {
+  body, html, #root {
+    /* Bloquear completamente el scroll */
+    overflow: hidden !important;
+    /* Prevenir scroll con gestos táctiles */
+    touch-action: none;
+    /* Usar viewport dinámico para mejor compatibilidad */
+    height: 100dvh;
+    width: 100vw;
+    /* Prevenir scroll con rueda del mouse */
+    overscroll-behavior: none;
+    /* Prevenir scroll con teclado */
+    scroll-behavior: auto;
+    /* No usar position fixed para evitar problemas con Safari */
+    position: relative;
+  }
+  
+  /* Bloquear scroll en el contenedor principal */
+  .app-mobile-redesign {
+    overflow: hidden !important;
+    /* Prevenir scroll con gestos */
+    touch-action: none;
+    /* Usar viewport dinámico para mejor compatibilidad */
+    height: 100dvh;
+    width: 100vw;
+    /* Asegurar que ocupe toda la pantalla */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Prevenir scroll con rueda del mouse */
+    overscroll-behavior: none;
+  }
+  
+  /* Bloquear scroll en el mapa */
+  .map-container-mobile {
+    overflow: hidden !important;
+    /* Permitir solo gestos del mapa */
+    touch-action: pan-x pan-y pinch-zoom;
+    /* Prevenir scroll con rueda del mouse */
+    overscroll-behavior: none;
+  }
+  
+  /* Bloquear scroll en overlays */
+  .drawer-overlay,
+  .modal-overlay {
+    overflow: hidden !important;
+    touch-action: none;
+    /* Prevenir scroll con rueda del mouse */
+    overscroll-behavior: none;
+  }
+  
+  /* Bloquear scroll en el bottom sheet */
+  .bottom-sheet-mobile {
+    overflow: hidden !important;
+    touch-action: none;
+    /* Prevenir scroll con rueda del mouse */
+    overscroll-behavior: none;
+  }
+  
+  /* Bloquear scroll en navegación */
+  .mobile-nav,
+  .mobile-header-redesign {
+    overflow: hidden !important;
+    touch-action: none;
+    /* Prevenir scroll con rueda del mouse */
+    overscroll-behavior: none;
+  }
+  
+  /* Bloquear scroll en contenedores de búsqueda */
+  .mobile-search-container,
+  .mobile-search-wrapper {
+    overflow: hidden !important;
+    touch-action: none;
+    /* Prevenir scroll con rueda del mouse */
+    overscroll-behavior: none;
+  }
+  
+  /* Bloquear scroll en el drawer */
+  .drawer-barberias {
+    overflow: hidden !important;
+    touch-action: none;
+    /* Prevenir scroll con rueda del mouse */
+    overscroll-behavior: none;
+  }
+  
+  /* Bloquear scroll en modales */
+  .modal {
+    overflow: hidden !important;
+    touch-action: none;
+    /* Prevenir scroll con rueda del mouse */
+    overscroll-behavior: none;
+  }
+  
+  /* Permitir scroll solo en elementos específicos */
+  .sheet-content,
+  .drawer-content,
+  .results-list,
+  .results-list-mobile {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    /* Permitir scroll con rueda del mouse solo en estos elementos */
+    overscroll-behavior: contain;
+  }
+  
+  /* Permitir scroll solo en el contenido del sheet */
+  .bottom-sheet-mobile .sheet-content {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    /* Permitir scroll con rueda del mouse solo en este elemento */
+    overscroll-behavior: contain;
+  }
+  
+  /* Permitir interacción solo en inputs específicos */
+  .mobile-search-input,
+  .mobile-search-input-redesign,
+  .form-input,
+  textarea {
+    touch-action: manipulation;
+    /* Prevenir scroll accidental */
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Configuraciones para botones táctiles */
+  .location-btn,
+  .center-location-btn,
+  .sheet-btn,
+  .mobile-nav button,
+  .card-btn,
+  .card-btn-secondary,
+  .favorite-btn,
+  .close-btn {
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+    /* Prevenir scroll accidental */
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Configuraciones específicas para dispositivos táctiles */
+@media (hover: none) and (pointer: coarse) {
+  /* Prevenir scroll con gestos táctiles en elementos no deseados */
+  body, html, #root {
+    touch-action: none;
+  }
+  
+  /* Permitir gestos táctiles solo en elementos específicos */
+  .map-container-mobile {
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+  
+  .sheet-content,
+  .drawer-content,
+  .results-list,
+  .results-list-mobile {
+    touch-action: pan-y;
+  }
+  
+  .mobile-search-input,
+  .mobile-search-input-redesign,
+  .form-input,
+  textarea {
+    touch-action: manipulation;
+  }
+  
+  .location-btn,
+  .center-location-btn,
+  .sheet-btn,
+  .mobile-nav button,
+  .card-btn,
+  .card-btn-secondary,
+  .favorite-btn,
+  .close-btn {
+    touch-action: manipulation;
+  }
+}
+
+/* Configuraciones para prevenir scroll con rueda del mouse */
+@media (max-width: 768px) {
+  /* Prevenir scroll con rueda del mouse en el body */
+  body {
+    overscroll-behavior: none;
+  }
+  
+  /* Prevenir scroll con rueda del mouse en contenedores principales */
+  .app-mobile-redesign,
+  .drawer-overlay,
+  .modal-overlay,
+  .bottom-sheet-mobile,
+  .mobile-nav,
+  .mobile-header-redesign,
+  .mobile-search-container,
+  .mobile-search-wrapper,
+  .drawer-barberias,
+  .modal {
+    overscroll-behavior: none;
+  }
+  
+  /* Permitir scroll con rueda del mouse solo en elementos específicos */
+  .sheet-content,
+  .drawer-content,
+  .results-list,
+  .results-list-mobile,
+  .bottom-sheet-mobile .sheet-content {
+    overscroll-behavior: contain;
+  }
+}
+
+/* Configuraciones para prevenir scroll con teclado */
+@media (max-width: 768px) {
+  body, html, #root {
+    /* Prevenir scroll con teclado */
+    scroll-behavior: auto;
+  }
+}
+
+/* Configuraciones para prevenir scroll con gestos de navegador */
+@media (max-width: 768px) {
+  body, html, #root {
+    /* Prevenir scroll con gestos de navegador */
+    overscroll-behavior: none;
+    /* Prevenir scroll con gestos de navegador en iOS */
+    -webkit-overflow-scrolling: auto;
+  }
+}
+
+/* Configuraciones específicas para Safari en iOS */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 768px) {
+    /* Configuración del viewport para Safari */
+    @viewport {
+      width: device-width;
+      initial-scale: 1.0;
+      viewport-fit: cover;
+      user-scalable: no;
+    }
+    
+    body, html, #root {
+      /* Prevenir scroll con gestos de iOS */
+      -webkit-overflow-scrolling: auto;
+      /* Prevenir scroll con gestos de navegador en iOS */
+      overscroll-behavior: none;
+      /* Ajustar para Safari - no usar position fixed en body */
+      position: relative;
+      /* Usar viewport dinámico para iOS */
+      height: 100dvh;
+      width: 100vw;
+      /* Bloquear scroll sin position fixed */
+      overflow: hidden;
+      /* Prevenir scroll con gestos táctiles */
+      touch-action: none;
+      /* Ajustar para Safari */
+      -webkit-overflow-scrolling: auto;
+      /* Prevenir scroll con gestos de navegador */
+      overscroll-behavior: none;
+      /* Asegurar que no haya scroll */
+      min-height: 100dvh;
+      max-height: 100dvh;
+    }
+    
+    /* Contenedor principal para iOS */
+    .app-mobile-redesign {
+      /* Usar viewport dinámico para iOS */
+      height: 100dvh;
+      width: 100vw;
+      /* Bloquear scroll sin position fixed */
+      overflow: hidden;
+      /* Prevenir scroll con gestos */
+      touch-action: none;
+      /* Asegurar que ocupe toda la pantalla */
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      /* Prevenir scroll con rueda del mouse */
+      overscroll-behavior: none;
+      /* Ajustar para Safari */
+      -webkit-overflow-scrolling: auto;
+      /* Asegurar que no haya scroll */
+      min-height: 100dvh;
+      max-height: 100dvh;
+    }
+    
+    /* Permitir scroll con gestos de iOS solo en elementos específicos */
+    .sheet-content,
+    .drawer-content,
+    .results-list,
+    .results-list-mobile,
+    .bottom-sheet-mobile .sheet-content {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    
+    /* Ajustar navegación móvil para Safari */
+    .mobile-nav {
+      /* Asegurar que esté visible en Safari */
+      bottom: max(24px, env(safe-area-inset-bottom));
+      /* Prevenir que Safari lo tape */
+      z-index: 1000;
+    }
+    
+    /* Ajustar bottom sheet para Safari */
+    .bottom-sheet-mobile {
+      /* Asegurar que esté visible en Safari */
+      padding-bottom: env(safe-area-inset-bottom);
+      /* Prevenir que Safari lo tape */
+      z-index: 1000;
+    }
+  }
+}
+
+/* Configuraciones específicas para Android */
+@supports not (-webkit-touch-callout: none) {
+  @media (max-width: 768px) {
+    body, html, #root {
+      /* Prevenir scroll con gestos de Android */
+      overscroll-behavior: none;
+    }
+    
+    /* Permitir scroll con gestos de Android solo en elementos específicos */
+    .sheet-content,
+    .drawer-content,
+    .results-list,
+    .results-list-mobile,
+    .bottom-sheet-mobile .sheet-content {
+      overscroll-behavior: contain;
+    }
+  }
+} 

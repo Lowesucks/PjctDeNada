@@ -1,0 +1,308 @@
+/**
+ * Optimizaciones específicas para dispositivos móviles modernos
+ * Considera notches, barras de navegación gestuales y diferentes tamaños de pantalla
+ */
+
+/* ===== CONFIGURACIONES BASE PARA MÓVILES ===== */
+
+/* Viewport dinámico para considerar barras de navegación */
+.app-mobile-redesign {
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+  /* Áreas seguras para dispositivos modernos */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  /* Asegurar que ocupe todo el espacio disponible */
+  min-height: 100dvh;
+}
+
+/* Contenedor del mapa optimizado */
+.map-container-mobile {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Asegurar que el mapa ocupe todo el espacio */
+  min-height: 100%;
+}
+
+/* ===== OPTIMIZACIONES PARA DIFERENTES DISPOSITIVOS ===== */
+
+/* iPhone con notch (iPhone X y posteriores) */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .app-mobile-redesign {
+    /* Asegurar que el contenido no se superponga con el notch */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .mobile-header-redesign {
+    /* Header adaptado al notch */
+    padding-top: max(16px, env(safe-area-inset-top));
+  }
+  
+  .mobile-nav {
+    /* Navegación adaptada a la barra de navegación gestual */
+    bottom: max(24px, env(safe-area-inset-bottom));
+    margin-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .bottom-sheet-mobile {
+    /* Bottom sheet considerando la barra de navegación */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Dispositivos sin soporte para áreas seguras (fallback) */
+@supports not (padding-top: env(safe-area-inset-top)) {
+  .app-mobile-redesign {
+    height: 100vh;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  
+  .mobile-header-redesign {
+    padding-top: 16px;
+  }
+  
+  .mobile-nav {
+    bottom: 24px;
+  }
+}
+
+/* ===== CONFIGURACIONES POR TAMAÑO DE PANTALLA ===== */
+
+/* Pantallas muy pequeñas (≤480px) */
+@media (max-width: 480px) {
+  .app-mobile-redesign {
+    height: 100dvh;
+  }
+  
+  .mobile-nav {
+    bottom: max(16px, env(safe-area-inset-bottom));
+    padding: 12px;
+  }
+  
+  .mobile-nav button {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .mobile-nav button svg {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .mobile-header-redesign {
+    padding: 12px;
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+}
+
+/* Pantallas medianas (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .app-mobile-redesign {
+    height: 100dvh;
+  }
+  
+  .mobile-nav {
+    bottom: max(20px, env(safe-area-inset-bottom));
+    padding: 10px;
+  }
+  
+  .mobile-nav button {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .mobile-nav button svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* ===== ORIENTACIÓN LANDSCAPE ===== */
+
+/* Móviles en orientación horizontal */
+@media (max-width: 768px) and (orientation: landscape) {
+  .app-mobile-redesign {
+    height: 100dvh;
+  }
+  
+  .mobile-header-redesign {
+    /* Header más compacto en landscape */
+    padding: 8px 16px;
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+  
+  .mobile-nav {
+    /* Navegación más compacta en landscape */
+    bottom: max(16px, env(safe-area-inset-bottom));
+    padding: 6px;
+  }
+  
+  .mobile-nav button {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .mobile-nav button svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .bottom-sheet-mobile {
+    /* Bottom sheet más alto en landscape */
+    height: 85%;
+  }
+}
+
+/* ===== DISPOSITIVOS ESPECÍFICOS ===== */
+
+/* Samsung Galaxy con barra de navegación */
+@media (max-width: 768px) and (min-height: 600px) {
+  .app-mobile-redesign {
+    /* Asegurar que funcione bien en dispositivos Samsung */
+    height: 100dvh;
+  }
+  
+  .mobile-nav {
+    bottom: max(20px, env(safe-area-inset-bottom));
+  }
+}
+
+/* iPhone SE y dispositivos similares */
+@media (max-width: 375px) and (max-height: 667px) {
+  .app-mobile-redesign {
+    height: 100dvh;
+  }
+  
+  .mobile-header-redesign {
+    padding: 8px;
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+  
+  .mobile-nav {
+    bottom: max(12px, env(safe-area-inset-bottom));
+    padding: 8px;
+  }
+  
+  .mobile-nav button {
+    width: 52px;
+    height: 52px;
+  }
+  
+  .mobile-nav button svg {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+/* ===== OPTIMIZACIONES DE RENDIMIENTO ===== */
+
+/* Mejorar el rendimiento en dispositivos de gama baja */
+@media (max-width: 768px) {
+  .app-mobile-redesign {
+    /* Optimizaciones de renderizado */
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  
+  .map-container-mobile {
+    /* Optimizar el mapa para móviles */
+    will-change: transform;
+    transform: translateZ(0);
+  }
+  
+  .mobile-nav {
+    /* Optimizar la navegación */
+    will-change: transform;
+    transform: translateZ(0);
+  }
+}
+
+/* ===== ACCESIBILIDAD ===== */
+
+/* Mejorar la accesibilidad en dispositivos móviles */
+@media (max-width: 768px) {
+  .mobile-nav button {
+    /* Área de toque mínima para accesibilidad */
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .mobile-search-input-redesign {
+    /* Input más grande para mejor usabilidad */
+    font-size: 16px; /* Evita zoom en iOS */
+    padding: 16px;
+  }
+  
+  .barberia-card {
+    /* Tarjetas más grandes para mejor interacción */
+    padding: 20px;
+  }
+}
+
+/* ===== DARK MODE OPTIMIZATIONS ===== */
+
+/* Optimizaciones específicas para modo oscuro en móviles */
+@media (max-width: 768px) {
+  .app-mobile-redesign {
+    /* Asegurar que el modo oscuro funcione bien */
+    background-color: var(--color-background);
+  }
+  
+  .mobile-nav {
+    /* Navegación optimizada para modo oscuro */
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+  }
+  
+  .bottom-sheet-mobile {
+    /* Bottom sheet optimizado para modo oscuro */
+    background-color: var(--color-surface);
+  }
+}
+
+/* ===== UTILIDADES PARA DEBUGGING ===== */
+
+/* Clases de utilidad para debugging de layout */
+.debug-mobile-layout {
+  border: 2px solid red;
+}
+
+.debug-safe-area {
+  background-color: rgba(255, 0, 0, 0.1);
+}
+
+/* ===== CONFIGURACIONES ESPECÍFICAS PARA NAVEGADORES ===== */
+
+/* Safari en iOS */
+@supports (-webkit-touch-callout: none) {
+  .app-mobile-redesign {
+    /* Optimizaciones específicas para Safari */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .mobile-nav {
+    /* Navegación optimizada para Safari */
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%);
+  }
+}
+
+/* Chrome en Android */
+@supports not (-webkit-touch-callout: none) {
+  .app-mobile-redesign {
+    /* Optimizaciones específicas para Chrome */
+    overflow: hidden;
+  }
+} 

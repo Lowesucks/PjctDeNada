@@ -8,11 +8,15 @@ from pathlib import Path
 # Configuración de la aplicación
 class Config:
     # Configuración básica
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    if not SECRET_KEY:
+        raise RuntimeError('SECRET_KEY no está definida en variables de entorno. Por favor, configúrala en .env')
     DEBUG = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
     
     # Configuración de la base de datos
-    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://lowe:Heisenbergduke0105$@localhost:5432/barberias"
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    if not SQLALCHEMY_DATABASE_URI:
+        raise RuntimeError('DATABASE_URL no está definida en variables de entorno. Por favor, configúrala en .env')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Configuración de APIs
@@ -20,7 +24,9 @@ class Config:
     GOOGLE_PLACES_API_KEY = os.environ.get('GOOGLE_PLACES_API_KEY') or GOOGLE_MAPS_API_KEY
     
     # Configuración JWT
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key-change-in-production'
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+    if not JWT_SECRET_KEY:
+        raise RuntimeError('JWT_SECRET_KEY no está definida en variables de entorno. Por favor, configúrala en .env')
     JWT_ALGORITHM = 'HS256'
     JWT_EXPIRATION_HOURS = 24
     
@@ -60,12 +66,12 @@ class Config:
 class DevelopmentConfig(Config):
     """Configuración para desarrollo"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://lowe:Heisenbergduke0105$@localhost:5432/barberias"
+    # No sobreescribir SQLALCHEMY_DATABASE_URI aquí, usar solo variable de entorno
 
 class ProductionConfig(Config):
     """Configuración para producción"""
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    # No sobreescribir SQLALCHEMY_DATABASE_URI aquí, usar solo variable de entorno
     
     @classmethod
     def init_app(cls, app):

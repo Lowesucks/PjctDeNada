@@ -17,6 +17,21 @@ import { initTouchVerification } from './utils/touchTest';
 import { initDeviceDetection } from './utils/mobileDetection';
 import { applyScrollConfig, initScrollControl } from './utils/scrollControl';
 
+// Interceptor global para manejar 401 (token inválido o expirado)
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userData');
+      delete axios.defaults.headers.common['Authorization'];
+      // Opcional: puedes mostrar un mensaje o redirigir al login
+      window.location.reload(); // Recarga la app para forzar login
+    }
+    return Promise.reject(error);
+  }
+);
+
 const ICON_CONFIG = {
   url: '/icono_ubicaciones.png',
   scaledSize: { width: 80, height: 110 }, 

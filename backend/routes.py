@@ -167,17 +167,45 @@ def buscar_barberias_cercanas() -> list[dict[str, Any]]:
         lng = float(request.args.get('lng', 0))
         radio = int(request.args.get('radio', 5000))
         
-        # Buscar en Google Places API
-        barberias_google = buscar_barberias_google_places(lat, lng, radio)
+        # Para radios grandes, hacer múltiples búsquedas
+        if radio > 25000:
+            barberias_google = []
+            # Hacer búsquedas con diferentes términos para obtener más resultados
+            search_terms = ['barbería', 'peluquería', 'salón de belleza', 'corte de cabello']
+            
+            for term in search_terms:
+                try:
+                    barberias_term = buscar_barberias_por_texto(term, lat, lng)
+                    barberias_google.extend(barberias_term)
+                except Exception as e:
+                    print(f"Error buscando con término '{term}': {e}")
+                    continue
+        else:
+            # Buscar en Google Places API para radios normales
+            barberias_google = buscar_barberias_google_places(lat, lng, radio)
         
         # Buscar en base de datos local
         barberias_db = Barberia.query.all()
+        
+        # Eliminar duplicados de Google Places
+        barberias_google_unicas = []
+        ids_google_vistos = set()
+        
+        for barberia in barberias_google:
+            if barberia.get('google_place_id') and barberia['google_place_id'] not in ids_google_vistos:
+                ids_google_vistos.add(barberia['google_place_id'])
+                barberias_google_unicas.append(barberia)
+            elif not barberia.get('google_place_id'):
+                # Si no tiene place_id, usar el id normal
+                if barberia.get('id') not in ids_google_vistos:
+                    ids_google_vistos.add(barberia.get('id'))
+                    barberias_google_unicas.append(barberia)
         
         # Combinar y calcular distancias
         todas_barberias = []
         
         # Agregar barberías de Google
-        for barberia in barberias_google:
+        for barberia in barberias_google_unicas:
             try:
                 # Verificar que las coordenadas existan y sean válidas
                 if barberia.get('latitud') is not None and barberia.get('longitud') is not None:

@@ -2352,4 +2352,507 @@ body, html, #root {
     width: 16px;
     height: 16px;
   }
+}
+
+/* --- Estilos para la vista desktop moderna --- */
+.app-desktop-modern {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #232a36 0%, #2e3542 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.app-desktop-modern.dark {
+  background: linear-gradient(135deg, #181c23 0%, #232a36 100%);
+  color: #e0e0e0;
+}
+
+.desktop-header {
+  width: 100%;
+  background: rgba(30, 34, 44, 0.98);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.desktop-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px 16px 32px;
+}
+.desktop-logo {
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #fff;
+  text-shadow: 0 2px 8px #0002;
+}
+.desktop-search-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.desktop-search-input {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 1.1rem;
+  width: 340px;
+  background: #f7f8fa;
+  color: #232a36;
+  box-shadow: 0 1px 4px #0001;
+  outline: none;
+  transition: box-shadow 0.2s;
+}
+.desktop-search-input:focus {
+  box-shadow: 0 2px 8px #0002;
+}
+.desktop-nav {
+  display: flex;
+  gap: 12px;
+}
+.desktop-nav button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.desktop-nav button.active, .desktop-nav button:hover {
+  background: #3b4252;
+  color: #ffd700;
+}
+
+.desktop-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.desktop-map-container {
+  width: 100%;
+  height: 60vh;
+  min-height: 340px;
+  border-radius: 18px;
+  overflow: hidden;
+  margin-top: 24px;
+  box-shadow: 0 4px 24px #0002;
+  background: #232a36;
+}
+
+.desktop-list-section {
+  width: 100%;
+  margin-top: 32px;
+  background: rgba(30,34,44,0.96);
+  border-radius: 18px;
+  box-shadow: 0 2px 12px #0002;
+  padding: 32px 32px 24px 32px;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.desktop-list-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.desktop-list-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 1px;
+}
+.desktop-sort-container {
+  position: relative;
+}
+.sort-button {
+  background: #2e3542;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+.sort-button:hover {
+  background: #3b4252;
+}
+.sort-dropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background: #232a36;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #0003;
+  padding: 8px 0;
+  z-index: 20;
+  min-width: 160px;
+}
+.sort-dropdown button {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  padding: 10px 18px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.sort-dropdown button:hover {
+  background: #3b4252;
+}
+
+.desktop-loading, .desktop-empty-state {
+  width: 100%;
+  text-align: center;
+  padding: 48px 0 32px 0;
+  color: #bfc4d1;
+  font-size: 1.2rem;
+}
+.desktop-empty-state h3 {
+  font-size: 1.4rem;
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+.desktop-barberias-list {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: flex-start;
+  margin-top: 8px;
+  animation: fadeInList 0.5s;
+}
+@keyframes fadeInList {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mejorar tarjetas de barbería en desktop */
+.desktop-barberias-list .barberia-card {
+  flex: 1 1 340px;
+  max-width: 370px;
+  min-width: 320px;
+  background: #232a36;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px #0002;
+  margin-bottom: 12px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: 1.5px solid #2e3542;
+}
+.desktop-barberias-list .barberia-card:hover {
+  box-shadow: 0 6px 24px #0003;
+  transform: translateY(-4px) scale(1.02);
+  border-color: #ffd700;
+}
+
+/* Ajustes para modo oscuro */
+.app-desktop-modern.dark .desktop-header,
+.app-desktop-modern.dark .desktop-list-section,
+.app-desktop-modern.dark .desktop-map-container {
+  background: #181c23;
+}
+.app-desktop-modern.dark .desktop-search-input {
+  background: #232a36;
+  color: #fff;
+}
+.app-desktop-modern.dark .desktop-nav button.active, .app-desktop-modern.dark .desktop-nav button:hover {
+  background: #232a36;
+  color: #ffd700;
+}
+.app-desktop-modern.dark .desktop-barberias-list .barberia-card {
+  background: #232a36;
+  border-color: #232a36;
+}
+
+/* Responsive para pantallas medianas */
+@media (max-width: 1100px) {
+  .desktop-header-content, .desktop-main {
+    max-width: 98vw;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .desktop-list-section {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+@media (max-width: 900px) {
+  .desktop-map-container {
+    height: 40vh;
+    min-height: 220px;
+  }
+  .desktop-list-section {
+    padding: 18px 4px 12px 4px;
+  }
+}
+
+/* --- Layout minimalista con barra lateral izquierda y mapa --- */
+.app-desktop-sidebar {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  background: linear-gradient(135deg, #232a36 0%, #2e3542 100%);
+  color: #fff;
+}
+.app-desktop-sidebar.dark {
+  background: linear-gradient(135deg, #181c23 0%, #232a36 100%);
+  color: #e0e0e0;
+}
+
+.sidebar-left {
+  width: 410px;
+  min-width: 320px;
+  max-width: 480px;
+  height: 100vh;
+  background: rgba(30,34,44,0.98);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-shadow: 2px 0 16px #0002;
+  z-index: 20;
+  position: relative;
+}
+.sidebar-header {
+  padding: 32px 32px 12px 32px;
+  text-align: left;
+}
+.sidebar-logo {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #fff;
+  text-shadow: 0 2px 8px #0002;
+}
+.sidebar-search-nav {
+  padding: 0 32px 0 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.sidebar-search-input {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  font-size: 1.1rem;
+  background: #f7f8fa;
+  color: #232a36;
+  box-shadow: 0 1px 4px #0001;
+  outline: none;
+  transition: box-shadow 0.2s;
+  margin-bottom: 8px;
+}
+.sidebar-search-input:focus {
+  box-shadow: 0 2px 8px #0002;
+}
+.sidebar-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.sidebar-nav button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.sidebar-nav button.active, .sidebar-nav button:hover {
+  background: #3b4252;
+  color: #ffd700;
+}
+
+.sidebar-list-section {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0 24px 18px 24px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+}
+.sidebar-list-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  margin-top: 8px;
+}
+.sidebar-list-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 1px;
+}
+.sidebar-sort-container {
+  position: relative;
+}
+.sort-button {
+  background: #2e3542;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+.sort-button:hover {
+  background: #3b4252;
+}
+.sort-dropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background: #232a36;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #0003;
+  padding: 8px 0;
+  z-index: 20;
+  min-width: 160px;
+}
+.sort-dropdown button {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  padding: 10px 18px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.sort-dropdown button:hover {
+  background: #3b4252;
+  color: #ffd700;
+}
+
+.sidebar-loading, .sidebar-empty-state {
+  width: 100%;
+  text-align: center;
+  padding: 36px 0 24px 0;
+  color: #bfc4d1;
+  font-size: 1.1rem;
+}
+.sidebar-empty-state h3 {
+  font-size: 1.2rem;
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+.sidebar-barberias-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+  animation: fadeInList 0.5s;
+}
+@keyframes fadeInList {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sidebar-barberias-list .barberia-card {
+  background: #232a36;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px #0002;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: 1.5px solid #2e3542;
+}
+.sidebar-barberias-list .barberia-card:hover {
+  box-shadow: 0 6px 24px #0003;
+  transform: translateY(-2px) scale(1.01);
+  border-color: #ffd700;
+}
+
+.sidebar-settings-view {
+  padding: 24px 32px 0 32px;
+  border-top: 1px solid #232a36;
+  margin-top: 12px;
+}
+
+/* Mapa a la derecha */
+.main-map-area {
+  flex: 1 1 auto;
+  height: 100vh;
+  min-width: 0;
+  position: relative;
+  background: #232a36;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+.main-map-area > div, .main-map-area .mapa-barberias {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100vh;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Ajustes para modo oscuro */
+.app-desktop-sidebar.dark .sidebar-left,
+.app-desktop-sidebar.dark .sidebar-list-section,
+.app-desktop-sidebar.dark .main-map-area {
+  background: #181c23;
+}
+.app-desktop-sidebar.dark .sidebar-search-input {
+  background: #232a36;
+  color: #fff;
+}
+.app-desktop-sidebar.dark .sidebar-nav button.active, .app-desktop-sidebar.dark .sidebar-nav button:hover {
+  background: #232a36;
+  color: #ffd700;
+}
+.app-desktop-sidebar.dark .sidebar-barberias-list .barberia-card {
+  background: #232a36;
+  border-color: #232a36;
+}
+
+/* Responsive para pantallas medianas */
+@media (max-width: 1100px) {
+  .sidebar-left {
+    width: 90vw;
+    min-width: 0;
+    max-width: 100vw;
+  }
+}
+@media (max-width: 900px) {
+  .sidebar-left {
+    width: 100vw;
+    min-width: 0;
+    max-width: 100vw;
+  }
+  .main-map-area {
+    display: none;
+  }
 } 

@@ -686,13 +686,10 @@
     -webkit-overflow-scrolling: touch;
   }
   
-  /* Optimizar controles del mapa para touch */
-  .leaflet-control-zoom a {
-    /* Hacer los botones más grandes para touch */
-    min-width: 44px;
-    min-height: 44px;
-    /* Mejorar la respuesta táctil */
-    touch-action: manipulation;
+  /* Ocultar completamente los controles de zoom en móviles */
+  .leaflet-control-zoom,
+  .leaflet-top.leaflet-left {
+    display: none !important;
   }
   
   /* Optimizar marcadores para touch */
@@ -715,10 +712,9 @@
     touch-action: pan-x pan-y pinch-zoom;
   }
   
-  /* Hacer los controles aún más grandes en pantallas pequeñas */
-  .leaflet-control-zoom a {
-    min-width: 48px;
-    min-height: 48px;
-    font-size: 18px;
+  /* Mantener ocultos los controles de zoom en pantallas pequeñas */
+  .leaflet-control-zoom,
+  .leaflet-top.leaflet-left {
+    display: none !important;
   }
 } 

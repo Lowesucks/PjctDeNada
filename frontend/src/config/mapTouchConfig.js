@@ -6,7 +6,7 @@
 export const mapTouchOptions = {
   // Configuración principal para gestos táctiles
   gestureHandling: 'greedy', // Permite navegación con un dedo
-  zoomControl: true,
+  zoomControl: true, // Se desactivará dinámicamente en móviles
   scrollwheel: false, // Desactiva zoom con rueda del mouse
   
   // Configuraciones de arrastre optimizadas
@@ -29,7 +29,7 @@ export const mapTouchOptions = {
   // Configuraciones específicas para touch
   disableDefaultUI: false,
   zoomControlOptions: {
-    position: window.google?.maps?.ControlPosition?.LEFT_CENTER || 4,
+    position: window.google?.maps?.ControlPosition?.RIGHT_CENTER || 3,
     style: window.google?.maps?.ZoomControlStyle?.SMALL || 2
   },
   
@@ -40,10 +40,6 @@ export const mapTouchOptions = {
   
   // Configuraciones de estilo para mejor visibilidad en móviles
   backgroundColor: '#f8fafc',
-  
-  // Configuraciones de rendimiento
-  maxZoom: 18,
-  minZoom: 10,
   
   // Configuraciones específicas para dispositivos táctiles
   isFractionalZoomEnabled: true, // Permite zoom suave
@@ -133,17 +129,17 @@ export const getOptimizedConfig = () => {
   return {
     ...mapTouchOptions,
     gestureHandling: isTouch ? 'greedy' : 'cooperative',
-    zoomControl: true,
+    zoomControl: !isMobile, // Desactivar controles de zoom en móviles
     zoomControlOptions: {
-      position: window.google?.maps?.ControlPosition?.LEFT_CENTER || 4,
+      position: window.google?.maps?.ControlPosition?.RIGHT_CENTER || 3,
       style: window.google?.maps?.ZoomControlStyle?.LARGE || 1
     },
     // Configuraciones adicionales para dispositivos táctiles
     ...(isMobile && {
-      zoomControlOptions: {
-        position: window.google?.maps?.ControlPosition?.RIGHT_BOTTOM || 3,
-        style: window.google?.maps?.ZoomControlStyle?.LARGE || 1
-      }
+      zoomControl: false, // Sin controles de zoom en móviles
+      gestureHandling: 'greedy', // Gestos táctiles optimizados
+      scrollwheel: false, // Sin zoom con rueda del mouse
+      keyboardShortcuts: false, // Sin atajos de teclado
     })
   };
 }; 

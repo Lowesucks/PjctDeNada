@@ -1726,23 +1726,7 @@ body, html, #root {
   color: var(--color-text);
 }
 
-.mobile-profile-btn {
-  background-color: var(--color-switch-bg);
-  border: 1px solid var(--color-border);
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.mobile-profile-btn svg {
-  width: 24px;
-  height: 24px;
-  color: var(--color-text-secondary);
-}
+/* Botón de perfil móvil anterior eliminado */
 
 .mobile-search-wrapper {
   position: relative;
@@ -2625,65 +2609,150 @@ body, html, #root {
   min-width: 320px;
   max-width: 480px;
   height: 100vh;
-  background: rgba(30,34,44,0.98);
+  background: var(--color-surface);
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  box-shadow: 2px 0 16px #0002;
+  box-shadow: 2px 0 16px var(--color-shadow);
   z-index: 20;
   position: relative;
+  border-right: 1px solid var(--color-border);
+  transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
+
 .sidebar-header {
-  padding: 32px 32px 12px 32px;
+  padding: 24px 24px 16px 24px;
   text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  transition: background-color 0.3s, border-color 0.3s;
 }
+
 .sidebar-logo {
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 800;
-  letter-spacing: 2px;
-  color: #fff;
-  text-shadow: 0 2px 8px #0002;
+  letter-spacing: 1px;
+  color: var(--color-text);
+  text-shadow: 0 2px 8px var(--color-shadow);
+  margin: 0;
+  transition: color 0.3s;
 }
+
 .sidebar-search-nav {
-  padding: 0 32px 0 32px;
+  padding: 16px 24px 0 24px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
+  background: var(--color-surface);
+  transition: background-color 0.3s;
 }
+
 .sidebar-search-input {
-  padding: 12px 20px;
+  padding: 12px 16px;
   border-radius: 12px;
-  border: none;
-  font-size: 1.1rem;
-  background: #f7f8fa;
-  color: #232a36;
-  box-shadow: 0 1px 4px #0001;
+  border: 1px solid var(--color-border);
+  font-size: 1rem;
+  background: var(--color-background);
+  color: var(--color-text);
+  box-shadow: 0 1px 4px var(--color-shadow);
   outline: none;
-  transition: box-shadow 0.2s;
+  transition: all 0.2s ease;
   margin-bottom: 8px;
 }
+
 .sidebar-search-input:focus {
-  box-shadow: 0 2px 8px #0002;
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px var(--color-shadow);
+  background: var(--color-surface);
 }
+
+.sidebar-search-input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
 .sidebar-nav {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
+
 .sidebar-nav button {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1.05rem;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 8px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 12px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 48px;
+  flex: 1;
+  max-width: 60px;
 }
-.sidebar-nav button.active, .sidebar-nav button:hover {
-  background: #3b4252;
-  color: #ffd700;
+
+.sidebar-nav button svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.sidebar-nav button.active, 
+.sidebar-nav button:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.sidebar-nav button:active {
+  transform: translateY(-1px);
+}
+
+/* Botones especiales de usuario */
+.user-profile-btn, .login-btn {
+  background: var(--color-background) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-secondary) !important;
+  padding: 8px !important;
+  border-radius: 50% !important;
+  width: 48px !important;
+  height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  flex: none !important;
+}
+
+.user-profile-btn:hover, .login-btn:hover {
+  background: var(--color-primary) !important;
+  color: white !important;
+  border-color: var(--color-primary) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4) !important;
+}
+
+.user-avatar-small {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .sidebar-list-section {
@@ -2693,111 +2762,177 @@ body, html, #root {
   display: flex;
   flex-direction: column;
   margin-top: 8px;
+  background: var(--color-surface);
+  transition: background-color 0.3s;
 }
+
 .sidebar-list-header {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
   margin-top: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
 }
+
 .sidebar-list-title {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: #ffd700;
-  letter-spacing: 1px;
+  color: var(--color-text);
+  letter-spacing: 0.5px;
+  transition: color 0.3s;
 }
+
 .sidebar-sort-container {
   position: relative;
 }
+
 .sort-button {
-  background: #2e3542;
-  color: #fff;
-  border: none;
+  background: var(--color-background);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  padding: 7px 16px;
-  font-size: 1rem;
+  padding: 8px 12px;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: background 0.2s;
+  gap: 6px;
+  transition: all 0.2s ease;
 }
+
 .sort-button:hover {
-  background: #3b4252;
+  background: var(--color-surface);
+  border-color: var(--color-primary);
+  color: var(--color-text);
 }
+
+.sort-button svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+
 .sort-dropdown {
   position: absolute;
   top: 110%;
   right: 0;
-  background: #232a36;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
-  box-shadow: 0 2px 12px #0003;
+  box-shadow: 0 4px 20px var(--color-shadow);
   padding: 8px 0;
   z-index: 20;
   min-width: 160px;
+  animation: fadeInDropdown 0.2s ease;
 }
+
+@keyframes fadeInDropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .sort-dropdown button {
   width: 100%;
   background: none;
   border: none;
-  color: #fff;
-  font-size: 1rem;
-  padding: 10px 18px;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  padding: 10px 16px;
   text-align: left;
   cursor: pointer;
   border-radius: 6px;
-  transition: background 0.2s;
+  transition: background 0.2s ease;
 }
+
 .sort-dropdown button:hover {
-  background: #3b4252;
-  color: #ffd700;
+  background: var(--color-background);
+  color: var(--color-primary);
 }
 
 .sidebar-loading, .sidebar-empty-state {
   width: 100%;
   text-align: center;
-  padding: 36px 0 24px 0;
-  color: #bfc4d1;
-  font-size: 1.1rem;
+  padding: 40px 0 24px 0;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
 }
+
+.sidebar-loading .loading-spinner {
+  margin: 0 auto 16px auto;
+}
+
 .sidebar-empty-state h3 {
-  font-size: 1.2rem;
-  color: #ffd700;
+  font-size: 1.1rem;
+  color: var(--color-text);
   margin-bottom: 8px;
+  font-weight: 600;
 }
+
+.sidebar-empty-state p {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
 .sidebar-barberias-list {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   margin-top: 8px;
-  animation: fadeInList 0.5s;
+  animation: fadeInList 0.5s ease;
 }
+
 @keyframes fadeInList {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 
 .sidebar-barberias-list .barberia-card {
-  background: #232a36;
-  border-radius: 14px;
-  box-shadow: 0 2px 12px #0002;
-  transition: box-shadow 0.2s, transform 0.2s;
-  border: 1.5px solid #2e3542;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--color-shadow);
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
+
 .sidebar-barberias-list .barberia-card:hover {
-  box-shadow: 0 6px 24px #0003;
-  transform: translateY(-2px) scale(1.01);
-  border-color: #ffd700;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--color-shadow);
+  border-color: var(--color-primary);
 }
 
 .sidebar-settings-view {
-  padding: 24px 32px 0 32px;
-  border-top: 1px solid #232a36;
+  padding: 24px 24px 0 24px;
+  border-top: 1px solid var(--color-border);
   margin-top: 12px;
+  background: var(--color-surface);
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.sidebar-settings-view h2 {
+  color: var(--color-text);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  transition: color 0.3s;
 }
 
 /* Mapa a la derecha */
@@ -2806,12 +2941,15 @@ body, html, #root {
   height: 100vh;
   min-width: 0;
   position: relative;
-  background: #232a36;
+  background: var(--color-background);
   display: flex;
   align-items: stretch;
   justify-content: stretch;
+  transition: background-color 0.3s;
 }
-.main-map-area > div, .main-map-area .mapa-barberias {
+
+.main-map-area > div, 
+.main-map-area .mapa-barberias {
   width: 100% !important;
   height: 100% !important;
   min-height: 100vh;
@@ -2819,40 +2957,490 @@ body, html, #root {
   box-shadow: none;
 }
 
-/* Ajustes para modo oscuro */
-.app-desktop-sidebar.dark .sidebar-left,
-.app-desktop-sidebar.dark .sidebar-list-section,
-.app-desktop-sidebar.dark .main-map-area {
-  background: #181c23;
-}
-.app-desktop-sidebar.dark .sidebar-search-input {
-  background: #232a36;
-  color: #fff;
-}
-.app-desktop-sidebar.dark .sidebar-nav button.active, .app-desktop-sidebar.dark .sidebar-nav button:hover {
-  background: #232a36;
-  color: #ffd700;
-}
-.app-desktop-sidebar.dark .sidebar-barberias-list .barberia-card {
-  background: #232a36;
-  border-color: #232a36;
-}
-
-/* Responsive para pantallas medianas */
+/* Responsive para el sidebar */
 @media (max-width: 1100px) {
   .sidebar-left {
-    width: 90vw;
-    min-width: 0;
-    max-width: 100vw;
+    width: 360px;
+    min-width: 280px;
   }
 }
+
 @media (max-width: 900px) {
   .sidebar-left {
     width: 100vw;
-    min-width: 0;
+    min-width: 100vw;
     max-width: 100vw;
+    height: auto;
+    position: static;
+    box-shadow: none;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
   }
+  
   .main-map-area {
-    display: none;
+    height: 60vh;
+    min-height: 400px;
   }
-} 
+  
+  .sidebar-header {
+    padding: 16px 16px 12px 16px;
+  }
+  
+  .sidebar-search-nav {
+    padding: 12px 16px 0 16px;
+  }
+  
+  .sidebar-list-section {
+    padding: 0 16px 12px 16px;
+  }
+  
+  .sidebar-settings-view {
+    padding: 16px 16px 0 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar-nav {
+    gap: 6px;
+  }
+  
+  .sidebar-nav button {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .sidebar-nav button svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .user-profile-btn, .login-btn {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  .user-avatar-small {
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
+  }
+}
+
+/* ==========================================================================
+   ESTILOS ADICIONALES PARA EL SIDEBAR
+   ========================================================================== */
+
+/* Botón de cerrar sesión */
+.logout-btn {
+  background: var(--color-background) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-secondary) !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-size: 0.9rem !important;
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+}
+
+.logout-btn:hover {
+  background: #ef4444 !important;
+  color: white !important;
+  border-color: #ef4444 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Mejoras para el dropdown de ordenamiento */
+.sort-dropdown button.active {
+  background: var(--color-primary) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+/* Mejoras para los botones de navegación en móvil */
+@media (max-width: 600px) {
+  .sidebar-nav {
+    gap: 6px;
+    justify-content: space-between;
+  }
+  
+  .sidebar-nav button {
+    min-width: 44px;
+    height: 44px;
+    max-width: 44px;
+    padding: 10px;
+  }
+  
+  .sidebar-nav button svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .user-profile-btn, .login-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+  }
+  
+  .user-avatar-small {
+    width: 18px;
+    height: 18px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Animación para el icono de ordenamiento */
+.sort-button svg {
+  transition: transform 0.2s ease;
+}
+
+.sort-button:hover svg {
+  transform: translateY(1px);
+}
+
+/* Mejoras para el estado vacío */
+.sidebar-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.sidebar-empty-state::before {
+  content: '';
+  width: 60px;
+  height: 60px;
+  background: var(--color-background);
+  border-radius: 50%;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--color-text-secondary);
+}
+
+.sidebar-empty-state[data-view="favoritos"]::before {
+  content: '❤️';
+}
+
+.sidebar-empty-state[data-view="cercanos"]::before {
+  content: '📍';
+}
+
+.sidebar-empty-state[data-view="busqueda"]::before {
+  content: '🔍';
+}
+
+/* Mejoras para el loading spinner */
+.sidebar-loading .loading-spinner {
+  border: 3px solid var(--color-border);
+  border-top: 3px solid var(--color-primary);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px auto;
+}
+
+/* Mejoras para las tarjetas de barberías */
+.sidebar-barberias-list .barberia-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-barberias-list .barberia-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-hover));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.sidebar-barberias-list .barberia-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* Mejoras para el header del sidebar */
+.sidebar-header {
+  position: relative;
+}
+
+.sidebar-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+}
+
+/* Mejoras para el contenedor de búsqueda */
+.sidebar-search-nav {
+  position: relative;
+}
+
+.sidebar-search-input {
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-search-input:focus {
+  z-index: 2;
+}
+
+/* Mejoras para la navegación */
+.sidebar-nav {
+  position: relative;
+}
+
+.sidebar-nav::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--color-border);
+  opacity: 0.5;
+}
+
+/* Mejoras para el botón de usuario */
+.user-profile-btn, .login-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.user-profile-btn::before, .login-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.user-profile-btn:hover::before, .login-btn:hover::before {
+  width: 100%;
+  height: 100%;
+}
+
+/* Mejoras para el avatar del usuario */
+.user-avatar-small {
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Mejoras para el título de la lista */
+.sidebar-list-title {
+  position: relative;
+  display: inline-block;
+}
+
+.sidebar-list-title::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.sidebar-list-title:hover::after {
+  transform: scaleX(1);
+}
+
+/* Mejoras para el contenedor de ordenamiento */
+.sidebar-sort-container {
+  position: relative;
+}
+
+.sort-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.sort-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.sort-button:hover::before {
+  left: 100%;
+}
+
+/* Mejoras para el dropdown */
+.sort-dropdown {
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 32px var(--color-shadow);
+}
+
+.sort-dropdown button {
+  position: relative;
+  overflow: hidden;
+}
+
+.sort-dropdown button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-primary);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: -1;
+}
+
+.sort-dropdown button:hover::before,
+.sort-dropdown button.active::before {
+  transform: translateX(0);
+}
+
+.sort-dropdown button:hover,
+.sort-dropdown button.active {
+  color: white;
+}
+
+/* Mejoras para las configuraciones */
+.settings-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.settings-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--color-shadow);
+}
+
+.settings-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.05), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.settings-item:hover::before {
+  transform: translateX(100%);
+}
+
+/* Estilos para el botón de perfil en navegación móvil */
+.mobile-profile-nav-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.mobile-profile-nav-btn svg {
+  width: 28px;
+  height: 28px;
+  color: var(--color-text-secondary);
+}
+
+.mobile-profile-nav-btn:hover svg {
+  color: var(--color-primary);
+}
+
+.mobile-user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #1d4ed8 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.mobile-profile-nav-btn:hover .mobile-user-avatar {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Ajuste para la navegación móvil con 4 botones */
+.mobile-nav {
+  position: absolute;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  background-color: var(--color-surface);
+  border-radius: 999px;
+  padding: 8px;
+  box-shadow: 0 4px 20px var(--color-shadow);
+  z-index: 10;
+  margin-bottom: env(safe-area-inset-bottom);
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+.mobile-nav button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav button svg {
+  width: 26px;
+  height: 26px;
+  color: var(--color-text-secondary);
+}
+
+.mobile-nav button.active svg {
+  color: var(--color-primary);
+}
+
+.mobile-nav button.active {
+  background-color: var(--color-switch-bg);
+}

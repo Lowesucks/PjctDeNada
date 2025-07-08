@@ -7,7 +7,6 @@ import MapaBarberias from './components/MapaBarberias';
 import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
 import UserProfile from './components/UserProfile';
-import FloatingProfileButton from './components/FloatingProfileButton';
 import './App.css';
 import './styles/mobileOptimization.css';
 import './styles/scrollControl.css';
@@ -520,9 +519,7 @@ function App() {
                 {viewLabels[currentView]}
               </span>
             )}
-            <button className="mobile-profile-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
-            </button>
+            {/* Botón de perfil móvil eliminado */}
           </div>
           <div className="mobile-search-wrapper">
             <input
@@ -654,6 +651,24 @@ function App() {
               <circle cx="12" cy="12" r="1.3" fill="var(--color-background)"/>
             </svg>
           </button>
+          <button 
+            onClick={() => {
+              if (user) setShowUserProfile(true);
+              else setShowLoginModal(true);
+            }} 
+            className="mobile-profile-nav-btn"
+            title={user ? 'Mi perfil' : 'Iniciar sesión'}
+          >
+            {user ? (
+              <div className="mobile-user-avatar">
+                {user.nombre_completo.charAt(0).toUpperCase()}
+              </div>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            )}
+          </button>
         </nav>
 
         {mostrarModal && barberiaSeleccionada && (
@@ -700,12 +715,6 @@ function App() {
             onClose={() => setShowUserProfile(false)}
           />
         )}
-
-        {/* Botón flotante de perfil */}
-        <FloatingProfileButton user={user} onClick={() => {
-          if (user) setShowUserProfile(true);
-          else setShowLoginModal(true);
-        }} />
       </div>
     );
   }
@@ -728,112 +737,195 @@ function App() {
               onChange={handleBusqueda}
             />
             <nav className="sidebar-nav">
-              <button onClick={() => setCurrentView('cercanos')} className={currentView === 'cercanos' ? 'active' : ''} aria-label="Cercanos">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-              </button>
-              <button onClick={() => setCurrentView('favoritos')} className={currentView === 'favoritos' ? 'active' : ''} aria-label="Favoritos">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
-              </button>
-                          <button onClick={() => setCurrentView('configuracion')} className={currentView === 'configuracion' ? 'active' : ''} aria-label="Configuración">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
-                <path d="M19.14 12.94c.04-.31.07-.63.07-.94s-.03-.63-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.42-.49-.42h-3.84c-.25 0-.45.18-.49.42l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22l-1.92 3.32c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.07.63-.07.94s.03.63.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.24.42.49.42h3.84c.25 0 .45-.18.49-.42l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.21.08-.47-.12-.61l-2.01-1.58z"/>
-                <circle cx="12" cy="12" r="1.3" fill="var(--color-background)"/>
-              </svg>
-            </button>
-            {user ? (
-              <button onClick={handleShowProfile} className="user-profile-btn" aria-label="Mi Perfil">
-                <div className="user-avatar-small">
-                  {user.nombre_completo.charAt(0).toUpperCase()}
-                </div>
-              </button>
-            ) : (
-              <button onClick={handleShowLogin} className="login-btn" aria-label="Iniciar Sesión">
+              <button 
+                onClick={() => setCurrentView('cercanos')} 
+                className={currentView === 'cercanos' ? 'active' : ''} 
+                aria-label="Ver barberías cercanas"
+                title="Barberías cercanas"
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
               </button>
-            )}
+              <button 
+                onClick={() => setCurrentView('favoritos')} 
+                className={currentView === 'favoritos' ? 'active' : ''} 
+                aria-label="Ver favoritos"
+                title="Mis favoritos"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+              </button>
+              <button 
+                onClick={() => setCurrentView('configuracion')} 
+                className={currentView === 'configuracion' ? 'active' : ''} 
+                aria-label="Configuración"
+                title="Configuración"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                  <path d="M19.14 12.94c.04-.31.07-.63.07-.94s-.03-.63-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.42-.49-.42h-3.84c-.25 0-.45.18-.49.42l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22l-1.92 3.32c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.07.63-.07.94s.03.63.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.24.42.49.42h3.84c.25 0 .45-.18.49-.42l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.21.08-.47-.12-.61l-2.01-1.58z"/>
+                  <circle cx="12" cy="12" r="1.3" fill="var(--color-background)"/>
+                </svg>
+              </button>
+              {user ? (
+                <button 
+                  onClick={handleShowProfile} 
+                  className="user-profile-btn" 
+                  aria-label="Mi Perfil"
+                  title={`Perfil de ${user.nombre_completo}`}
+                >
+                  <div className="user-avatar-small">
+                    {user.nombre_completo.charAt(0).toUpperCase()}
+                  </div>
+                </button>
+              ) : (
+                <button 
+                  onClick={handleShowLogin} 
+                  className="login-btn" 
+                  aria-label="Iniciar Sesión"
+                  title="Iniciar sesión"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  </svg>
+                </button>
+              )}
             </nav>
           </div>
+          
+          {/* Contenido principal del sidebar */}
           <div className="sidebar-list-section">
             <div className="sidebar-list-header">
               <span className="sidebar-list-title">
                 {viewLabels[currentView]}
               </span>
-              <div className="sidebar-sort-container">
-                <button onClick={() => setIsSortMenuOpen(!isSortMenuOpen)} className="sort-button">
-                  <span>Ordenar por: <strong>{getSortLabel(sortOrder)}</strong></span>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
-                </button>
-                {isSortMenuOpen && (
-                  <div className="sort-dropdown">
-                    {Object.keys(sortLabels).map(key => (
-                      <button key={key} onClick={() => { setSortOrder(key); setIsSortMenuOpen(false); }}>
-                        {sortLabels[key]}
-                      </button>
-                    ))}
+              {currentView !== 'configuracion' && (
+                <div className="sidebar-sort-container">
+                  <button 
+                    onClick={() => setIsSortMenuOpen(!isSortMenuOpen)} 
+                    className="sort-button"
+                    aria-label="Ordenar resultados"
+                    title="Ordenar por"
+                  >
+                    <span>Ordenar por: <strong>{getSortLabel(sortOrder)}</strong></span>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      viewBox="0 0 20 20" 
+                      fill="currentColor" 
+                      width="18" 
+                      height="18"
+                      style={{ transform: isSortMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                    >
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/>
+                    </svg>
+                  </button>
+                  {isSortMenuOpen && (
+                    <div className="sort-dropdown">
+                      {Object.keys(sortLabels).map(key => (
+                        <button 
+                          key={key} 
+                          onClick={() => { 
+                            setSortOrder(key); 
+                            setIsSortMenuOpen(false); 
+                          }}
+                          className={sortOrder === key ? 'active' : ''}
+                        >
+                          {sortLabels[key]}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            {/* Contenido según la vista seleccionada */}
+            {currentView === 'configuracion' ? (
+              <div className="sidebar-settings-view">
+                <h2>Configuración</h2>
+                <div className="settings-item">
+                  <span>Modo Oscuro</span>
+                  <label className="switch">
+                    <input 
+                      type="checkbox" 
+                      onChange={toggleTheme} 
+                      checked={theme === 'dark'}
+                    />
+                    <span className="slider round"></span>
+                  </label>
+                </div>
+                {user && (
+                  <div className="settings-item">
+                    <span>Usuario: {user.nombre_completo}</span>
+                    <button 
+                      onClick={handleLogout}
+                      className="logout-btn"
+                      style={{
+                        background: 'var(--color-background)',
+                        border: '1px solid var(--color-border)',
+                        color: 'var(--color-text-secondary)',
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      Cerrar sesión
+                    </button>
                   </div>
                 )}
               </div>
-            </div>
-            {/* Lista o mensajes */}
-            {cargando ? (
-              <div className="sidebar-loading">
-                <div className="loading-spinner"></div>
-                <p>Buscando barberías...</p>
-              </div>
-            ) : barberiasFiltradas.length === 0 ? (
-              <div className="sidebar-empty-state">
-                <h3>
-                  {currentView === 'favoritos' 
-                    ? 'No tienes favoritos' 
-                    : busqueda.trim() 
-                      ? 'No se encontraron lugares' 
-                      : 'Cargando barberías cercanas...'}
-                </h3>
-                <p>
-                  {currentView === 'favoritos' 
-                    ? 'Usa el icono del corazón ❤ para guardar lugares.' 
-                    : busqueda.trim()
-                      ? 'Prueba con otros términos de búsqueda.'
-                      : 'Buscando barberías cerca de ti...'}
-                </p>
-              </div>
             ) : (
-              <div className="sidebar-barberias-list">
-                {barberiasFiltradas.map(barberia => (
-                  <BarberiaCard
-                    key={barberia.id}
-                    barberia={barberia}
-                    onVerDetalles={handleVerBarberia}
-                    onVerEnMapa={handleVerEnMapa}
-                    onToggleFavorite={handleToggleFavorite}
-                    isFavorite={favorites.has(barberia.id)}
-                    onCalificar={handleCalificar}
-                  />
-                ))}
-              </div>
+              <>
+                {/* Estados de carga y vacío */}
+                {cargando ? (
+                  <div className="sidebar-loading">
+                    <div className="loading-spinner"></div>
+                    <p>Buscando barberías...</p>
+                  </div>
+                ) : barberiasFiltradas.length === 0 ? (
+                  <div 
+                    className="sidebar-empty-state"
+                    data-view={currentView === 'favoritos' ? 'favoritos' : busqueda.trim() ? 'busqueda' : 'cercanos'}
+                  >
+                    <h3>
+                      {currentView === 'favoritos' 
+                        ? 'No tienes favoritos' 
+                        : busqueda.trim() 
+                          ? 'No se encontraron lugares' 
+                          : 'Cargando barberías cercanas...'}
+                    </h3>
+                    <p>
+                      {currentView === 'favoritos' 
+                        ? 'Usa el icono del corazón ❤ para guardar lugares.' 
+                        : busqueda.trim()
+                          ? 'Prueba con otros términos de búsqueda.'
+                          : 'Buscando barberías cerca de ti...'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="sidebar-barberias-list">
+                    {barberiasFiltradas.map(barberia => (
+                      <BarberiaCard
+                        key={barberia.id}
+                        barberia={barberia}
+                        onVerDetalles={handleVerBarberia}
+                        onVerEnMapa={handleVerEnMapa}
+                        onToggleFavorite={handleToggleFavorite}
+                        isFavorite={favorites.has(barberia.id)}
+                        onCalificar={handleCalificar}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
-          {/* Configuración */}
-          {currentView === 'configuracion' && (
-            <div className="sidebar-settings-view">
-              <h2>Configuración</h2>
-              <div className="settings-item">
-                <span>Modo Oscuro</span>
-                <label className="switch">
-                  <input 
-                    type="checkbox" 
-                    onChange={toggleTheme} 
-                    checked={theme === 'dark'}
-                  />
-                  <span className="slider round"></span>
-                </label>
-              </div>
-            </div>
-          )}
         </aside>
+        
         {/* Mapa a la derecha, ocupa todo el espacio restante */}
         <main className="main-map-area">
           <MapaBarberias 
@@ -849,6 +941,7 @@ function App() {
             iconConfig={ICON_CONFIG}
           />
         </main>
+        
         {/* Modales */}
         {mostrarModal && barberiaSeleccionada && (
           <BarberiaModal
@@ -893,12 +986,6 @@ function App() {
             onClose={() => setShowUserProfile(false)}
           />
         )}
-
-        {/* Botón flotante de perfil */}
-        <FloatingProfileButton user={user} onClick={() => {
-          if (user) setShowUserProfile(true);
-          else setShowLoginModal(true);
-        }} />
       </div>
     );
   }
@@ -906,11 +993,7 @@ function App() {
   return (
     <>
       {/* ...tu layout actual... */}
-      {/* Botón flotante de perfil */}
-      <FloatingProfileButton user={user} onClick={() => {
-        if (user) setShowUserProfile(true);
-        else setShowLoginModal(true);
-      }} />
+      {/* Botón flotante de perfil - ELIMINADO */}
     </>
   );
 }

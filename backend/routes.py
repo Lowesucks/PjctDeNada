@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, jsonify, Blueprint
 from typing import Any
 from .models import db, Barberia, Calificacion, Usuario
 from .services import (
@@ -390,4 +390,26 @@ def obtener_calificaciones_usuario(current_user: Usuario) -> list[dict[str, Any]
         ]
     except Exception as e:
         print(f"Error al obtener calificaciones del usuario: {e}")
-        return [] 
+        return []
+
+usuarios_bp = Blueprint('usuarios', __name__)
+
+# Registro de usuario
+usuarios_bp.route('/api/auth/register', methods=['POST'])(registrar_usuario)
+
+# Login de usuario
+usuarios_bp.route('/api/auth/login', methods=['POST'])(login_usuario)
+
+# Obtener perfil
+usuarios_bp.route('/api/auth/profile', methods=['GET'])(obtener_perfil_usuario)
+
+# Actualizar perfil
+usuarios_bp.route('/api/auth/update', methods=['POST'])(actualizar_perfil_usuario)
+
+# Cambiar contraseña
+usuarios_bp.route('/api/auth/change-password', methods=['POST'])(cambiar_password_usuario)
+
+# Obtener calificaciones del usuario
+usuarios_bp.route('/api/auth/mis-calificaciones', methods=['GET'])(obtener_calificaciones_usuario)
+
+__all__ = ["usuarios_bp"] 

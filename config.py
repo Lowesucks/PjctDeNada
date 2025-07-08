@@ -12,7 +12,7 @@ class Config:
     DEBUG = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
     
     # Configuración de la base de datos
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///barberias.db'
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://lowe:Heisenbergduke0105$@localhost:5432/barberias"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Configuración de APIs
@@ -60,7 +60,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Configuración para desarrollo"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///barberias_dev.db'
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://lowe:Heisenbergduke0105$@localhost:5432/barberias"
 
 class ProductionConfig(Config):
     """Configuración para producción"""

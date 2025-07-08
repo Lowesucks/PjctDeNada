@@ -3,8 +3,7 @@ from .models import db
 from .routes import (
     obtener_barberias, crear_barberia, obtener_barberia, 
     calificar_barberia, buscar_barberias, buscar_barberias_cercanas,
-    registrar_usuario, login_usuario, obtener_perfil_usuario,
-    actualizar_perfil_usuario, cambiar_password_usuario, obtener_calificaciones_usuario
+    usuarios_bp
 )
 import sys
 import os
@@ -32,13 +31,8 @@ def create_app(config_name='default'):
     app.add_url_rule('/api/barberias/buscar', 'buscar_barberias', buscar_barberias, methods=['GET'])
     app.add_url_rule('/api/barberias/cercanas', 'buscar_barberias_cercanas', buscar_barberias_cercanas, methods=['GET'])
     
-    # Registrar rutas de autenticación y usuarios
-    app.add_url_rule('/api/auth/registro', 'registrar_usuario', registrar_usuario, methods=['POST'])
-    app.add_url_rule('/api/auth/login', 'login_usuario', login_usuario, methods=['POST'])
-    app.add_url_rule('/api/auth/perfil', 'obtener_perfil_usuario', obtener_perfil_usuario, methods=['GET'])
-    app.add_url_rule('/api/auth/perfil', 'actualizar_perfil_usuario', actualizar_perfil_usuario, methods=['PUT'])
-    app.add_url_rule('/api/auth/cambiar-password', 'cambiar_password_usuario', cambiar_password_usuario, methods=['POST'])
-    app.add_url_rule('/api/auth/mis-calificaciones', 'obtener_calificaciones_usuario', obtener_calificaciones_usuario, methods=['GET'])
+    # Registrar blueprint de usuarios
+    app.register_blueprint(usuarios_bp)
     
     return app
 

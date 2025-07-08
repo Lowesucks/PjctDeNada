@@ -4,6 +4,10 @@ import BarberiaCard from './components/BarberiaCard';
 import BarberiaModal from './components/BarberiaModal';
 import CalificarModal from './components/CalificarModal';
 import MapaBarberias from './components/MapaBarberias';
+import LoginModal from './components/LoginModal';
+import RegisterModal from './components/RegisterModal';
+import UserProfile from './components/UserProfile';
+import FloatingProfileButton from './components/FloatingProfileButton';
 import './App.css';
 import './styles/mobileOptimization.css';
 import './styles/scrollControl.css';
@@ -40,6 +44,12 @@ function App() {
   const [sortOrder, setSortOrder] = useState('distancia'); // 'distancia', 'calificacion', 'reseñas'
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
   
+  // Estados de autenticación
+  const [user, setUser] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  
   // Ref para el debounce de búsqueda
   const searchTimeoutRef = useRef(null);
 
@@ -73,6 +83,9 @@ function App() {
     // Inicializar control de scroll para prevenir scroll no deseado
     initScrollControl();
     applyScrollConfig();
+
+    // Verificar si hay un usuario autenticado
+    checkAuthStatus();
 
     const handleResize = () => {
       checkScreenSize();
@@ -405,6 +418,59 @@ function App() {
     }
   };
 
+  // Funciones de autenticación
+  const checkAuthStatus = () => {
+    const token = localStorage.getItem('authToken');
+    const userData = localStorage.getItem('userData');
+    
+    if (token && userData) {
+      try {
+        const user = JSON.parse(userData);
+        setUser(user);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        handleLogout();
+      }
+    }
+  };
+
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    setShowLoginModal(false);
+    setShowRegisterModal(false);
+  };
+
+  const handleRegisterSuccess = (userData) => {
+    setUser(userData);
+    setShowLoginModal(false);
+    setShowRegisterModal(false);
+    // Mostrar mensaje de éxito
+    alert('¡Cuenta creada exitosamente! Ya puedes iniciar sesión.');
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setShowUserProfile(false);
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
+    delete axios.defaults.headers.common['Authorization'];
+  };
+
+  const handleShowLogin = () => {
+    setShowLoginModal(true);
+    setShowRegisterModal(false);
+  };
+
+  const handleShowRegister = () => {
+    setShowRegisterModal(true);
+    setShowLoginModal(false);
+  };
+
+  const handleShowProfile = () => {
+    setShowUserProfile(true);
+  };
+
   // Vista móvil (estilo Uber)
   if (isMobile) {
     return (
@@ -592,6 +658,39 @@ function App() {
             onCalificacionEnviada={handleCalificacionEnviada}
           />
         )}
+
+        {/* Modales de autenticación */}
+        {showLoginModal && (
+          <LoginModal
+            isOpen={showLoginModal}
+            onClose={() => setShowLoginModal(false)}
+            onLoginSuccess={handleLoginSuccess}
+            onSwitchToRegister={handleShowRegister}
+          />
+        )}
+
+        {showRegisterModal && (
+          <RegisterModal
+            isOpen={showRegisterModal}
+            onClose={() => setShowRegisterModal(false)}
+            onRegisterSuccess={handleRegisterSuccess}
+            onSwitchToLogin={handleShowLogin}
+          />
+        )}
+
+        {showUserProfile && user && (
+          <UserProfile
+            user={user}
+            onLogout={handleLogout}
+            onClose={() => setShowUserProfile(false)}
+          />
+        )}
+
+        {/* Botón flotante de perfil */}
+        <FloatingProfileButton user={user} onClick={() => {
+          if (user) setShowUserProfile(true);
+          else setShowLoginModal(true);
+        }} />
       </div>
     );
   }
@@ -620,13 +719,26 @@ function App() {
               <button onClick={() => setCurrentView('favoritos')} className={currentView === 'favoritos' ? 'active' : ''} aria-label="Favoritos">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
               </button>
-              <button onClick={() => setCurrentView('configuracion')} className={currentView === 'configuracion' ? 'active' : ''} aria-label="Configuración">
+                          <button onClick={() => setCurrentView('configuracion')} className={currentView === 'configuracion' ? 'active' : ''} aria-label="Configuración">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                <path d="M19.14 12.94c.04-.31.07-.63.07-.94s-.03-.63-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.42-.49-.42h-3.84c-.25 0-.45.18-.49.42l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22l-1.92 3.32c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.07.63-.07.94s.03.63.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.24.42.49.42h3.84c.25 0 .45-.18.49-.42l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.21.08-.47-.12-.61l-2.01-1.58z"/>
+                <circle cx="12" cy="12" r="1.3" fill="var(--color-background)"/>
+              </svg>
+            </button>
+            {user ? (
+              <button onClick={handleShowProfile} className="user-profile-btn" aria-label="Mi Perfil">
+                <div className="user-avatar-small">
+                  {user.nombre_completo.charAt(0).toUpperCase()}
+                </div>
+              </button>
+            ) : (
+              <button onClick={handleShowLogin} className="login-btn" aria-label="Iniciar Sesión">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
-                  <path d="M19.14 12.94c.04-.31.07-.63.07-.94s-.03-.63-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.42-.49-.42h-3.84c-.25 0-.45.18-.49.42l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22l-1.92 3.32c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.07.63-.07.94s.03.63.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.24.42.49.42h3.84c.25 0 .45-.18.49-.42l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.21.08-.47-.12-.61l-2.01-1.58z"/>
-                  <circle cx="12" cy="12" r="1.3" fill="var(--color-background)"/>
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
               </button>
+            )}
             </nav>
           </div>
           <div className="sidebar-list-section">
@@ -739,9 +851,53 @@ function App() {
             onCalificacionEnviada={handleCalificacionEnviada}
           />
         )}
+
+        {/* Modales de autenticación */}
+        {showLoginModal && (
+          <LoginModal
+            isOpen={showLoginModal}
+            onClose={() => setShowLoginModal(false)}
+            onLoginSuccess={handleLoginSuccess}
+            onSwitchToRegister={handleShowRegister}
+          />
+        )}
+
+        {showRegisterModal && (
+          <RegisterModal
+            isOpen={showRegisterModal}
+            onClose={() => setShowRegisterModal(false)}
+            onRegisterSuccess={handleRegisterSuccess}
+            onSwitchToLogin={handleShowLogin}
+          />
+        )}
+
+        {showUserProfile && user && (
+          <UserProfile
+            user={user}
+            onLogout={handleLogout}
+            onClose={() => setShowUserProfile(false)}
+          />
+        )}
+
+        {/* Botón flotante de perfil */}
+        <FloatingProfileButton user={user} onClick={() => {
+          if (user) setShowUserProfile(true);
+          else setShowLoginModal(true);
+        }} />
       </div>
     );
   }
+
+  return (
+    <>
+      {/* ...tu layout actual... */}
+      {/* Botón flotante de perfil */}
+      <FloatingProfileButton user={user} onClick={() => {
+        if (user) setShowUserProfile(true);
+        else setShowLoginModal(true);
+      }} />
+    </>
+  );
 }
 
 export default App; 

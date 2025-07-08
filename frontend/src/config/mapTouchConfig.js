@@ -29,7 +29,7 @@ export const mapTouchOptions = {
   // Configuraciones específicas para touch
   disableDefaultUI: false,
   zoomControlOptions: {
-    position: window.google?.maps?.ControlPosition?.RIGHT_BOTTOM || 3,
+    position: window.google?.maps?.ControlPosition?.LEFT_CENTER || 4,
     style: window.google?.maps?.ZoomControlStyle?.SMALL || 2
   },
   
@@ -132,10 +132,13 @@ export const getOptimizedConfig = () => {
   
   return {
     ...mapTouchOptions,
-    // Configuraciones adicionales para dispositivos táctiles
     gestureHandling: isTouch ? 'greedy' : 'cooperative',
     zoomControl: true,
-    // Configuraciones específicas para móviles
+    zoomControlOptions: {
+      position: window.google?.maps?.ControlPosition?.LEFT_CENTER || 4,
+      style: window.google?.maps?.ZoomControlStyle?.LARGE || 1
+    },
+    // Configuraciones adicionales para dispositivos táctiles
     ...(isMobile && {
       zoomControlOptions: {
         position: window.google?.maps?.ControlPosition?.RIGHT_BOTTOM || 3,

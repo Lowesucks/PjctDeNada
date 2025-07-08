@@ -3,9 +3,17 @@ import googlemaps
 from functools import lru_cache
 from typing import Any
 import math
+import jwt
+from datetime import datetime, timedelta, timezone
+from .models import Usuario, db
 
 # Clave de API de Google (se lee de variables de entorno)
 GOOGLE_API_KEY: str | None = os.environ.get('GOOGLE_MAPS_API_KEY')
+
+# Configuración JWT
+JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'tu-clave-secreta-cambiar-en-produccion')
+JWT_ALGORITHM = 'HS256'
+JWT_EXPIRATION_HOURS = 24
 
 @lru_cache(maxsize=32)
 def buscar_barberias_google_places(lat: float, lng: float, radio: int = 5000) -> list[dict[str, Any]]:
@@ -129,4 +137,124 @@ def calcular_distancia(lat1: float, lng1: float, lat2: float, lng2: float) -> fl
     a = math.sin(dlat/2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlng/2)**2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
     
-    return R * c 
+    return R * c
+
+# ==================== SERVICIOS DE USUARIOS ====================
+
+def crear_usuario(username: str, email: str, password: str, nombre_completo: str, telefono: str = None) -> dict[str, Any]:
+    """Crea un nuevo usuario"""
+    try:
+        # Verificar si el usuario ya existe
+        if Usuario.query.filter_by(username=username).first():
+            return {'error': 'El nombre de usuario ya existe'}, 400
+        
+        if Usuario.query.filter_by(email=email).first():
+            return {'error': 'El email ya está registrado'}, 400
+        
+        # Crear nuevo usuario
+        nuevo_usuario = Usuario(
+            username=username,
+            email=email,
+            nombre_completo=nombre_completo,
+            telefono=telefono
+        )
+        nuevo_usuario.set_password(password)
+        
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+        
+        return {'mensaje': 'Usuario creado exitosamente', 'usuario': nuevo_usuario.to_dict()}, 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return {'error': f'Error al crear usuario: {str(e)}'}, 500
+
+def autenticar_usuario(username: str, password: str) -> dict[str, Any]:
+    """Autentica un usuario y retorna token JWT"""
+    try:
+        usuario = Usuario.query.filter_by(username=username).first()
+        
+        if not usuario or not usuario.check_password(password):
+            return {'error': 'Credenciales inválidas'}, 401
+        
+        if not usuario.activo:
+            return {'error': 'Usuario desactivado'}, 401
+        
+        # Actualizar último acceso
+        usuario.ultimo_acceso = datetime.now(timezone.utc)
+        db.session.commit()
+        
+        # Generar token JWT
+        token = generar_token_jwt(usuario.id)
+        
+        return {
+            'mensaje': 'Autenticación exitosa',
+            'token': token,
+            'usuario': usuario.to_dict()
+        }, 200
+        
+    except Exception as e:
+        return {'error': f'Error en autenticación: {str(e)}'}, 500
+
+def generar_token_jwt(user_id: int) -> str:
+    """Genera un token JWT para el usuario"""
+    payload = {
+        'user_id': user_id,
+        'exp': datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRATION_HOURS),
+        'iat': datetime.now(timezone.utc)
+    }
+    return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+
+def verificar_token_jwt(token: str) -> dict[str, Any]:
+    """Verifica y decodifica un token JWT"""
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        return {'valido': True, 'user_id': payload['user_id']}
+    except jwt.ExpiredSignatureError:
+        return {'valido': False, 'error': 'Token expirado'}
+    except jwt.InvalidTokenError:
+        return {'valido': False, 'error': 'Token inválido'}
+
+def obtener_usuario_por_id(user_id: int) -> Usuario:
+    """Obtiene un usuario por su ID"""
+    return Usuario.query.get(user_id)
+
+def actualizar_usuario(user_id: int, datos: dict[str, Any]) -> dict[str, Any]:
+    """Actualiza los datos de un usuario"""
+    try:
+        usuario = Usuario.query.get(user_id)
+        if not usuario:
+            return {'error': 'Usuario no encontrado'}, 404
+        
+        # Campos permitidos para actualizar
+        campos_permitidos = ['nombre_completo', 'telefono', 'email']
+        
+        for campo in campos_permitidos:
+            if campo in datos:
+                setattr(usuario, campo, datos[campo])
+        
+        db.session.commit()
+        return {'mensaje': 'Usuario actualizado exitosamente', 'usuario': usuario.to_dict()}, 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return {'error': f'Error al actualizar usuario: {str(e)}'}, 500
+
+def cambiar_password(user_id: int, password_actual: str, password_nuevo: str) -> dict[str, Any]:
+    """Cambia la contraseña de un usuario"""
+    try:
+        usuario = Usuario.query.get(user_id)
+        if not usuario:
+            return {'error': 'Usuario no encontrado'}, 404
+        
+        if not usuario.check_password(password_actual):
+            return {'error': 'Contraseña actual incorrecta'}, 400
+        
+        usuario.set_password(password_nuevo)
+        db.session.commit()
+        
+        return {'mensaje': 'Contraseña cambiada exitosamente'}, 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return {'error': f'Error al cambiar contraseña: {str(e)}'}, 500 

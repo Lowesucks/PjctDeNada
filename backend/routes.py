@@ -1,9 +1,48 @@
 from flask import request, jsonify
 from typing import Any
-from .models import db, Barberia, Calificacion
-from .services import buscar_barberias_google_places, buscar_barberias_por_texto, calcular_distancia
+from .models import db, Barberia, Calificacion, Usuario
+from .services import (
+    buscar_barberias_google_places, buscar_barberias_por_texto, calcular_distancia,
+    crear_usuario, autenticar_usuario, verificar_token_jwt, obtener_usuario_por_id,
+    actualizar_usuario, cambiar_password
+)
+from functools import wraps
 
-# Rutas de la API
+# ==================== DECORADORES DE AUTENTICACIÓN ====================
+
+def token_required(f):
+    """Decorador para proteger rutas que requieren autenticación"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        
+        # Obtener token del header Authorization
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            try:
+                token = auth_header.split(" ")[1]  # Bearer <token>
+            except IndexError:
+                return jsonify({'error': 'Token inválido'}), 401
+        
+        if not token:
+            return jsonify({'error': 'Token requerido'}), 401
+        
+        # Verificar token
+        token_data = verificar_token_jwt(token)
+        if not token_data['valido']:
+            return jsonify({'error': token_data['error']}), 401
+        
+        # Obtener usuario
+        current_user = obtener_usuario_por_id(token_data['user_id'])
+        if not current_user:
+            return jsonify({'error': 'Usuario no encontrado'}), 401
+        
+        return f(current_user, *args, **kwargs)
+    
+    return decorated
+
+# ==================== RUTAS DE BARBERÍAS (EXISTENTES) ====================
+
 def obtener_barberias() -> list[dict[str, Any]]:
     try:
         barberias = Barberia.query.all()
@@ -54,7 +93,7 @@ def obtener_barberia(barberia_id: int) -> dict[str, Any]:
         'calificaciones': [
             {
                 'id': c.id,
-                'nombre_usuario': c.nombre_usuario,
+                'nombre_usuario': c.usuario.nombre_completo if c.usuario else c.nombre_usuario,
                 'calificacion': c.calificacion,
                 'comentario': c.comentario,
                 'fecha': c.fecha.strftime('%d/%m/%Y %H:%M')
@@ -69,11 +108,24 @@ def calificar_barberia(barberia_id: int) -> tuple[dict[str, Any], int]:
     if not data:
         return {'error': 'Datos JSON requeridos'}, 400
     
+    # Obtener usuario del token (si está autenticado)
+    usuario_actual = None
+    if 'Authorization' in request.headers:
+        auth_header = request.headers['Authorization']
+        try:
+            token = auth_header.split(" ")[1]
+            token_data = verificar_token_jwt(token)
+            if token_data['valido']:
+                usuario_actual = obtener_usuario_por_id(token_data['user_id'])
+        except:
+            pass
+    
     nueva_calificacion = Calificacion(
         barberia_id=barberia_id,
-        nombre_usuario=data.get('nombre_usuario', ''),
+        usuario_id=usuario_actual.id if usuario_actual else None,
         calificacion=data.get('calificacion', 0),
-        comentario=data.get('comentario', '')
+        comentario=data.get('comentario', ''),
+        nombre_usuario=data.get('nombre_usuario', '') if not usuario_actual else None
     )
     
     db.session.add(nueva_calificacion)
@@ -201,48 +253,34 @@ def buscar_barberias_cercanas() -> list[dict[str, Any]]:
                     ids_google_vistos.add(barberia.get('id'))
                     barberias_google_unicas.append(barberia)
         
-        # Combinar y calcular distancias
+        # Combinar resultados
         todas_barberias = []
-        
-        # Agregar barberías de Google
-        for barberia in barberias_google_unicas:
-            try:
-                # Verificar que las coordenadas existan y sean válidas
-                if barberia.get('latitud') is not None and barberia.get('longitud') is not None:
-                    distancia = calcular_distancia(lat, lng, barberia['latitud'], barberia['longitud'])
-                    barberia['distancia'] = distancia
-                    barberia['lat'] = barberia['latitud']
-                    barberia['lng'] = barberia['longitud']
-                    todas_barberias.append(barberia)
-            except (KeyError, TypeError, ValueError) as e:
-                print(f"Error procesando barbería de Google: {e}")
-                continue
         
         # Agregar barberías de la base de datos
         for barberia in barberias_db:
-            try:
-                if barberia.latitud is not None and barberia.longitud is not None:
-                    distancia = calcular_distancia(lat, lng, barberia.latitud, barberia.longitud)
-                    if distancia <= radio / 1000:  # Convertir radio a km
-                        barberia_dict = {
-                            'id': barberia.id,
-                            'nombre': barberia.nombre,
-                            'direccion': barberia.direccion,
-                            'telefono': barberia.telefono,
-                            'horario': barberia.horario,
-                            'latitud': barberia.latitud,
-                            'longitud': barberia.longitud,
-                            'lat': barberia.latitud,
-                            'lng': barberia.longitud,
-                            'calificacion_promedio': round(barberia.calificacion_promedio, 1),
-                            'total_calificaciones': barberia.total_calificaciones,
-                            'distancia': distancia,
-                            'fuente': 'local'
-                        }
-                        todas_barberias.append(barberia_dict)
-            except Exception as e:
-                print(f"Error procesando barbería de BD: {e}")
-                continue
+            distancia = calcular_distancia(lat, lng, barberia.latitud, barberia.longitud)
+            barberia_dict = {
+                'id': barberia.id,
+                'nombre': barberia.nombre,
+                'direccion': barberia.direccion,
+                'telefono': barberia.telefono,
+                'horario': barberia.horario,
+                'latitud': barberia.latitud,
+                'longitud': barberia.longitud,
+                'lat': barberia.latitud,
+                'lng': barberia.longitud,
+                'calificacion_promedio': round(barberia.calificacion_promedio, 1),
+                'total_calificaciones': barberia.total_calificaciones,
+                'distancia': distancia,
+                'fuente': 'local'
+            }
+            todas_barberias.append(barberia_dict)
+        
+        # Agregar barberías de Google Places
+        for barberia in barberias_google_unicas:
+            distancia = calcular_distancia(lat, lng, barberia['latitud'], barberia['longitud'])
+            barberia['distancia'] = distancia
+            todas_barberias.append(barberia)
         
         # Ordenar por distancia
         todas_barberias.sort(key=lambda x: x.get('distancia', float('inf')))
@@ -251,4 +289,105 @@ def buscar_barberias_cercanas() -> list[dict[str, Any]]:
         
     except Exception as e:
         print(f"Error en buscar_barberias_cercanas: {e}")
+        return []
+
+# ==================== RUTAS DE AUTENTICACIÓN Y USUARIOS ====================
+
+def registrar_usuario() -> tuple[dict[str, Any], int]:
+    """Registra un nuevo usuario"""
+    data: dict[str, Any] = request.get_json()
+    if not data:
+        return {'error': 'Datos JSON requeridos'}, 400
+    
+    # Validar campos requeridos
+    campos_requeridos = ['username', 'email', 'password', 'nombre_completo']
+    for campo in campos_requeridos:
+        if not data.get(campo):
+            return {'error': f'Campo {campo} es requerido'}, 400
+    
+    # Validar longitud de contraseña
+    if len(data['password']) < 6:
+        return {'error': 'La contraseña debe tener al menos 6 caracteres'}, 400
+    
+    # Validar formato de email
+    if '@' not in data['email']:
+        return {'error': 'Formato de email inválido'}, 400
+    
+    resultado, codigo = crear_usuario(
+        username=data['username'],
+        email=data['email'],
+        password=data['password'],
+        nombre_completo=data['nombre_completo'],
+        telefono=data.get('telefono')
+    )
+    
+    return resultado, codigo
+
+def login_usuario() -> tuple[dict[str, Any], int]:
+    """Autentica un usuario"""
+    data: dict[str, Any] = request.get_json()
+    if not data:
+        return {'error': 'Datos JSON requeridos'}, 400
+    
+    username = data.get('username')
+    password = data.get('password')
+    
+    if not username or not password:
+        return {'error': 'Username y password son requeridos'}, 400
+    
+    resultado, codigo = autenticar_usuario(username, password)
+    return resultado, codigo
+
+@token_required
+def obtener_perfil_usuario(current_user: Usuario) -> dict[str, Any]:
+    """Obtiene el perfil del usuario autenticado"""
+    return current_user.to_dict()
+
+@token_required
+def actualizar_perfil_usuario(current_user: Usuario) -> tuple[dict[str, Any], int]:
+    """Actualiza el perfil del usuario autenticado"""
+    data: dict[str, Any] = request.get_json()
+    if not data:
+        return {'error': 'Datos JSON requeridos'}, 400
+    
+    resultado, codigo = actualizar_usuario(current_user.id, data)
+    return resultado, codigo
+
+@token_required
+def cambiar_password_usuario(current_user: Usuario) -> tuple[dict[str, Any], int]:
+    """Cambia la contraseña del usuario autenticado"""
+    data: dict[str, Any] = request.get_json()
+    if not data:
+        return {'error': 'Datos JSON requeridos'}, 400
+    
+    password_actual = data.get('password_actual')
+    password_nuevo = data.get('password_nuevo')
+    
+    if not password_actual or not password_nuevo:
+        return {'error': 'Password actual y nuevo son requeridos'}, 400
+    
+    if len(password_nuevo) < 6:
+        return {'error': 'La nueva contraseña debe tener al menos 6 caracteres'}, 400
+    
+    resultado, codigo = cambiar_password(current_user.id, password_actual, password_nuevo)
+    return resultado, codigo
+
+@token_required
+def obtener_calificaciones_usuario(current_user: Usuario) -> list[dict[str, Any]]:
+    """Obtiene las calificaciones del usuario autenticado"""
+    try:
+        calificaciones = Calificacion.query.filter_by(usuario_id=current_user.id).order_by(Calificacion.fecha.desc()).all()
+        
+        return [
+            {
+                'id': c.id,
+                'barberia_id': c.barberia_id,
+                'barberia_nombre': c.barberia.nombre,
+                'calificacion': c.calificacion,
+                'comentario': c.comentario,
+                'fecha': c.fecha.strftime('%d/%m/%Y %H:%M')
+            } for c in calificaciones
+        ]
+    except Exception as e:
+        print(f"Error al obtener calificaciones del usuario: {e}")
         return [] 

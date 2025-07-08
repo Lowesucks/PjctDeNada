@@ -19,6 +19,11 @@ class Config:
     GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
     GOOGLE_PLACES_API_KEY = os.environ.get('GOOGLE_PLACES_API_KEY') or GOOGLE_MAPS_API_KEY
     
+    # Configuración JWT
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key-change-in-production'
+    JWT_ALGORITHM = 'HS256'
+    JWT_EXPIRATION_HOURS = 24
+    
     # Configuración del servidor
     HOST = os.environ.get('HOST', '0.0.0.0')
     PORT = int(os.environ.get('PORT', 5000))

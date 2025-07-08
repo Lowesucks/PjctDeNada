@@ -43,12 +43,12 @@ def buscar_barberias_google_places(lat: float, lng: float, radio: int = 5000) ->
         gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
         
         # Se realiza una única búsqueda por palabras clave para mayor precisión
-        places_result = gmaps.places_nearby(
+        places_result = gmaps.places_nearby(  # type: ignore[attr-defined, unknown-member]
             location=(lat, lng),
             radius=radio,
             keyword='barbería OR peluquería OR "salón de belleza"',
             language='es'
-        )  # type: ignore
+        )
         
         barberias_encontradas: list[dict[str, Any]] = []
         for place in places_result.get('results', []):

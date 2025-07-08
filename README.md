@@ -4,21 +4,21 @@ Una aplicación web moderna para encontrar y calificar barberías cercanas, con 
 
 ## ✨ Características
 
-- 🗺️ **Mapa Interactivo**: Visualiza barberías en un mapa con Leaflet
+- 🗺️ **Mapa Interactivo**: Visualiza barberías en un mapa con Google Maps
 - 📍 **Ubicación en Tiempo Real**: Encuentra barberías cercanas a tu ubicación
 - ⭐ **Sistema de Calificaciones**: Califica y comenta sobre barberías
 - 🔍 **Búsqueda Avanzada**: Busca por nombre, dirección o ubicación
 - 📱 **Responsive Design**: Funciona perfectamente en móviles y desktop
-- 🌐 **Datos Reales**: Integración con OpenStreetMap para barberías reales
+- 🌐 **Datos Reales**: Integración con Google Places API para barberías reales
 - 🎨 **UI Moderna**: Interfaz elegante con sidebar colapsible
 
 ## 🛠️ Tecnologías
 
-- **Backend**: Python Flask + SQLAlchemy
-- **Frontend**: React + Leaflet (mapas)
+- **Backend**: Python Flask + SQLAlchemy (estructura modular)
+- **Frontend**: React + Google Maps API
 - **Base de Datos**: SQLite
-- **APIs**: OpenStreetMap Overpass API
-- **Estilos**: CSS moderno con animaciones
+- **APIs**: Google Places API
+- **Estilos**: CSS moderno con optimizaciones móviles
 
 ## 📋 Requisitos
 
@@ -41,11 +41,6 @@ run.bat
 ```
 
 #### Linux/macOS
-```bash
-./run.sh
-```
-
-### Opción 3: Script de Shell Universal
 ```bash
 ./run
 ```
@@ -79,7 +74,7 @@ python show_ip.py
 - **Búsqueda por ubicación**: Encuentra barberías cercanas
 - **Búsqueda por nombre**: Busca barberías específicas
 - **Filtros**: Por distancia, calificación, etc.
-- **Datos reales**: Integración con OpenStreetMap
+- **Datos reales**: Integración con Google Places API
 
 ### ⭐ Sistema de Calificaciones
 - Califica barberías del 1 al 5 estrellas
@@ -93,6 +88,35 @@ python show_ip.py
 - **Diseño responsive**: Adaptable a cualquier pantalla
 - **Tema moderno**: UI limpia y profesional
 
+## 📁 Estructura del Proyecto
+
+```
+barberias-app/
+├── main.py                 # Punto de entrada principal
+├── run.py                  # Script universal de inicio
+├── run.bat                # Script Windows
+├── run                    # Script Unix
+├── show_ip.py             # Mostrar IP local
+├── requirements.txt       # Dependencias Python
+├── backend/               # Backend modular
+│   ├── __init__.py
+│   ├── app.py            # Configuración de Flask
+│   ├── models.py         # Modelos de base de datos
+│   ├── routes.py         # Rutas de la API
+│   └── services.py       # Lógica de negocio y APIs
+├── frontend/              # Aplicación React
+│   ├── src/
+│   ├── public/
+│   └── package.json
+├── docs/                  # Documentación
+│   ├── README.md
+│   ├── CONFIGURACION_COMPLETA.md
+│   ├── GOOGLE_MAPS_SETUP.md
+│   └── ...
+├── scripts/               # Scripts adicionales
+└── instance/              # Base de datos SQLite
+```
+
 ## 🔧 Configuración Avanzada
 
 ### Variables de Entorno
@@ -101,32 +125,16 @@ Crea un archivo `.env` en la raíz del proyecto:
 ```env
 FLASK_ENV=development
 FLASK_DEBUG=True
+GOOGLE_MAPS_API_KEY=tu_clave_de_google_maps
 ```
 
 ### Configuración de APIs
-La aplicación usa OpenStreetMap por defecto, pero puedes configurar otras APIs:
+La aplicación usa Google Places API por defecto. Configura tu clave de API:
 
-- **Google Places API**: Para datos más detallados
-- **Foursquare API**: Para información adicional
-- **OpenStreetMap**: Gratuito y sin límites
-
-## 📁 Estructura del Proyecto
-
-```
-barberias-app/
-├── app.py                 # Backend Flask
-├── run.py                 # Script universal
-├── run.bat               # Script Windows
-├── run.sh                # Script Unix
-├── show_ip.py            # Mostrar IP local
-├── requirements.txt      # Dependencias Python
-├── frontend/             # Aplicación React
-│   ├── src/
-│   ├── public/
-│   └── package.json
-├── instance/             # Base de datos SQLite
-└── README.md
-```
+1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
+2. Crea un proyecto y habilita Places API
+3. Genera una clave de API
+4. Configúrala en las variables de entorno
 
 ## 🧪 Pruebas
 
@@ -158,6 +166,15 @@ Presiona **Ctrl+C** en la terminal donde ejecutaste el script. Esto detendrá ta
 - Verifica que estés en la misma red WiFi
 - Usa `python show_ip.py` para obtener la IP correcta
 
+## 📚 Documentación Adicional
+
+Consulta la carpeta `docs/` para documentación detallada:
+
+- [Configuración Completa](docs/CONFIGURACION_COMPLETA.md)
+- [Configuración de Google Maps](docs/GOOGLE_MAPS_SETUP.md)
+- [Optimización Móvil](docs/MOBILE_OPTIMIZATION.md)
+- [Solución de Problemas](docs/GOOGLE_MAPS_TROUBLESHOOTING.md)
+
 ## 🤝 Contribuir
 
 1. Fork el proyecto
@@ -172,8 +189,8 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ## 🙏 Agradecimientos
 
-- **OpenStreetMap**: Por los datos de barberías
-- **Leaflet**: Por la librería de mapas
+- **Google Places API**: Por los datos de barberías
+- **Google Maps**: Por la librería de mapas
 - **React**: Por el framework frontend
 - **Flask**: Por el framework backend
 

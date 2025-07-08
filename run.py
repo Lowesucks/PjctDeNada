@@ -157,13 +157,13 @@ class BarberiasApp:
         try:
             if self.system == "windows":
                 # En Windows, usar cmd para activar el entorno virtual
-                cmd = f'cmd /c "call {venv_activate} && python app.py"'
+                cmd = f'cmd /c "call {venv_activate} && python main.py"'
                 self.backend_process = subprocess.Popen(cmd, shell=True)
             else:
                 # En Unix, activar el entorno virtual directamente
                 env["VIRTUAL_ENV"] = str(Path("venv").absolute())
                 env["PATH"] = f"{Path('venv') / 'bin'}:{env.get('PATH', '')}"
-                self.backend_process = subprocess.Popen([str(python_path), "app.py"], env=env)
+                self.backend_process = subprocess.Popen([str(python_path), "main.py"], env=env)
                 
             print("✓ Backend iniciado")
             return True

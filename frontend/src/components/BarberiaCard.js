@@ -51,10 +51,23 @@ function BarberiaCard({ barberia, onVerDetalles, onVerEnMapa, isFavorite, onTogg
       </div>
       <p className="card-address">{barberia.direccion}</p>
       
-      <div className="card-rating">
-        <span className="rating-value">{barberia.calificacion_promedio?.toFixed(1) || 'N/A'}</span>
-        <StarRating rating={barberia.calificacion_promedio} />
-        <span className="total-ratings">({barberia.total_calificaciones || 0} calificaciones)</span>
+      <div className="card-info">
+        <div className="card-rating">
+          <span className="rating-value">{barberia.calificacion_promedio?.toFixed(1) || 'N/A'}</span>
+          <StarRating rating={barberia.calificacion_promedio} />
+          <span className="total-ratings">({barberia.total_calificaciones || 0} calificaciones)</span>
+        </div>
+        
+        {barberia.distancia !== undefined && (
+          <div className="card-distance">
+            <span className="distance-icon">📍</span>
+            <span className="distance-text">
+              {barberia.distancia < 1 
+                ? `${Math.round(barberia.distancia * 1000)}m` 
+                : `${barberia.distancia.toFixed(1)}km`}
+            </span>
+          </div>
+        )}
       </div>
       
       <div className="card-actions">

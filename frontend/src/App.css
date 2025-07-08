@@ -1386,11 +1386,33 @@ body, html, #root {
   margin: 0 0 12px 0;
 }
 
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
 .card-rating {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 16px;
+}
+
+.card-distance {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.distance-icon {
+  font-size: 1rem;
+}
+
+.distance-text {
+  font-weight: 500;
 }
 
 .rating-value {

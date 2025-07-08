@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from 'react';
+import React, { useState, useEffect, useContext, useMemo, useRef } from 'react';
 import axios from 'axios';
 import BarberiaCard from './components/BarberiaCard';
 import BarberiaModal from './components/BarberiaModal';
@@ -39,6 +39,9 @@ function App() {
   const [barberiaSeleccionadaParaSheet, setBarberiaSeleccionadaParaSheet] = useState(null);
   const [sortOrder, setSortOrder] = useState('distancia'); // 'distancia', 'calificacion', 'reseñas'
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
+  
+  // Ref para el debounce de búsqueda
+  const searchTimeoutRef = useRef(null);
 
   const sortLabels = {
     distancia: 'Cercanía',
@@ -67,7 +70,13 @@ function App() {
     };
     window.addEventListener('resize', handleResize);
 
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      // Limpiar timeout al desmontar
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // El array vacío asegura que esto se ejecute solo una vez.
 
@@ -91,6 +100,15 @@ function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLocation]); // Se ejecuta solo cuando userLocation cambia.
+  
+  // Efecto para manejar cambios de vista
+  useEffect(() => {
+    // Si no hay búsqueda activa, cargar datos según la vista
+    if (!busqueda.trim()) {
+      cargarDatosSegunVista();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentView, busqueda]);
 
   const checkScreenSize = () => {
     setIsMobile(window.innerWidth <= 768);
@@ -113,14 +131,29 @@ function App() {
     try {
       setCargando(true);
       if (query.trim()) {
-        const response = await axios.get(`/api/barberias/buscar?q=${encodeURIComponent(query)}`);
+        // Incluir coordenadas del usuario en la búsqueda si están disponibles
+        let url = `/api/barberias/buscar?q=${encodeURIComponent(query)}`;
+        if (userLocation && userLocation.lat && userLocation.lng) {
+          url += `&lat=${userLocation.lat}&lng=${userLocation.lng}`;
+        }
+        const response = await axios.get(url);
         setBarberias(response.data);
       } else {
-        // Si la búsqueda se vacía, volvemos a cargar las barberías cercanas.
-        await cargarBarberias(userLocation);
+        // Si la búsqueda se vacía, cargar según el filtro actual
+        if (currentView === 'favoritos') {
+          // Mantener la vista de favoritos
+          return;
+        } else {
+          // Cargar barberías cercanas
+          await cargarBarberias(userLocation);
+        }
       }
     } catch (error) {
       console.error('Error al buscar barberías:', error);
+      // En caso de error, mantener las barberías actuales o cargar cercanas
+      if (!query.trim() && currentView !== 'favoritos') {
+        await cargarBarberias(userLocation);
+      }
     } finally {
       setCargando(false);
     }
@@ -129,7 +162,28 @@ function App() {
   const handleBusqueda = (e) => {
     const query = e.target.value;
     setBusqueda(query);
-    buscarBarberias(query);
+    
+    // Cancelar búsqueda anterior si existe
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Si la búsqueda está vacía, cargar según el filtro actual
+    if (!query.trim()) {
+      if (currentView === 'favoritos') {
+        // Si estamos en favoritos, mantener esa vista
+        return;
+      } else {
+        // Si estamos en cercanos, cargar barberías cercanas
+        cargarBarberias(userLocation);
+      }
+      return;
+    }
+    
+    // Esperar 500ms antes de ejecutar la búsqueda (debounce)
+    searchTimeoutRef.current = setTimeout(() => {
+      buscarBarberias(query);
+    }, 500);
   };
 
   const handleVerBarberia = async (barberia) => {
@@ -203,6 +257,11 @@ function App() {
   const handleMobileNavClick = (view) => {
     setCurrentView(view);
     setMobileListVisible(true);
+    
+    // Si cambiamos a cercanos y no hay búsqueda activa, cargar barberías cercanas
+    if (view === 'cercanos' && !busqueda.trim()) {
+      cargarBarberias(userLocation);
+    }
   };
 
   const handleToggleFavorite = (barberiaId) => {
@@ -219,6 +278,11 @@ function App() {
       console.log('Current favorites:', Array.from(newFavorites));
       return newFavorites;
     });
+    
+    // Si estamos en la vista de favoritos y no hay búsqueda, actualizar la vista
+    if (currentView === 'favoritos' && !busqueda.trim()) {
+      // La vista se actualizará automáticamente por el useMemo
+    }
   };
 
   const handleSolicitarUbicacion = () => {
@@ -245,24 +309,91 @@ function App() {
     }
   };
 
-  // Adaptar barberías para que tengan lat y lng
-  const barberiasAdaptadas = barberias.map(b => ({
-    ...b,
-    lat: b.lat || b.latitud,
-    lng: b.lng || b.longitud,
-  }));
+  // Función para calcular distancia entre dos puntos (fórmula de Haversine)
+  const calcularDistancia = (lat1, lng1, lat2, lng2) => {
+    const R = 6371; // Radio de la Tierra en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  // Adaptar barberías para que tengan lat y lng y calcular distancias si no las tienen
+  const barberiasAdaptadas = barberias.map(b => {
+    const barberia = {
+      ...b,
+      lat: b.lat || b.latitud,
+      lng: b.lng || b.longitud,
+    };
+    
+    // Si no tiene distancia calculada y tenemos ubicación del usuario, calcularla
+    if (userLocation && barberia.lat && barberia.lng && typeof barberia.distancia === 'undefined') {
+      barberia.distancia = calcularDistancia(
+        userLocation.lat, 
+        userLocation.lng, 
+        barberia.lat, 
+        barberia.lng
+      );
+    }
+    
+    return barberia;
+  });
 
   // Filtrar solo barberías de Google con lat y lng válidos para mostrar en el mapa y la lista
   const barberiasGoogle = barberiasAdaptadas
     .filter(b => b.fuente === 'google' && typeof b.lat === 'number' && typeof b.lng === 'number' && !isNaN(b.lat) && !isNaN(b.lng));
 
-  // Filtrar barberías según la vista actual
+  // Filtrar y ordenar barberías según la vista actual y criterios de ordenamiento
   const barberiasFiltradas = useMemo(() => {
+    let barberiasFiltradas = barberiasGoogle;
+    
+    // Filtrar por vista
     if (currentView === 'favoritos') {
-      return barberiasGoogle.filter(b => favorites.has(b.id));
+      barberiasFiltradas = barberiasFiltradas.filter(b => favorites.has(b.id));
     }
-    return barberiasGoogle;
-  }, [barberiasGoogle, currentView, favorites]);
+    
+    // Ordenar según el criterio seleccionado
+    barberiasFiltradas = [...barberiasFiltradas].sort((a, b) => {
+      switch (sortOrder) {
+        case 'distancia':
+          // Ordenar por distancia (más cercanas primero)
+          const distanciaA = a.distancia || 0;
+          const distanciaB = b.distancia || 0;
+          return distanciaA - distanciaB;
+          
+        case 'calificacion':
+          // Ordenar por calificación (más alta primero)
+          const calificacionA = a.calificacion_promedio || 0;
+          const calificacionB = b.calificacion_promedio || 0;
+          return calificacionB - calificacionA; // Orden descendente
+          
+        case 'reseñas':
+          // Ordenar por número de reseñas (más reseñas primero)
+          const reseñasA = a.total_calificaciones || 0;
+          const reseñasB = b.total_calificaciones || 0;
+          return reseñasB - reseñasA; // Orden descendente
+          
+        default:
+          return 0;
+      }
+    });
+    
+    return barberiasFiltradas;
+  }, [barberiasGoogle, currentView, favorites, sortOrder]);
+  
+  // Función para cargar datos según la vista actual
+  const cargarDatosSegunVista = () => {
+    if (currentView === 'favoritos') {
+      // Para favoritos, no necesitamos cargar nada nuevo
+      return;
+    } else if (currentView === 'cercanos' && !busqueda.trim()) {
+      // Para cercanos sin búsqueda, cargar barberías cercanas
+      cargarBarberias(userLocation);
+    }
+  };
 
   // Vista móvil (estilo Uber)
   if (isMobile) {
@@ -293,6 +424,11 @@ function App() {
         <div className="mobile-header-redesign">
           <div className="mobile-header-top">
             <span className="mobile-header-title">Cuts</span>
+            {!busqueda.trim() && (
+              <span className="view-indicator">
+                {currentView === 'favoritos' ? '❤ Favoritos' : '📍 Cercanos'}
+              </span>
+            )}
             <button className="mobile-profile-btn">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
             </button>
@@ -301,13 +437,24 @@ function App() {
             <input
               type="text"
               className="mobile-search-input-redesign"
-              placeholder="Buscar barberías..."
+              placeholder={userLocation ? "Buscar barberías cerca de ti..." : "Buscar barberías..."}
               value={busqueda}
               onChange={handleBusqueda}
             />
              <div className="search-icon-wrapper">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
+                {cargando ? (
+                  <div className="search-loading-spinner"></div>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
+                )}
              </div>
+             {userLocation && (
+               <div className="location-indicator" title="Usando tu ubicación">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                 </svg>
+               </div>
+             )}
           </div>
         </div>
         
@@ -355,12 +502,16 @@ function App() {
                   <h3>
                     {currentView === 'favoritos' 
                       ? 'No tienes favoritos' 
-                      : 'No se encontraron lugares'}
+                      : busqueda.trim() 
+                        ? 'No se encontraron lugares' 
+                        : 'Cargando barberías cercanas...'}
                   </h3>
                   <p>
                     {currentView === 'favoritos' 
                       ? 'Usa el icono del corazón ❤ para guardar lugares.' 
-                      : 'Prueba a moverte por el mapa.'}
+                      : busqueda.trim()
+                        ? 'Prueba con otros términos de búsqueda.'
+                        : 'Buscando barberías cerca de ti...'}
                   </p>
                 </div>
               ) : (

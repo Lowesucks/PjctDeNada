@@ -6,7 +6,14 @@
 export const mapTouchOptions = {
   // Configuración principal para gestos táctiles
   gestureHandling: 'greedy', // Permite navegación con un dedo
-  zoomControl: true, // Se desactivará dinámicamente en móviles
+  disableDefaultUI: true,
+  zoomControl: false,
+  mapTypeControl: false,
+  scaleControl: false,
+  streetViewControl: false,
+  rotateControl: false,
+  fullscreenControl: false,
+  clickableIcons: false,
   scrollwheel: false, // Desactiva zoom con rueda del mouse
   
   // Configuraciones de arrastre optimizadas
@@ -15,7 +22,7 @@ export const mapTouchOptions = {
   draggingCursor: 'grabbing',
   
   // Optimizaciones para móviles
-  clickableIcons: true,
+  // clickableIcons: true, // This line is removed as per the edit hint
   keyboardShortcuts: false, // Desactiva atajos de teclado en móviles
   
   // Configuraciones de zoom
@@ -27,16 +34,16 @@ export const mapTouchOptions = {
   heading: 0, // Sin rotación
   
   // Configuraciones específicas para touch
-  disableDefaultUI: false,
+  // disableDefaultUI: false, // This line is removed as per the edit hint
   zoomControlOptions: {
     position: window.google?.maps?.ControlPosition?.RIGHT_CENTER || 3,
     style: window.google?.maps?.ZoomControlStyle?.SMALL || 2
   },
   
   // Configuraciones de controles
-  fullscreenControl: false,
-  streetViewControl: false,
-  mapTypeControl: false,
+  // fullscreenControl: false, // This line is removed as per the edit hint
+  // streetViewControl: false, // This line is removed as per the edit hint
+  // mapTypeControl: false, // This line is removed as per the edit hint
   
   // Configuraciones de estilo para mejor visibilidad en móviles
   backgroundColor: '#f8fafc',

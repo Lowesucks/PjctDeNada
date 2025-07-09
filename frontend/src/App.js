@@ -225,6 +225,12 @@ function App() {
 
   const handleVerBarberia = async (barberia) => {
     try {
+      // Validar que barberia existe y tiene las propiedades necesarias
+      if (!barberia) {
+        console.error('Barbería no definida');
+        return;
+      }
+
       let barberiaConDireccion = { ...barberia };
 
       // Si la dirección no está disponible y tenemos coordenadas, la buscamos.
@@ -241,16 +247,34 @@ function App() {
         }
       }
 
-      // Solo mostrar detalles para barberías de Google
-      if (barberia.fuente === 'google') {
-        setBarberiaSeleccionada(barberiaConDireccion);
-        setMostrarModal(true);
+      // Mostrar detalles para todas las barberías
+      setBarberiaSeleccionada(barberiaConDireccion);
+      setMostrarModal(true);
+      
+      // En móvil, también mostrar la tarjeta de detalle inferior
+      if (isMobile) {
+        setBarberiaSeleccionadaParaSheet(barberiaConDireccion);
       }
-      // Si no es de Google, no hacer nada
+      
     } catch (error) {
       console.error('Error al cargar detalles de la barbería:', error);
-      setBarberiaSeleccionada(barberia);
+      
+      // Asegurar que tenemos un objeto válido antes de establecer el estado
+      const barberiaSegura = barberia || {
+        id: 'unknown',
+        nombre: 'Barbería desconocida',
+        direccion: 'Dirección no disponible',
+        calificacion_promedio: 0,
+        total_calificaciones: 0
+      };
+      
+      setBarberiaSeleccionada(barberiaSegura);
       setMostrarModal(true);
+      
+      // En móvil, también mostrar la tarjeta de detalle inferior
+      if (isMobile) {
+        setBarberiaSeleccionadaParaSheet(barberiaSegura);
+      }
     }
   };
 
@@ -282,6 +306,7 @@ function App() {
     setMapCenter({ lat: barberia.lat, lng: barberia.lng });
     setMapZoom(17); // Zoom más cercano al seleccionar una barbería
     setMobileListVisible(false); // Ocultar lista al seleccionar en mapa
+    setMostrarModal(false); // Cerrar modal si está abierto
   };
 
   const handleCenterOnUser = () => {
@@ -678,6 +703,7 @@ function App() {
             onCalificar={handleCalificar}
             isFavorite={favorites.has(barberiaSeleccionada.id)}
             onToggleFavorite={() => handleToggleFavorite(barberiaSeleccionada.id)}
+            onVerEnMapa={handleVerEnMapa}
           />
         )}
 

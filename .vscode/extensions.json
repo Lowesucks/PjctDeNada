@@ -1,0 +1,9 @@
+{
+    "recommendations": [],
+    "unwantedRecommendations": [
+        "ms-python.pyright",
+        "ms-python.pylint",
+        "ms-python.flake8",
+        "ms-python.mypy-type-checker"
+    ]
+} 

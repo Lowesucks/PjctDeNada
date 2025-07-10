@@ -189,14 +189,10 @@ class BarberiasApp:
                     print(f"Intentando con: {' '.join(cmd)}")
                     
                     if self.system == "windows":
-                        # En Windows, usar shell=True para mejor compatibilidad
-                        if cmd[0] == "npm":
-                            shell_cmd = f'cd frontend && npm start -- --host 0.0.0.0'
-                        else:
-                            shell_cmd = f'cd frontend && npx react-scripts start -- --host 0.0.0.0'
-                        self.frontend_process = subprocess.Popen(shell_cmd, shell=True)
+                        # En Windows, usar cwd para que el working directory sea 'frontend'
+                        self.frontend_process = subprocess.Popen('npm start -- --host 0.0.0.0', shell=True, cwd='frontend')
                     else:
-                        # En Unix, usar subprocess normal
+                        # En Unix, usar cwd para que el working directory sea 'frontend'
                         self.frontend_process = subprocess.Popen(cmd, cwd="frontend")
                     
                     print("✓ Frontend iniciado")

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api, { setAuthToken } from '../utils/api';
 import './AuthModals.css';
 
 const LoginModal = ({ isOpen, onClose, onLoginSuccess, onSwitchToRegister }) => {
@@ -26,7 +26,7 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess, onSwitchToRegister }) => 
     setError('');
 
     try {
-      const response = await axios.post('/api/auth/login', formData);
+      const response = await api.post('/api/auth/login', formData);
       
       if (response.status === 200) {
         const { token, usuario } = response.data;
@@ -35,8 +35,8 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess, onSwitchToRegister }) => 
         localStorage.setItem('authToken', token);
         localStorage.setItem('userData', JSON.stringify(usuario));
         
-        // Configurar axios para incluir el token en futuras peticiones
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+              // Configurar el token para futuras peticiones
+      setAuthToken(token);
         
         onLoginSuccess(usuario);
         onClose();

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useMemo, useRef } from 'react';
-import axios from 'axios';
+import api, { setAuthToken } from './utils/api';
+import axios from 'axios'; // Solo para llamadas externas como Google Maps
 import BarberiaCard from './components/BarberiaCard';
 import BarberiaModal from './components/BarberiaModal';
 import CalificarModal from './components/CalificarModal';
@@ -16,20 +17,7 @@ import { initTouchVerification } from './utils/touchTest';
 import { initDeviceDetection } from './utils/mobileDetection';
 import { applyScrollConfig, initScrollControl } from './utils/scrollControl';
 
-// Interceptor global para manejar 401 (token inválido o expirado)
-axios.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userData');
-      delete axios.defaults.headers.common['Authorization'];
-      // Opcional: puedes mostrar un mensaje o redirigir al login
-      window.location.reload(); // Recarga la app para forzar login
-    }
-    return Promise.reject(error);
-  }
-);
+// El interceptor ya está configurado en utils/api.js
 
 const ICON_CONFIG = {
   url: '/icono_ubicaciones.png',
@@ -156,7 +144,7 @@ function App() {
     if (!location) return;
     try {
       // Pasamos la ubicación como argumento para evitar depender del estado.
-      const response = await axios.get(`/api/barberias/cercanas?lat=${location.lat}&lng=${location.lng}&radio=5000`);
+      const response = await api.get(`/api/barberias/cercanas?lat=${location.lat}&lng=${location.lng}&radio=5000`);
       setBarberias(response.data);
     } catch (error) {
       console.error('Error al cargar barberías del backend:', error);
@@ -173,7 +161,7 @@ function App() {
         if (userLocation && userLocation.lat && userLocation.lng) {
           url += `&lat=${userLocation.lat}&lng=${userLocation.lng}`;
         }
-        const response = await axios.get(url);
+        const response = await api.get(url);
         setBarberias(response.data);
       } else {
         // Si la búsqueda se vacía, cargar según el filtro actual
@@ -466,7 +454,7 @@ function App() {
       try {
         const user = JSON.parse(userData);
         setUser(user);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        setAuthToken(token);
       } catch (error) {
         console.error('Error parsing user data:', error);
         handleLogout();
@@ -493,7 +481,7 @@ function App() {
     setShowUserProfile(false);
     localStorage.removeItem('authToken');
     localStorage.removeItem('userData');
-    delete axios.defaults.headers.common['Authorization'];
+    setAuthToken(null);
   };
 
   const handleShowLogin = () => {

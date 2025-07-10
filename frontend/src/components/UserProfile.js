@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import './UserProfile.css';
 
 const UserProfile = ({ user, onLogout, onClose }) => {
@@ -17,7 +17,7 @@ const UserProfile = ({ user, onLogout, onClose }) => {
   const cargarCalificaciones = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/auth/mis-calificaciones');
+      const response = await api.get('/api/auth/mis-calificaciones');
       setCalificaciones(response.data);
     } catch (error) {
       console.error('Error al cargar calificaciones:', error);
@@ -32,8 +32,9 @@ const UserProfile = ({ user, onLogout, onClose }) => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userData');
     
-    // Limpiar headers de axios
-    delete axios.defaults.headers.common['Authorization'];
+    // Limpiar token de autorización
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
     
     onLogout();
   };

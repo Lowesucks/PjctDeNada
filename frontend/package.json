@@ -10,8 +10,8 @@
     "react-scripts": "^5.0.1"
   },
   "scripts": {
-    "start": "cross-env GENERATE_SOURCEMAP=false react-scripts start",
-    "start-https": "cross-env HTTPS=true GENERATE_SOURCEMAP=false react-scripts start",
+    "start": "cross-env GENERATE_SOURCEMAP=false HOST=0.0.0.0 react-scripts start",
+    "start-https": "cross-env HTTPS=true GENERATE_SOURCEMAP=false HOST=0.0.0.0 react-scripts start",
     "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -38,7 +38,6 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000",
   "devDependencies": {
     "cross-env": "^7.0.3"
   }

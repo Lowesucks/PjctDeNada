@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api, { setAuthToken } from '../utils/api';
 import './AuthModals.css';
 
 const RegisterModal = ({ isOpen, onClose, onRegisterSuccess, onSwitchToLogin }) => {
@@ -76,7 +76,7 @@ const RegisterModal = ({ isOpen, onClose, onRegisterSuccess, onSwitchToLogin }) 
     setError('');
 
     try {
-      const response = await axios.post('/api/auth/register', {
+      const response = await api.post('/api/auth/register', {
         username: formData.username,
         email: formData.email,
         password: formData.password,

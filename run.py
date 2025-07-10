@@ -152,20 +152,29 @@ class BarberiasApp:
         else:
             venv_activate = Path("venv") / "bin" / "activate"
             python_path = Path("venv") / "bin" / "python"
-            
+        
+        # Detectar si hay certificados SSL
+        cert_file = Path("frontend") / "cert.pem"
+        key_file = Path("frontend") / "key.pem"
+        use_https = cert_file.exists() and key_file.exists()
+        self.backend_https = use_https
+        
         # Iniciar backend
         try:
             if self.system == "windows":
-                # En Windows, usar cmd para activar el entorno virtual
-                cmd = f'cmd /c "call {venv_activate} && python main.py"'
+                if use_https:
+                    cmd = f'cmd /c "call {venv_activate} && python main.py --https"'
+                else:
+                    cmd = f'cmd /c "call {venv_activate} && python main.py"'
                 self.backend_process = subprocess.Popen(cmd, shell=True)
             else:
-                # En Unix, activar el entorno virtual directamente
                 env["VIRTUAL_ENV"] = str(Path("venv").absolute())
                 env["PATH"] = f"{Path('venv') / 'bin'}:{env.get('PATH', '')}"
-                self.backend_process = subprocess.Popen([str(python_path), "main.py"], env=env)
-                
-            print("✓ Backend iniciado")
+                if use_https:
+                    self.backend_process = subprocess.Popen([str(python_path), "main.py", "--https"], env=env)
+                else:
+                    self.backend_process = subprocess.Popen([str(python_path), "main.py"], env=env)
+            print(f"✓ Backend iniciado en {'HTTPS' if use_https else 'HTTP'}")
             return True
         except Exception as e:
             print(f"❌ Error iniciando backend: {e}")
@@ -242,13 +251,14 @@ class BarberiasApp:
         """Abre el navegador después de un delay"""
         time.sleep(3)  # Esperar a que los servicios estén listos
         
+        url = f"{'https' if getattr(self, 'frontend_https', False) else 'http'}://localhost:3000"
         try:
             if self.system == "windows":
-                _ = os.startfile("http://localhost:3000")
+                _ = os.startfile(url)
             elif self.system == "darwin":  # macOS
-                _ = subprocess.run(["open", "http://localhost:3000"])
+                _ = subprocess.run(["open", url])
             else:  # Linux
-                _ = subprocess.run(["xdg-open", "http://localhost:3000"])
+                _ = subprocess.run(["xdg-open", url])
         except:
             print("⚠️  No se pudo abrir el navegador automáticamente")
             
@@ -261,30 +271,42 @@ class BarberiasApp:
             return False
         if not self.check_node():
             return False
-            
+        
         # Configurar dependencias
         if not self.setup_python_dependencies():
             return False
         if not self.setup_node_dependencies():
             return False
-            
+        
         print("\n🚀 Iniciando servicios...\n")
         
         # Configurar manejo de señales para limpieza
         _ = signal.signal(signal.SIGINT, self.cleanup)
         if self.system != "windows":
             _ = signal.signal(signal.SIGTERM, self.cleanup)
-            
+        
         # Iniciar servicios
         if not self.start_backend():
             return False
-            
+        
         time.sleep(2)  # Esperar a que el backend se inicie
+        
+        # Detectar si el frontend usará HTTPS
+        frontend_env = Path("frontend") / ".env"
+        self.frontend_https = False
+        if frontend_env.exists():
+            with open(frontend_env, "r", encoding="utf-8") as f:
+                env_lines = f.readlines()
+            env_dict = dict(
+                line.strip().split("=", 1) for line in env_lines if "=" in line and not line.strip().startswith("#")
+            )
+            if env_dict.get("HTTPS", "false").lower() == "true":
+                self.frontend_https = True
         
         if not self.start_frontend():
             self.cleanup()
             return False
-            
+        
         # Abrir navegador en un hilo separado
         browser_thread = threading.Thread(target=self.open_browser)
         browser_thread.daemon = True
@@ -301,12 +323,12 @@ class BarberiasApp:
             print("\n" + "=" * 50)
             print("   ¡Servicios iniciados!")
             print("=" * 50)
-            print("Backend:  http://localhost:5000")
-            print("Frontend: http://localhost:3000")
+            print(f"Backend:  {'https' if self.backend_https else 'http'}://localhost:5000")
+            print(f"Frontend: {'https' if self.frontend_https else 'http'}://localhost:3000")
             print()
             print("📱 Acceso desde teléfonos:")
-            print(f"Frontend: http://{local_ip}:3000")
-            print(f"Backend:  http://{local_ip}:5000")
+            print(f"Frontend: {'https' if self.frontend_https else 'http'}://{local_ip}:3000")
+            print(f"Backend:  {'https' if self.backend_https else 'http'}://{local_ip}:5000")
             print()
             print("💡 Asegúrate de que tu teléfono esté en la misma red WiFi")
             print("Las aplicaciones se abrirán automáticamente en tu navegador.")
@@ -316,8 +338,8 @@ class BarberiasApp:
             print("\n" + "=" * 50)
             print("   ¡Servicios iniciados!")
             print("=" * 50)
-            print("Backend:  http://localhost:5000")
-            print("Frontend: http://localhost:3000")
+            print(f"Backend:  {'https' if self.backend_https else 'http'}://localhost:5000")
+            print(f"Frontend: {'https' if self.frontend_https else 'http'}://localhost:3000")
             print()
             print("Las aplicaciones se abrirán automáticamente en tu navegador.")
             print("Presiona Ctrl+C para detener todos los servicios.")
@@ -329,7 +351,7 @@ class BarberiasApp:
                 time.sleep(1)
         except KeyboardInterrupt:
             self.cleanup()
-            
+        
         return True
 
 def main():

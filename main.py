@@ -5,6 +5,7 @@ Usa la nueva estructura modular del backend
 """
 
 import os
+import sys
 from backend.app import create_app
 from backend.models import db
 from config import config
@@ -23,9 +24,26 @@ if __name__ == '__main__':
     # Inicializar base de datos
     init_db()
     
+    # Verificar si se debe usar HTTPS
+    use_https = False
+    cert_file = 'frontend/cert.pem'
+    key_file = 'frontend/key.pem'
+    if os.path.exists(cert_file) and os.path.exists(key_file):
+        use_https = True
+    else:
+        print('⚠️  Certificados SSL no encontrados. Iniciando en HTTP.')
+    
     # Ejecutar aplicación
-    app.run(
-        host=app.config['HOST'],
-        port=app.config['PORT'],
-        debug=app.config['DEBUG']
-    ) 
+    if use_https:
+        app.run(
+            host=app.config['HOST'],
+            port=app.config['PORT'],
+            debug=app.config['DEBUG'],
+            ssl_context=(cert_file, key_file)
+        )
+    else:
+        app.run(
+            host=app.config['HOST'],
+            port=app.config['PORT'],
+            debug=app.config['DEBUG']
+        ) 

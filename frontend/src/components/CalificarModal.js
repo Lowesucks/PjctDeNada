@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const CalificarModal = ({ barberia, onClose, onCalificacionEnviada }) => {
   useEffect(() => {
@@ -31,7 +31,7 @@ const CalificarModal = ({ barberia, onClose, onCalificacionEnviada }) => {
 
     try {
       setEnviando(true);
-      await axios.post(`/api/barberias/${barberia.id}/calificar`, {
+      await api.post(`/api/barberias/${barberia.id}/calificar`, {
         nombre_usuario: nombreUsuario.trim(),
         calificacion: calificacion,
         comentario: comentario.trim()

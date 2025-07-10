@@ -39,7 +39,10 @@ class Config:
         'http://localhost:3000',
         'http://127.0.0.1:3000',
         'http://localhost:3001',
-        'http://127.0.0.1:3001'
+        'http://127.0.0.1:3001',
+        # Permitir acceso desde cualquier IP en la red local
+        'http://0.0.0.0:3000',
+        'http://0.0.0.0:3001'
     ]
     
     # Configuración de búsqueda
@@ -59,9 +62,14 @@ class Config:
         # Crear directorios necesarios
         Config.UPLOAD_FOLDER.mkdir(exist_ok=True)
         
-        # Configurar CORS
+        # Configurar CORS - permitir cualquier origen en desarrollo
         from flask_cors import CORS
-        CORS(app, origins=Config.CORS_ORIGINS)
+        if app.config.get('DEBUG', False):
+            # En desarrollo, permitir cualquier origen
+            CORS(app, origins='*', supports_credentials=True)
+        else:
+            # En producción, usar orígenes específicos
+            CORS(app, origins=Config.CORS_ORIGINS, supports_credentials=True)
 
 class DevelopmentConfig(Config):
     """Configuración para desarrollo"""

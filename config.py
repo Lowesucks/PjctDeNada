@@ -42,7 +42,8 @@ class Config:
         'http://127.0.0.1:3001',
         # Permitir acceso desde cualquier IP en la red local
         'http://0.0.0.0:3000',
-        'http://0.0.0.0:3001'
+        'http://0.0.0.0:3001',
+        'https://192.168.1.125:3000',  # Agregado para acceso desde móvil en HTTPS
     ]
     
     # Configuración de búsqueda

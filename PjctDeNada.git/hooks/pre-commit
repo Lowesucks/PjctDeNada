@@ -6,6 +6,14 @@
 # it wants to stop the commit.
 #
 # To enable this hook, rename this file to "pre-commit".
+#!/bin/sh
+
+# Evita commits de archivos .env, claves y carpetas prohibidas
+
+if git diff --cached --name-only | grep -E '\.env$|\.env\.|node_modules/|\.cache/|build/|dist/|AIza[0-9A-Za-z-_]{35}'; then
+  echo "ERROR: Estás intentando commitear un archivo prohibido (.env, build, dist, node_modules, .cache o una Google API Key)"
+  exit 1
+fi
 
 if git rev-parse --verify HEAD >/dev/null 2>&1
 then

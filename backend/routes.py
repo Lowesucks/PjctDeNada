@@ -218,6 +218,7 @@ def buscar_barberias_cercanas() -> list[dict[str, Any]]:
         lat = float(request.args.get('lat', 0))
         lng = float(request.args.get('lng', 0))
         radio = int(request.args.get('radio', 5000))
+        mostrar_todas = request.args.get('todas', 'false').lower() == 'true'
         
         # Para radios grandes, hacer múltiples búsquedas
         if radio > 25000:
@@ -285,7 +286,11 @@ def buscar_barberias_cercanas() -> list[dict[str, Any]]:
         # Ordenar por distancia
         todas_barberias.sort(key=lambda x: x.get('distancia', float('inf')))
         
-        return todas_barberias
+        # Si no se pide mostrar todas, limitar a las 20 más cercanas
+        if not mostrar_todas:
+            return todas_barberias[:20]
+        else:
+            return todas_barberias
         
     except Exception as e:
         print(f"Error en buscar_barberias_cercanas: {e}")

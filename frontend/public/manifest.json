@@ -11,7 +11,7 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#007aff",
+  "theme_color": "#1a202c",
   "background_color": "#f2f2f7",
   "orientation": "portrait-primary",
   "categories": ["lifestyle", "business"],

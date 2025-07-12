@@ -1750,26 +1750,48 @@ body, html, #root {
 }
 
 .sheet-handle {
+  width: 100%;
+  height: 36px; /* Área de arrastre más alta */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  margin: 0 auto 8px auto;
+  /* El área de arrastre es invisible */
+  z-index: 2;
+}
+
+.sheet-handle-bar {
   width: 40px;
   height: 5px;
   background-color: var(--color-border);
   border-radius: 3px;
-  margin: 8px auto;
-  cursor: pointer;
-  /* Mejorar feedback táctil */
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  /* Indicador visual de que se puede arrastrar */
-  position: relative;
   transition: background-color 0.2s ease;
+  pointer-events: none; /* El bar no bloquea el área de arrastre */
 }
 
-.sheet-handle:hover {
+.sheet-handle:hover .sheet-handle-bar {
   background-color: var(--color-text-secondary);
 }
 
-.sheet-handle:active {
+.sheet-handle:active .sheet-handle-bar,
+.bottom-sheet-mobile.dragging .sheet-handle .sheet-handle-bar {
   background-color: var(--color-primary);
+}
+
+/* Mejorar la visibilidad del handle cuando está en posición baja */
+.bottom-sheet-mobile.sheet-low .sheet-handle .sheet-handle-bar,
+.bottom-sheet-mobile.sheet-very-low .sheet-handle .sheet-handle-bar {
+  background-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.bottom-sheet-mobile.sheet-low .sheet-handle:hover .sheet-handle-bar,
+.bottom-sheet-mobile.sheet-very-low .sheet-handle:hover .sheet-handle-bar {
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 /* Indicador visual cuando se está arrastrando */
@@ -1777,7 +1799,7 @@ body, html, #root {
   transition: none;
 }
 
-.bottom-sheet-mobile.dragging .sheet-handle {
+.bottom-sheet-mobile.dragging .sheet-handle::before {
   background-color: var(--color-primary);
 }
 
@@ -2063,6 +2085,7 @@ body, html, #root {
   padding: 16px;
   background-color: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
+  z-index: 1000;
 }
 
 .sort-button {
@@ -2089,16 +2112,18 @@ body, html, #root {
 .sort-dropdown {
   position: absolute;
   top: calc(100% - 8px);
-  left: 16px;
-  right: 16px;
+  left: 50%;
+  transform: translateX(-50%);
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   box-shadow: 0 4px 12px var(--color-shadow);
-  z-index: 30;
+  z-index: 9999;
   padding: 8px;
   display: flex;
   flex-direction: column;
+  min-width: 200px;
+  width: auto;
 }
 
 .sort-dropdown button {
@@ -2119,6 +2144,7 @@ body, html, #root {
   padding: 8px 16px 16px;
   border-bottom: none;
   background-color: transparent;
+  z-index: 1000;
 }
 
 /* Estilos para el Modal de Barbería */
@@ -2647,6 +2673,7 @@ body, html, #root {
 }
 .desktop-sort-container {
   position: relative;
+  z-index: 1000;
 }
 .sort-button {
   background: #2e3542;
@@ -2668,13 +2695,15 @@ body, html, #root {
 .sort-dropdown {
   position: absolute;
   top: 110%;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   background: #232a36;
   border-radius: 10px;
   box-shadow: 0 2px 12px #0003;
   padding: 8px 0;
-  z-index: 20;
-  min-width: 160px;
+  z-index: 9999;
+  min-width: 200px;
+  width: auto;
 }
 .sort-dropdown button {
   width: 100%;
@@ -3005,26 +3034,17 @@ body, html, #root {
 .sort-dropdown {
   position: absolute;
   top: 110%;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 10px;
   box-shadow: 0 4px 20px var(--color-shadow);
   padding: 8px 0;
-  z-index: 20;
-  min-width: 160px;
-  animation: fadeInDropdown 0.2s ease;
-}
-
-@keyframes fadeInDropdown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  z-index: 9999;
+  min-width: 200px;
+  width: auto;
+  opacity: 1;
 }
 
 .sort-dropdown button {
@@ -3456,6 +3476,7 @@ body, html, #root {
 /* Mejoras para el contenedor de ordenamiento */
 .sidebar-sort-container {
   position: relative;
+  z-index: 1000;
 }
 
 .sort-button {
@@ -3961,6 +3982,15 @@ body, html, #root {
   font-weight: 600;
 }
 
+/* Color blanco para el texto del contador en modo oscuro */
+.dark .counter-info {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.dark .counter-info span {
+  color: white;
+}
+
 .counter-actions {
   display: flex;
   justify-content: center;
@@ -4008,14 +4038,14 @@ body, html, #root {
 }
 
 /* Mejorar la visibilidad del handle cuando está en posición baja */
-.bottom-sheet-mobile.sheet-low .sheet-handle,
-.bottom-sheet-mobile.sheet-very-low .sheet-handle {
+.bottom-sheet-mobile.sheet-low .sheet-handle::before,
+.bottom-sheet-mobile.sheet-very-low .sheet-handle::before {
   background-color: rgba(0, 0, 0, 0.3);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.bottom-sheet-mobile.sheet-low .sheet-handle:hover,
-.bottom-sheet-mobile.sheet-very-low .sheet-handle:hover {
+.bottom-sheet-mobile.sheet-low .sheet-handle:hover::before,
+.bottom-sheet-mobile.sheet-very-low .sheet-handle:hover::before {
   background-color: rgba(0, 0, 0, 0.4);
 }
 
@@ -4046,14 +4076,10 @@ body, html, #root {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(255, 255, 255, 0.85) 100%
-  );
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
   overflow: hidden !important;
   touch-action: none;
 }
@@ -4081,12 +4107,11 @@ body, html, #root {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Efecto hover para la barra de navegación */
+/* Efecto hover para la barra de navegación - sin modificar la posición */
 .mobile-nav:hover {
   background: rgba(255, 255, 255, 0.8);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 
               0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateX(-50%) translateY(-2px);
 }
 
 /* Input de búsqueda con efecto glassmorphism */
@@ -4118,13 +4143,13 @@ body, html, #root {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
   z-index: 15;
   padding: 20px;
   padding-bottom: env(safe-area-inset-bottom);
@@ -4173,51 +4198,77 @@ body, html, #root {
 
 /* Tarjetas de barberías con efecto glassmorphism */
 .barberia-card {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
 
 .barberia-card:hover {
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
 }
 
 /* Dropdown de ordenamiento con efecto glassmorphism */
 .sort-dropdown {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  position: relative;
+}
+
+.sort-dropdown button {
+  color: #374151;
+  font-weight: 500;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+}
+
+.sort-dropdown button:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.sort-dropdown button.active {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  font-weight: 600;
 }
 
 /* Botones con efecto glassmorphism */
 .sort-button, .show-more-btn {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
   transition: all 0.3s ease;
+  color: #374151;
+  font-weight: 600;
 }
 
 .sort-button:hover, .show-more-btn:hover {
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.sort-button:active, .show-more-btn:active {
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 /* Soporte para tema oscuro en todos los elementos */
 .dark .mobile-header-redesign {
-  background: linear-gradient(
-    to bottom,
-    rgba(30, 30, 30, 0.95) 0%,
-    rgba(30, 30, 30, 0.85) 100%
-  );
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 30, 30, 0.28);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .dark .mobile-nav {
@@ -4233,7 +4284,6 @@ body, html, #root {
   background: rgba(30, 30, 30, 0.8);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 
               0 4px 12px rgba(0, 0, 0, 0.25);
-  transform: translateX(-50%) translateY(-2px);
 }
 
 .dark .mobile-search-input-redesign {
@@ -4248,8 +4298,10 @@ body, html, #root {
 }
 
 .dark .mobile-detail-sheet {
-  background: rgba(30, 30, 30, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 30, 30, 0.28);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
 }
 
 .dark .modal {
@@ -4273,36 +4325,71 @@ body, html, #root {
 }
 
 .dark .barberia-card {
-  background: rgba(30, 30, 30, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 30, 30, 0.28);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
 }
 
 .dark .barberia-card:hover {
-  background: rgba(30, 30, 30, 0.95);
+  background: rgba(30, 30, 30, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .dark .sort-dropdown {
-  background: rgba(30, 30, 30, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 30, 30, 0.9);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  z-index: 9999;
+  position: relative;
+}
+
+.dark .sort-dropdown button {
+  color: white;
+  font-weight: 500;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+}
+
+.dark .sort-dropdown button:hover {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+.dark .sort-dropdown button.active {
+  background: rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+  font-weight: 600;
 }
 
 .dark .sort-button, .dark .show-more-btn {
-  background: rgba(30, 30, 30, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 30, 30, 0.7);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   color: white;
+  font-weight: 600;
 }
 
 .dark .sort-button:hover, .dark .show-more-btn:hover {
+  background: rgba(30, 30, 30, 0.85);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.dark .sort-button:active, .dark .show-more-btn:active {
+  transform: translateY(0);
   background: rgba(30, 30, 30, 0.95);
 }
 
 /* Contadores de resultados con efecto glassmorphism */
 .results-counter-mobile, .results-counter-desktop {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
 /* Estados de carga con efecto glassmorphism */
@@ -4325,11 +4412,11 @@ body, html, #root {
 
 /* Contenedor de ordenamiento con efecto glassmorphism */
 .sort-container {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: 12px;
 }
 
 /* Navegación del sidebar con efecto glassmorphism */
@@ -4363,8 +4450,10 @@ body, html, #root {
 
 /* Soporte para tema oscuro en elementos adicionales */
 .dark .results-counter-mobile, .dark .results-counter-desktop {
-  background: rgba(30, 30, 30, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 30, 30, 0.28);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
 }
 
 .dark .loading, .dark .empty-state, .dark .sidebar-loading, .dark .sidebar-empty-state {
@@ -4378,8 +4467,10 @@ body, html, #root {
 }
 
 .dark .sort-container {
-  background: rgba(30, 30, 30, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 30, 30, 0.28);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
 }
 
 .dark .sidebar-nav button {
@@ -4451,10 +4542,14 @@ body, html, #root {
 }
 
 /* Excepción para elementos que no deben tener transición */
-.bottom-sheet-mobile.dragging *,
+.bottom-sheet-mobile.dragging * {
+  transition: none !important;
+}
+
+/* Permitir transiciones en botones de ordenamiento */
 .sort-button,
 .show-more-btn {
-  transition: none !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 /* Permitir transiciones en botones de navegación móvil */
@@ -4569,4 +4664,135 @@ body.dark .favoritos-empty {
 .mobile-nav button:hover,
 .mobile-nav button.active {
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.32) !important;
+}
+
+.mobile-nav button.active {
+  background-color: var(--color-switch-bg);
+  /* El icono ya cambia de color en el estado .active */
+  box-shadow: none !important;
+}
+
+.mobile-nav button:active,
+.mobile-nav button:focus,
+.mobile-nav button:hover {
+  /* Eliminar cualquier box-shadow de luz */
+  box-shadow: none !important;
+}
+
+.dark .mobile-nav button.active {
+  background: rgba(59, 130, 246, 0.8);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  /* Eliminar luz azul */
+  box-shadow: none !important;
+}
+
+.dark .mobile-nav button:active,
+.dark .mobile-nav button:focus,
+.dark .mobile-nav button:hover {
+  box-shadow: none !important;
+}
+
+/* ===== CONFIGURACIONES ESPECÍFICAS PARA SAFARI iOS ===== */
+
+/* Configurar la barra de estado superior para que coincida con el header */
+@supports (-webkit-touch-callout: none) {
+  /* Barra superior con el mismo color que el header */
+  body {
+    background-color: rgba(255, 255, 255, 0.32);
+  }
+  
+  /* Asegurar que el header se vea bien con la barra de estado */
+  .mobile-header-redesign {
+    background: rgba(255, 255, 255, 0.32);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  }
+  
+  /* Barra inferior transparente */
+  .mobile-nav {
+    background: rgba(255, 255, 255, 0.32) !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+    /* Asegurar posición estable en Safari iOS */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+    transition-property: background-color, box-shadow, border-color !important;
+    /* Dimensiones fijas para Safari iOS */
+    width: 360px !important;
+    max-width: calc(100vw - 32px) !important;
+    height: 80px !important;
+    padding: 12px !important;
+    border-radius: 999px !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Bottom sheet con transparencia */
+  .bottom-sheet-mobile {
+    background: rgba(255, 255, 255, 0.32);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+  }
+}
+
+/* Configuraciones para modo oscuro en Safari */
+@supports (-webkit-touch-callout: none) {
+  body.dark {
+    background-color: rgba(30, 30, 30, 0.28);
+  }
+  
+  body.dark .mobile-header-redesign {
+    background: rgba(30, 30, 30, 0.28);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  
+  body.dark .mobile-nav {
+    background: rgba(30, 30, 30, 0.28) !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+    /* Asegurar posición estable en Safari iOS */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+    transition-property: background-color, box-shadow, border-color !important;
+    /* Dimensiones fijas para Safari iOS */
+    width: 360px !important;
+    max-width: calc(100vw - 32px) !important;
+    height: 80px !important;
+    padding: 12px !important;
+    border-radius: 999px !important;
+    box-sizing: border-box !important;
+  }
+  
+  body.dark .bottom-sheet-mobile {
+    background: rgba(30, 30, 30, 0.28);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+  }
+}
+
+.sheet-handle-bar.pulse {
+  animation: handlePulse 1.6s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes handlePulse {
+  0% {
+    transform: scaleX(1) scaleY(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scaleX(1.15) scaleY(1.3);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scaleX(1) scaleY(1);
+    opacity: 1;
+  }
 }

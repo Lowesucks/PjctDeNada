@@ -764,17 +764,22 @@ function App() {
     const sheetElement = sheetRef.current;
     
     if (sheetElement && mobileListVisible) {
-      // Configurar event listeners manualmente para evitar el comportamiento pasivo
-      // sheetElement.addEventListener('touchstart', handleSheetTouchStart, { passive: false });
-      // sheetElement.addEventListener('touchmove', handleSheetTouchMoveOptimized, { passive: false });
-      // sheetElement.addEventListener('touchend', handleSheetTouchEnd, { passive: false });
+      // Buscar el handle dentro del sheet
+      const handleElement = sheetElement.querySelector('.sheet-handle');
       
-      // Función de limpieza
-      return () => {
-        // sheetElement.removeEventListener('touchstart', handleSheetTouchStart);
-        // sheetElement.removeEventListener('touchmove', handleSheetTouchMoveOptimized);
-        // sheetElement.removeEventListener('touchend', handleSheetTouchEnd);
-      };
+      if (handleElement) {
+        // Configurar event listeners solo en el handle para evitar el comportamiento pasivo
+        handleElement.addEventListener('touchstart', handleSheetTouchStart, { passive: false });
+        handleElement.addEventListener('touchmove', handleSheetTouchMoveOptimized, { passive: false });
+        handleElement.addEventListener('touchend', handleSheetTouchEnd, { passive: false });
+        
+        // Función de limpieza
+        return () => {
+          handleElement.removeEventListener('touchstart', handleSheetTouchStart);
+          handleElement.removeEventListener('touchmove', handleSheetTouchMoveOptimized);
+          handleElement.removeEventListener('touchend', handleSheetTouchEnd);
+        };
+      }
     }
   }, [mobileListVisible, handleSheetTouchStart, handleSheetTouchMoveOptimized, handleSheetTouchEnd]);
 
@@ -864,10 +869,9 @@ function App() {
             <div 
               className="sheet-handle" 
               onClick={handleSheetHandleClick}
-              onTouchStart={handleSheetTouchStart}
-              onTouchMove={handleSheetTouchMoveOptimized}
-              onTouchEnd={handleSheetTouchEnd}
-            ></div>
+            >
+              <div className="sheet-handle-bar pulse"></div>
+            </div>
             <div className="sheet-content">
               {cargando ? (
                 <div className="loading-redesign">

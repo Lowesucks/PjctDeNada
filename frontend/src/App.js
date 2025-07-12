@@ -765,15 +765,15 @@ function App() {
     
     if (sheetElement && mobileListVisible) {
       // Configurar event listeners manualmente para evitar el comportamiento pasivo
-      sheetElement.addEventListener('touchstart', handleSheetTouchStart, { passive: false });
-      sheetElement.addEventListener('touchmove', handleSheetTouchMoveOptimized, { passive: false });
-      sheetElement.addEventListener('touchend', handleSheetTouchEnd, { passive: false });
+      // sheetElement.addEventListener('touchstart', handleSheetTouchStart, { passive: false });
+      // sheetElement.addEventListener('touchmove', handleSheetTouchMoveOptimized, { passive: false });
+      // sheetElement.addEventListener('touchend', handleSheetTouchEnd, { passive: false });
       
       // Función de limpieza
       return () => {
-        sheetElement.removeEventListener('touchstart', handleSheetTouchStart);
-        sheetElement.removeEventListener('touchmove', handleSheetTouchMoveOptimized);
-        sheetElement.removeEventListener('touchend', handleSheetTouchEnd);
+        // sheetElement.removeEventListener('touchstart', handleSheetTouchStart);
+        // sheetElement.removeEventListener('touchmove', handleSheetTouchMoveOptimized);
+        // sheetElement.removeEventListener('touchend', handleSheetTouchEnd);
       };
     }
   }, [mobileListVisible, handleSheetTouchStart, handleSheetTouchMoveOptimized, handleSheetTouchEnd]);
@@ -861,7 +861,13 @@ function App() {
             style={{ height: `${sheetPosition}%` }}
             ref={sheetRef}
           >
-            <div className="sheet-handle" onClick={handleSheetHandleClick}></div>
+            <div 
+              className="sheet-handle" 
+              onClick={handleSheetHandleClick}
+              onTouchStart={handleSheetTouchStart}
+              onTouchMove={handleSheetTouchMoveOptimized}
+              onTouchEnd={handleSheetTouchEnd}
+            ></div>
             <div className="sheet-content">
               {cargando ? (
                 <div className="loading-redesign">
@@ -884,21 +890,9 @@ function App() {
                   </div>
                 </div>
               ) : barberiasFiltradas.length === 0 ? (
-                <div className="empty-state-redesign">
-                  <h3>
-                    {currentView === 'favoritos' 
-                      ? 'No tienes favoritos' 
-                      : busqueda.trim() 
-                        ? 'No se encontraron lugares' 
-                        : 'Cargando barberías cercanas...'}
-                  </h3>
-                  <p>
-                    {currentView === 'favoritos' 
-                      ? 'Usa el icono del corazón ❤ para guardar lugares.' 
-                      : busqueda.trim()
-                        ? 'Prueba con otros términos de búsqueda.'
-                        : 'Buscando barberías cerca de ti...'}
-                  </p>
+                <div className="empty-state-redesign favoritos-empty">
+                  <h3>No tienes favoritos</h3>
+                  <p>Usa el icono del corazón ❤ para guardar lugares.</p>
                 </div>
               ) : (
                 <div className="results-list-mobile">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useContext, useMemo, useRef, useCallback } from 'react';
 import api, { setAuthToken } from './utils/api';
 import axios from 'axios'; // Solo para llamadas externas como Google Maps
 import BarberiaCard from './components/BarberiaCard';
@@ -56,6 +56,16 @@ function App() {
   const [mostrandoTodas, setMostrandoTodas] = useState(false);
   const [totalEncontradas, setTotalEncontradas] = useState(0);
   
+  // Estados para el arrastre de la pestaña móvil
+  const [sheetPosition, setSheetPosition] = useState(75); // Porcentaje de altura (75% = 75% de la pantalla)
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartY, setDragStartY] = useState(0);
+  const [dragStartPosition, setDragStartPosition] = useState(0);
+  const [isClosing, setIsClosing] = useState(false);
+  const [dragStartTime, setDragStartTime] = useState(0);
+  const [lastTouchY, setLastTouchY] = useState(0);
+  const [lastTouchTime, setLastTouchTime] = useState(0);
+  
   // Ref para el debounce de búsqueda
   const searchTimeoutRef = useRef(null);
 
@@ -105,6 +115,10 @@ function App() {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
+      // Limpiar requestAnimationFrame pendiente
+      if (throttledTouchMove.current) {
+        cancelAnimationFrame(throttledTouchMove.current);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // El array vacío asegura que esto se ejecute solo una vez.
@@ -140,6 +154,21 @@ function App() {
     setMostrandoTodas(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentView, busqueda]);
+
+  // Efecto para resetear la posición del sheet cuando se cierra
+  useEffect(() => {
+    if (!mobileListVisible) {
+      setSheetPosition(75); // Resetear a posición por defecto
+      setIsClosing(false); // Resetear estado de cierre
+      // Resetear valores de seguimiento
+      setDragStartTime(0);
+      setLastTouchY(0);
+      setLastTouchTime(0);
+    }
+  }, [mobileListVisible]);
+
+  // Ref para el elemento del sheet
+  const sheetRef = useRef(null);
 
   const checkScreenSize = () => {
     setIsMobile(window.innerWidth <= 768);
@@ -484,6 +513,190 @@ function App() {
     }
   };
 
+  // Funciones para el arrastre de la pestaña móvil
+  const handleSheetTouchStart = useCallback((e) => {
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStartY(touch.clientY);
+    setDragStartPosition(sheetPosition);
+    setDragStartTime(Date.now()); // Registrar el tiempo de inicio del arrastre
+    setLastTouchY(touch.clientY); // Registrar la posición inicial del último toque
+    setLastTouchTime(Date.now()); // Registrar el tiempo del último toque
+    // Prevenir scroll y selección de texto
+    e.preventDefault();
+    e.stopPropagation();
+  }, [sheetPosition]);
+
+  // Función para detectar gestos de "flick" (gestos muy rápidos)
+  const isFlickGesture = useCallback((velocity, distance, direction) => {
+    // Un flick es un gesto muy rápido con distancia mínima
+    const isFast = velocity > 0.8; // Muy rápido
+    const hasMinDistance = Math.abs(distance) > 80; // Distancia mínima
+    const isDownward = direction === 'down';
+    
+    return isFast && hasMinDistance && isDownward;
+  }, []);
+
+  const handleSheetTouchEnd = useCallback((e) => {
+    if (!isDragging) return;
+    
+    setIsDragging(false);
+    
+    // Cancelar requestAnimationFrame pendiente
+    if (throttledTouchMove.current) {
+      cancelAnimationFrame(throttledTouchMove.current);
+      throttledTouchMove.current = null;
+    }
+    
+    // Prevenir eventos adicionales
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const currentTime = Date.now();
+    const totalDragTime = currentTime - dragStartTime;
+    const totalDistance = dragStartY - lastTouchY;
+    const velocity = Math.abs(totalDistance) / totalDragTime; // píxeles por milisegundo
+    
+    // Calcular la dirección del gesto (positivo = hacia arriba, negativo = hacia abajo)
+    const isSwipingDown = totalDistance < 0;
+    const isSwipingUp = totalDistance > 0;
+    
+    // Lógica inteligente para determinar si cerrar
+    let shouldClose = false;
+    
+    // Caso 1: Gesto rápido hacia abajo (swipe down rápido)
+    if (isSwipingDown && velocity > 0.5) {
+      shouldClose = true;
+    }
+    
+    // Caso 2: Gesto hacia abajo con distancia significativa
+    else if (isSwipingDown && Math.abs(totalDistance) > 100) {
+      shouldClose = true;
+    }
+    
+    // Caso 3: Posición muy baja (menos del 30%)
+    else if (sheetPosition < 30) {
+      shouldClose = true;
+    }
+    
+    // Caso 4: Gesto hacia abajo moderado pero consistente
+    else if (isSwipingDown && velocity > 0.2 && Math.abs(totalDistance) > 50) {
+      shouldClose = true;
+    }
+    
+    // Caso 5: Gesto de "flick" hacia abajo (muy rápido)
+    else if (isFlickGesture(velocity, totalDistance, isSwipingDown ? 'down' : 'up')) {
+      shouldClose = true;
+    }
+    
+    // Caso 6: Gesto hacia abajo con velocidad moderada pero distancia larga
+    else if (isSwipingDown && velocity > 0.15 && Math.abs(totalDistance) > 150) {
+      shouldClose = true;
+    }
+    
+    // Si debe cerrar, iniciar animación
+    if (shouldClose) {
+      setIsClosing(true);
+      setTimeout(() => {
+        setMobileListVisible(false);
+        setIsClosing(false);
+        setSheetPosition(75); // Resetear para la próxima vez
+      }, 250);
+      return;
+    }
+    
+    // Si no debe cerrar, hacer snap a posiciones específicas
+    let snapPosition;
+    
+    // Si el gesto fue hacia arriba, ir a posición máxima
+    if (isSwipingUp && velocity > 0.3) {
+      snapPosition = 90;
+    }
+    // Si el gesto fue hacia abajo pero no lo suficiente para cerrar, ir a posición mínima
+    else if (isSwipingDown && !shouldClose) {
+      snapPosition = 25;
+    }
+    // Snap basado en posición actual
+    else if (sheetPosition < 45) {
+      snapPosition = 25; // Mínimo
+    } else if (sheetPosition > 70) {
+      snapPosition = 90; // Máximo
+    } else {
+      snapPosition = 75; // Medio (por defecto)
+    }
+    
+    // Usar requestAnimationFrame para mejor rendimiento
+    requestAnimationFrame(() => {
+      setSheetPosition(snapPosition);
+    });
+  }, [isDragging, dragStartTime, dragStartY, lastTouchY, sheetPosition, isFlickGesture]);
+
+  const handleSheetHandleClick = (e) => {
+    e.stopPropagation();
+    // Alternar entre posiciones al hacer clic en el handle
+    if (sheetPosition > 75) {
+      setSheetPosition(75); // Ir a posición media
+    } else {
+      setSheetPosition(25); // Ir a posición mínima
+    }
+  };
+
+  // Función para determinar las clases CSS basadas en la posición
+  const getSheetClasses = () => {
+    let classes = 'bottom-sheet-mobile';
+    
+    // Agregar clase de tema
+    if (theme === 'dark') {
+      classes += ' dark';
+    }
+    
+    if (isDragging) {
+      classes += ' dragging';
+    }
+    
+    if (isClosing) {
+      classes += ' closing';
+    }
+    
+    // Eliminadas las clases de transparencia condicional
+    return classes;
+  };
+
+  // Función optimizada para el arrastre con throttling
+  const throttledTouchMove = useRef(null);
+  
+  const handleSheetTouchMoveOptimized = useCallback((e) => {
+    if (!isDragging) return;
+    
+    // Usar throttling para mejorar rendimiento
+    if (throttledTouchMove.current) {
+      return;
+    }
+    
+    throttledTouchMove.current = requestAnimationFrame(() => {
+      const touch = e.touches[0];
+      const currentTime = Date.now();
+      const deltaY = dragStartY - touch.clientY;
+      const screenHeight = window.innerHeight;
+      const deltaPercentage = (deltaY / screenHeight) * 100;
+      
+      let newPosition = dragStartPosition + deltaPercentage;
+      
+      // Limitar la posición entre 0% y 90%
+      newPosition = Math.max(0, Math.min(90, newPosition));
+      
+      // Actualizar posiciones de seguimiento para calcular velocidad
+      setLastTouchY(touch.clientY);
+      setLastTouchTime(currentTime);
+      
+      setSheetPosition(newPosition);
+      throttledTouchMove.current = null;
+    });
+    
+    e.preventDefault();
+    e.stopPropagation();
+  }, [isDragging, dragStartY, dragStartPosition]);
+
   // Funciones de autenticación
   const checkAuthStatus = () => {
     const token = localStorage.getItem('authToken');
@@ -545,6 +758,25 @@ function App() {
       document.body.classList.add('is-android');
     }
   }
+
+  // Efecto para manejar los event listeners del sheet
+  useEffect(() => {
+    const sheetElement = sheetRef.current;
+    
+    if (sheetElement && mobileListVisible) {
+      // Configurar event listeners manualmente para evitar el comportamiento pasivo
+      sheetElement.addEventListener('touchstart', handleSheetTouchStart, { passive: false });
+      sheetElement.addEventListener('touchmove', handleSheetTouchMoveOptimized, { passive: false });
+      sheetElement.addEventListener('touchend', handleSheetTouchEnd, { passive: false });
+      
+      // Función de limpieza
+      return () => {
+        sheetElement.removeEventListener('touchstart', handleSheetTouchStart);
+        sheetElement.removeEventListener('touchmove', handleSheetTouchMoveOptimized);
+        sheetElement.removeEventListener('touchend', handleSheetTouchEnd);
+      };
+    }
+  }, [mobileListVisible, handleSheetTouchStart, handleSheetTouchMoveOptimized, handleSheetTouchEnd]);
 
   // Vista móvil (estilo Uber)
   if (isMobile) {
@@ -623,8 +855,13 @@ function App() {
         
         {/* --- LISTA DE RESULTADOS (BOTTOM SHEET) --- */}
         {mobileListVisible && (
-          <div className="bottom-sheet-mobile" onClick={(e) => e.stopPropagation()}>
-            <div className="sheet-handle" onClick={() => setMobileListVisible(false)}></div>
+          <div 
+            className={getSheetClasses()}
+            onClick={(e) => e.stopPropagation()}
+            style={{ height: `${sheetPosition}%` }}
+            ref={sheetRef}
+          >
+            <div className="sheet-handle" onClick={handleSheetHandleClick}></div>
             <div className="sheet-content">
               {cargando ? (
                 <div className="loading-redesign">

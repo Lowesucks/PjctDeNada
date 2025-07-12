@@ -1579,33 +1579,52 @@ body, html, #root {
   transform: translateX(-50%);
   display: flex;
   gap: 8px;
-  background-color: var(--color-surface);
-  border-radius: 999px;
-  padding: 8px;
-  box-shadow: 0 4px 20px var(--color-shadow);
+  background: rgba(255,255,255,0.32) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1.5px solid rgba(255,255,255,0.35) !important;
   z-index: 10;
   margin-bottom: env(safe-area-inset-bottom);
   overflow: hidden !important;
   touch-action: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.mobile-nav button {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+.dark .mobile-nav {
+  background: rgba(30,30,30,0.28) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1.5px solid rgba(255,255,255,0.12) !important;
+}
+
+.mobile-nav button,
+.mobile-nav button:active,
+.mobile-nav button:focus,
+.mobile-nav button:hover,
+.mobile-nav button.active {
+  background: none !important;
+  border: none !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: unset !important;
+  min-height: unset !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
 }
 
 .mobile-nav button svg {
+  background: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   width: 28px;
   height: 28px;
-  color: var(--color-text-secondary);
+  display: block;
 }
 
 .mobile-nav button.active svg {
@@ -4476,4 +4495,78 @@ body, html, #root {
 body.dark .favoritos-empty {
   background: rgba(30,30,30,0.28);
   color: #aaa;
+}
+
+@media (max-width: 480px) {
+  .mobile-nav {
+    padding-top: 28px;
+    padding-bottom: 28px;
+    /* Mantener el padding horizontal existente */
+  }
+  .mobile-nav button {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mobile-nav button svg {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .mobile-nav {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+}
+
+.mobile-nav button {
+  border-radius: 50% !important;
+}
+
+.mobile-nav button,
+.mobile-nav button:active,
+.mobile-nav button:focus,
+.mobile-nav button:hover,
+.mobile-nav button.active {
+  border-radius: 50% !important;
+  box-shadow: none !important;
+}
+
+.mobile-nav button:active,
+.mobile-nav button:focus,
+.mobile-nav button:hover,
+.mobile-nav button.active {
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.32) !important; /* Luz azul brillante, más delgada */
+}
+
+.mobile-nav button,
+.mobile-nav button:active,
+.mobile-nav button:focus,
+.mobile-nav button:hover,
+.mobile-nav button.active {
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  min-height: 60px !important;
+  max-width: 60px !important;
+  max-height: 60px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+.mobile-nav button:active,
+.mobile-nav button:focus,
+.mobile-nav button:hover,
+.mobile-nav button.active {
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.32) !important;
 }

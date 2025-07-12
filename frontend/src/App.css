@@ -3738,3 +3738,87 @@ body, html, #root {
   color: var(--color-label-text) !important;
   font-weight: 600;
 }
+
+/* Estilos para el contador de resultados y botón de mostrar todas */
+.results-counter-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.results-counter-desktop {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  max-width: 320px;
+  align-self: center;
+}
+
+.counter-info {
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.counter-info span {
+  color: #374151;
+  font-weight: 600;
+}
+
+.counter-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.show-more-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.show-more-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+.show-more-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+/* Responsive para el contador */
+@media (max-width: 768px) {
+  .results-counter-mobile {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .counter-info {
+    font-size: 13px;
+  }
+  
+  .show-more-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}

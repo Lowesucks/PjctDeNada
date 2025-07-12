@@ -52,6 +52,10 @@ function App() {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   
+  // Estados para el contador y mostrar todas
+  const [mostrandoTodas, setMostrandoTodas] = useState(false);
+  const [totalEncontradas, setTotalEncontradas] = useState(0);
+  
   // Ref para el debounce de búsqueda
   const searchTimeoutRef = useRef(null);
 
@@ -132,6 +136,8 @@ function App() {
     if (!busqueda.trim()) {
       cargarDatosSegunVista();
     }
+    // Resetear estado de "mostrar todas" cuando cambia la vista
+    setMostrandoTodas(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentView, busqueda]);
 
@@ -139,13 +145,28 @@ function App() {
     setIsMobile(window.innerWidth <= 768);
   };
 
-  const cargarBarberias = async (location) => {
+  const cargarBarberias = async (location, mostrarTodas = false) => {
     // Si no hay ubicación, no hacemos nada.
     if (!location) return;
     try {
-      // Pasamos la ubicación como argumento para evitar depender del estado.
-      const response = await api.get(`/api/barberias/cercanas?lat=${location.lat}&lng=${location.lng}&radio=5000`);
+      // Construir URL con parámetros
+      let url = `/api/barberias/cercanas?lat=${location.lat}&lng=${location.lng}&radio=5000`;
+      if (mostrarTodas) {
+        url += '&todas=true';
+      }
+      
+      const response = await api.get(url);
       setBarberias(response.data);
+      
+      // Si estamos mostrando todas, actualizar el contador
+      if (mostrarTodas) {
+        setTotalEncontradas(response.data.length);
+        setMostrandoTodas(true);
+      } else {
+        // Si no estamos mostrando todas, asumir que hay más (Google Places puede devolver hasta 20)
+        setTotalEncontradas(response.data.length);
+        setMostrandoTodas(false);
+      }
     } catch (error) {
       console.error('Error al cargar barberías del backend:', error);
       setBarberias([]); // En caso de error, vaciamos la lista para evitar datos viejos.
@@ -441,7 +462,25 @@ function App() {
       return;
     } else if (currentView === 'cercanos' && !busqueda.trim()) {
       // Para cercanos sin búsqueda, cargar barberías cercanas
-      cargarBarberias(userLocation);
+      cargarBarberias(userLocation, mostrandoTodas);
+    }
+  };
+
+  // Función para manejar el botón "Mostrar todas"
+  const handleMostrarTodas = async () => {
+    if (userLocation) {
+      setCargando(true);
+      await cargarBarberias(userLocation, true);
+      setCargando(false);
+    }
+  };
+
+  // Función para manejar el botón "Mostrar menos" (volver a las 20 más cercanas)
+  const handleMostrarMenos = async () => {
+    if (userLocation) {
+      setCargando(true);
+      await cargarBarberias(userLocation, false);
+      setCargando(false);
     }
   };
 
@@ -641,6 +680,31 @@ function App() {
                       </div>
                     )}
                   </div>
+                  
+                  {/* Contador y botón de mostrar todas */}
+                  {currentView === 'cercanos' && !busqueda.trim() && barberiasFiltradas.length > 0 && (
+                    <div className="results-counter-mobile">
+                      <div className="counter-info">
+                        {mostrandoTodas ? (
+                          <span>Mostrando todas las {totalEncontradas} barberías encontradas</span>
+                        ) : (
+                          <span>Mostrando las {barberiasFiltradas.length} más cercanas</span>
+                        )}
+                      </div>
+                      <div className="counter-actions">
+                        {mostrandoTodas ? (
+                          <button onClick={handleMostrarMenos} className="show-more-btn">
+                            Mostrar menos
+                          </button>
+                        ) : (
+                          <button onClick={handleMostrarTodas} className="show-more-btn">
+                            Mostrar todas
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
                   {barberiasFiltradas.map(barberia => (
                     <BarberiaCard
                       key={barberia.id}
@@ -933,6 +997,30 @@ function App() {
                   </div>
                 ) : (
                   <div className="sidebar-barberias-list">
+                    {/* Contador y botón de mostrar todas */}
+                    {currentView === 'cercanos' && !busqueda.trim() && barberiasFiltradas.length > 0 && (
+                      <div className="results-counter-desktop">
+                        <div className="counter-info">
+                          {mostrandoTodas ? (
+                            <span>Mostrando todas las {totalEncontradas} barberías encontradas</span>
+                          ) : (
+                            <span>Mostrando las {barberiasFiltradas.length} más cercanas</span>
+                          )}
+                        </div>
+                        <div className="counter-actions">
+                          {mostrandoTodas ? (
+                            <button onClick={handleMostrarMenos} className="show-more-btn">
+                              Mostrar menos
+                            </button>
+                          ) : (
+                            <button onClick={handleMostrarTodas} className="show-more-btn">
+                              Mostrar todas
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
                     {barberiasFiltradas.map(barberia => (
                       <BarberiaCard
                         key={barberia.id}

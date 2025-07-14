@@ -668,6 +668,21 @@ body, html, #root {
   .barberias-list .barberia-card {
     padding: 16px 8px;
   }
+  .sidebar-empty-state::before {
+    font-size: 32px !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .location-indicator svg {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+    display: block !important;
+  }
 }
 
 /* Estilos para tarjetas de barberías en desktop */
@@ -4715,16 +4730,14 @@ body.dark .favoritos-empty {
     backdrop-filter: blur(28px) !important;
     -webkit-backdrop-filter: blur(28px) !important;
     border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
-    /* Asegurar posición estable en Safari iOS */
     left: 50% !important;
     transform: translateX(-50%) !important;
     transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
     transition-property: background-color, box-shadow, border-color !important;
-    /* Dimensiones fijas para Safari iOS */
-    width: 360px !important;
-    max-width: calc(100vw - 32px) !important;
-    height: 80px !important;
-    padding: 12px !important;
+    width: 100vw !important;
+    max-width: clamp(320px, 92vw, 440px) !important;
+    height: clamp(52px, 7vw, 68px) !important;
+    padding: clamp(6px, 1vw, 12px) !important;
     border-radius: 999px !important;
     box-sizing: border-box !important;
   }
@@ -4756,16 +4769,14 @@ body.dark .favoritos-empty {
     backdrop-filter: blur(28px) !important;
     -webkit-backdrop-filter: blur(28px) !important;
     border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
-    /* Asegurar posición estable en Safari iOS */
     left: 50% !important;
     transform: translateX(-50%) !important;
     transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
     transition-property: background-color, box-shadow, border-color !important;
-    /* Dimensiones fijas para Safari iOS */
-    width: 360px !important;
-    max-width: calc(100vw - 32px) !important;
-    height: 80px !important;
-    padding: 12px !important;
+    width: 100vw !important;
+    max-width: clamp(320px, 92vw, 440px) !important;
+    height: clamp(52px, 7vw, 68px) !important;
+    padding: clamp(6px, 1vw, 12px) !important;
     border-radius: 999px !important;
     box-sizing: border-box !important;
   }
@@ -4794,5 +4805,79 @@ body.dark .favoritos-empty {
   100% {
     transform: scaleX(1) scaleY(1);
     opacity: 1;
+  }
+}
+
+.mobile-search-wrapper {
+  position: relative;
+}
+
+.location-indicator {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-search-input-redesign {
+  padding-right: 40px !important;
+}
+
+.mobile-nav__inner {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  gap: clamp(6px, 2vw, 18px);
+}
+
+/* Barra inferior general (Android, Chrome, etc.) */
+.mobile-nav, .dark .mobile-nav {
+  height: 68px !important;
+  max-width: clamp(320px, 80vw, 410px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: clamp(6px, 1vw, 12px) !important;
+  border-radius: 999px !important;
+  box-sizing: border-box !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+}
+
+.dark .mobile-nav {
+  background: rgba(30,30,30,0.28) !important;
+  border: 1.5px solid rgba(255,255,255,0.12) !important;
+}
+
+.mobile-nav {
+  background: rgba(255,255,255,0.32) !important;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .mobile-nav, .dark .mobile-nav {
+    height: 76px !important;
+    max-width: clamp(320px, 80vw, 410px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: clamp(6px, 1vw, 12px) !important;
+    border-radius: 999px !important;
+    box-sizing: border-box !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+  }
+  .dark .mobile-nav {
+    background: rgba(30,30,30,0.28) !important;
+    border: 1.5px solid rgba(255,255,255,0.12) !important;
+  }
+  .mobile-nav {
+    background: rgba(255,255,255,0.32) !important;
   }
 }

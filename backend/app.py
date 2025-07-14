@@ -3,6 +3,7 @@ from .models import db
 from .routes import (
     obtener_barberias, crear_barberia, obtener_barberia, 
     calificar_barberia, buscar_barberias, buscar_barberias_cercanas,
+    obtener_favoritos, agregar_favorito, eliminar_favorito, verificar_favorito,
     usuarios_bp
 )
 import sys
@@ -30,6 +31,12 @@ def create_app(config_name='default'):
     app.add_url_rule('/api/barberias/<int:barberia_id>/calificar', 'calificar_barberia', calificar_barberia, methods=['POST'])
     app.add_url_rule('/api/barberias/buscar', 'buscar_barberias', buscar_barberias, methods=['GET'])
     app.add_url_rule('/api/barberias/cercanas', 'buscar_barberias_cercanas', buscar_barberias_cercanas, methods=['GET'])
+    
+    # Registrar rutas de favoritos
+    app.add_url_rule('/api/favoritos', 'obtener_favoritos', obtener_favoritos, methods=['GET'])
+    app.add_url_rule('/api/favoritos/<int:barberia_id>', 'agregar_favorito', agregar_favorito, methods=['POST'])
+    app.add_url_rule('/api/favoritos/<int:barberia_id>', 'eliminar_favorito', eliminar_favorito, methods=['DELETE'])
+    app.add_url_rule('/api/favoritos/<int:barberia_id>/verificar', 'verificar_favorito', verificar_favorito, methods=['GET'])
     
     # Registrar blueprint de usuarios
     app.register_blueprint(usuarios_bp)

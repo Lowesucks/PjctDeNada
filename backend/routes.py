@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint
 from typing import Any
-from .models import db, Barberia, Calificacion, Usuario
+from .models import db, Barberia, Calificacion, Usuario, Favorito
 from .services import (
     buscar_barberias_google_places, buscar_barberias_por_texto, calcular_distancia,
     crear_usuario, autenticar_usuario, verificar_token_jwt, obtener_usuario_por_id,
@@ -295,6 +295,157 @@ def buscar_barberias_cercanas() -> list[dict[str, Any]]:
     except Exception as e:
         print(f"Error en buscar_barberias_cercanas: {e}")
         return []
+
+# ===== ENDPOINTS PARA FAVORITOS =====
+
+def obtener_favoritos() -> tuple[dict[str, Any], int]:
+    """Obtiene los favoritos del usuario autenticado"""
+    try:
+        # Verificar autenticación
+        if 'Authorization' not in request.headers:
+            return {'error': 'Token de autenticación requerido'}, 401
+        
+        auth_header = request.headers['Authorization']
+        token = auth_header.split(" ")[1]
+        token_data = verificar_token_jwt(token)
+        
+        if not token_data['valido']:
+            return {'error': 'Token inválido'}, 401
+        
+        usuario = obtener_usuario_por_id(token_data['user_id'])
+        if not usuario:
+            return {'error': 'Usuario no encontrado'}, 404
+        
+        # Obtener favoritos del usuario
+        favoritos = Favorito.query.filter_by(usuario_id=usuario.id).all()
+        
+        return {
+            'favoritos': [favorito.to_dict() for favorito in favoritos],
+            'total': len(favoritos)
+        }, 200
+        
+    except Exception as e:
+        print(f"Error obteniendo favoritos: {e}")
+        return {'error': 'Error interno del servidor'}, 500
+
+def agregar_favorito(barberia_id: int) -> tuple[dict[str, Any], int]:
+    """Agrega una barbería a los favoritos del usuario"""
+    try:
+        # Verificar autenticación
+        if 'Authorization' not in request.headers:
+            return {'error': 'Token de autenticación requerido'}, 401
+        
+        auth_header = request.headers['Authorization']
+        token = auth_header.split(" ")[1]
+        token_data = verificar_token_jwt(token)
+        
+        if not token_data['valido']:
+            return {'error': 'Token inválido'}, 401
+        
+        usuario = obtener_usuario_por_id(token_data['user_id'])
+        if not usuario:
+            return {'error': 'Usuario no encontrado'}, 404
+        
+        # Verificar que la barbería existe
+        barberia = Barberia.query.get(barberia_id)
+        if not barberia:
+            return {'error': 'Barbería no encontrada'}, 404
+        
+        # Verificar si ya es favorito
+        favorito_existente = Favorito.query.filter_by(
+            usuario_id=usuario.id, 
+            barberia_id=barberia_id
+        ).first()
+        
+        if favorito_existente:
+            return {'error': 'La barbería ya está en favoritos'}, 400
+        
+        # Crear nuevo favorito
+        nuevo_favorito = Favorito(
+            usuario_id=usuario.id,
+            barberia_id=barberia_id
+        )
+        
+        db.session.add(nuevo_favorito)
+        db.session.commit()
+        
+        return {
+            'mensaje': 'Barbería agregada a favoritos',
+            'favorito': nuevo_favorito.to_dict()
+        }, 201
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error agregando favorito: {e}")
+        return {'error': 'Error interno del servidor'}, 500
+
+def eliminar_favorito(barberia_id: int) -> tuple[dict[str, Any], int]:
+    """Elimina una barbería de los favoritos del usuario"""
+    try:
+        # Verificar autenticación
+        if 'Authorization' not in request.headers:
+            return {'error': 'Token de autenticación requerido'}, 401
+        
+        auth_header = request.headers['Authorization']
+        token = auth_header.split(" ")[1]
+        token_data = verificar_token_jwt(token)
+        
+        if not token_data['valido']:
+            return {'error': 'Token inválido'}, 401
+        
+        usuario = obtener_usuario_por_id(token_data['user_id'])
+        if not usuario:
+            return {'error': 'Usuario no encontrado'}, 404
+        
+        # Buscar el favorito
+        favorito = Favorito.query.filter_by(
+            usuario_id=usuario.id, 
+            barberia_id=barberia_id
+        ).first()
+        
+        if not favorito:
+            return {'error': 'La barbería no está en favoritos'}, 404
+        
+        # Eliminar favorito
+        db.session.delete(favorito)
+        db.session.commit()
+        
+        return {'mensaje': 'Barbería eliminada de favoritos'}, 200
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error eliminando favorito: {e}")
+        return {'error': 'Error interno del servidor'}, 500
+
+def verificar_favorito(barberia_id: int) -> tuple[dict[str, Any], int]:
+    """Verifica si una barbería está en los favoritos del usuario"""
+    try:
+        # Verificar autenticación
+        if 'Authorization' not in request.headers:
+            return {'es_favorito': False}, 200
+        
+        auth_header = request.headers['Authorization']
+        token = auth_header.split(" ")[1]
+        token_data = verificar_token_jwt(token)
+        
+        if not token_data['valido']:
+            return {'es_favorito': False}, 200
+        
+        usuario = obtener_usuario_por_id(token_data['user_id'])
+        if not usuario:
+            return {'es_favorito': False}, 200
+        
+        # Verificar si es favorito
+        favorito = Favorito.query.filter_by(
+            usuario_id=usuario.id, 
+            barberia_id=barberia_id
+        ).first()
+        
+        return {'es_favorito': favorito is not None}, 200
+        
+    except Exception as e:
+        print(f"Error verificando favorito: {e}")
+        return {'es_favorito': False}, 200
 
 # ==================== RUTAS DE AUTENTICACIÓN Y USUARIOS ====================
 

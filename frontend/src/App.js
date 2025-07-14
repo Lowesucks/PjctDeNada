@@ -1,21 +1,19 @@
-import React, { useState, useEffect, useContext, useMemo, useRef, useCallback } from 'react';
-import api, { setAuthToken } from './utils/api';
-import axios from 'axios'; // Solo para llamadas externas como Google Maps
+import React, { useState, useEffect, useMemo, useRef, useCallback, useContext } from 'react';
+import './App.css';
+import MapaBarberias from './components/MapaBarberias';
 import BarberiaCard from './components/BarberiaCard';
 import BarberiaModal from './components/BarberiaModal';
 import CalificarModal from './components/CalificarModal';
-import MapaBarberias from './components/MapaBarberias';
 import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
 import UserProfile from './components/UserProfile';
-import './App.css';
-import './styles/mobileOptimization.css';
-import './styles/scrollControl.css';
 import { ThemeContext } from './context/ThemeContext';
+import api from './utils/api';
 import { mapStyles } from './config/mapStyles';
+import { obtenerFavoritos, toggleFavorito, verificarFavorito } from './utils/api';
 import { initTouchVerification } from './utils/touchTest';
 import { initDeviceDetection } from './utils/mobileDetection';
-import { applyScrollConfig, initScrollControl } from './utils/scrollControl';
+import { initScrollControl, applyScrollConfig } from './utils/scrollControl';
 
 // El interceptor ya está configurado en utils/api.js
 
@@ -364,24 +362,40 @@ function App() {
     }
   };
 
-  const handleToggleFavorite = (barberiaId) => {
+  const handleToggleFavorite = async (barberiaId) => {
     console.log('Toggle favorite clicked for barberia:', barberiaId);
-    setFavorites(prevFavorites => {
-      const newFavorites = new Set(prevFavorites);
-      if (newFavorites.has(barberiaId)) {
-        newFavorites.delete(barberiaId);
-        console.log('Removed from favorites:', barberiaId);
-      } else {
-        newFavorites.add(barberiaId);
-        console.log('Added to favorites:', barberiaId);
-      }
-      console.log('Current favorites:', Array.from(newFavorites));
-      return newFavorites;
-    });
     
-    // Si estamos en la vista de favoritos y no hay búsqueda, actualizar la vista
-    if (currentView === 'favoritos' && !busqueda.trim()) {
-      // La vista se actualizará automáticamente por el useMemo
+    // Verificar si el usuario está autenticado
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    
+    try {
+      const esFavorito = favorites.has(barberiaId);
+      const nuevoEstado = await toggleFavorito(barberiaId, esFavorito);
+      
+      setFavorites(prevFavorites => {
+        const newFavorites = new Set(prevFavorites);
+        if (nuevoEstado) {
+          newFavorites.add(barberiaId);
+          console.log('Added to favorites:', barberiaId);
+        } else {
+          newFavorites.delete(barberiaId);
+          console.log('Removed from favorites:', barberiaId);
+        }
+        console.log('Current favorites:', Array.from(newFavorites));
+        return newFavorites;
+      });
+      
+      // Si estamos en la vista de favoritos y no hay búsqueda, actualizar la vista
+      if (currentView === 'favoritos' && !busqueda.trim()) {
+        // La vista se actualizará automáticamente por el useMemo
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      // Mostrar mensaje de error al usuario
+      alert('Error al actualizar favoritos. Por favor, intenta de nuevo.');
     }
   };
 
@@ -706,7 +720,7 @@ function App() {
       try {
         const user = JSON.parse(userData);
         setUser(user);
-        setAuthToken(token);
+        // setAuthToken(token); // No es necesario llamar a setAuthToken aquí, ya que el interceptor lo maneja
       } catch (error) {
         console.error('Error parsing user data:', error);
         handleLogout();
@@ -714,18 +728,37 @@ function App() {
     }
   };
 
-  const handleLoginSuccess = (userData) => {
+  const handleLoginSuccess = async (userData) => {
     setUser(userData);
     setShowLoginModal(false);
-    setShowRegisterModal(false);
+
+    // Cargar favoritos del usuario
+    try {
+      const favoritosData = await obtenerFavoritos();
+      const favoritosIds = favoritosData.favoritos.map(f => f.barberia_id);
+      setFavorites(new Set(favoritosIds));
+      console.log('Favoritos cargados:', favoritosIds);
+    } catch (error) {
+      console.error('Error cargando favoritos:', error);
+    }
   };
 
-  const handleRegisterSuccess = (userData) => {
+  const handleRegisterSuccess = async (userData) => {
     setUser(userData);
     setShowLoginModal(false);
     setShowRegisterModal(false);
     // Mostrar mensaje de éxito
     alert('¡Cuenta creada exitosamente! Ya puedes iniciar sesión.');
+
+    // Cargar favoritos del usuario
+    try {
+      const favoritosData = await obtenerFavoritos();
+      const favoritosIds = favoritosData.favoritos.map(f => f.barberia_id);
+      setFavorites(new Set(favoritosIds));
+      console.log('Favoritos cargados:', favoritosIds);
+    } catch (error) {
+      console.error('Error cargando favoritos:', error);
+    }
   };
 
   const handleLogout = () => {
@@ -733,7 +766,7 @@ function App() {
     setShowUserProfile(false);
     localStorage.removeItem('authToken');
     localStorage.removeItem('userData');
-    setAuthToken(null);
+    // setAuthToken(null); // No es necesario llamar a setAuthToken aquí, ya que el interceptor lo maneja
   };
 
   const handleShowLogin = () => {

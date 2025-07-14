@@ -68,4 +68,37 @@ class Calificacion(db.Model):
     fecha = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     # Mantener compatibilidad con el campo anterior
-    nombre_usuario = db.Column(db.String(50), nullable=True)  # Para calificaciones antiguas 
+    nombre_usuario = db.Column(db.String(50), nullable=True)  # Para calificaciones antiguas
+
+class Favorito(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
+    barberia_id = db.Column(db.Integer, db.ForeignKey('barberia.id'), nullable=False)
+    fecha_agregado = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    
+    # Relación con usuario y barbería
+    usuario = db.relationship('Usuario', backref='favoritos')
+    barberia = db.relationship('Barberia', backref='favoritos')
+    
+    # Índice único para evitar duplicados
+    __table_args__ = (db.UniqueConstraint('usuario_id', 'barberia_id', name='_usuario_barberia_favorito_uc'),)
+    
+    def to_dict(self):
+        """Convierte el favorito a diccionario"""
+        return {
+            'id': self.id,
+            'usuario_id': self.usuario_id,
+            'barberia_id': self.barberia_id,
+            'fecha_agregado': self.fecha_agregado.strftime('%d/%m/%Y %H:%M'),
+            'barberia': {
+                'id': self.barberia.id,
+                'nombre': self.barberia.nombre,
+                'direccion': self.barberia.direccion,
+                'telefono': self.barberia.telefono,
+                'horario': self.barberia.horario,
+                'latitud': self.barberia.latitud,
+                'longitud': self.barberia.longitud,
+                'calificacion_promedio': round(self.barberia.calificacion_promedio, 1),
+                'total_calificaciones': self.barberia.total_calificaciones
+            } if self.barberia else None
+        } 

@@ -32,33 +32,156 @@
   min-height: 100%;
 }
 
-/* Barra de navegación inferior fija y centrada */
-.mobile-nav {
-  position: fixed;
-  left: env(safe-area-inset-left, 0px);
-  right: env(safe-area-inset-right, 0px);
-  bottom: 0;
-  z-index: 1000;
+/* === INICIO BLOQUE UNIFICADO PARA .mobile-nav EN mobileOptimization.css === */
+
+/* Barra de navegación inferior general (Android, Chrome, etc.) */
+.mobile-nav, .dark .mobile-nav {
+  position: absolute;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  background: white;
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
-  padding: 8px 0;
-  padding-bottom: env(safe-area-inset-bottom, 8px);
-  text-align: center;
+  gap: clamp(6px, 2vw, 18px);
+  background: rgba(255,255,255,0.32) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1.5px solid rgba(255,255,255,0.35) !important;
+  z-index: 10;
+  margin-bottom: env(safe-area-inset-bottom);
+  overflow: hidden !important;
+  border-radius: 999px !important;
+  box-sizing: border-box !important;
+  height: 68px !important;
+  max-width: clamp(320px, 80vw, 410px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: clamp(6px, 1vw, 12px) !important;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+  transition-property: background-color, box-shadow, border-color !important;
+}
+.dark .mobile-nav {
+  background: rgba(30,30,30,0.28) !important;
+  border: 1.5px solid rgba(255,255,255,0.12) !important;
 }
 
+/* iOS/Safari: estilos específicos */
+@supports (-webkit-touch-callout: none) {
+  .mobile-nav, .dark .mobile-nav {
+    width: 340px !important;
+    max-width: calc(100vw - 32px) !important;
+    height: 76px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    border-radius: 999px !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    /* Mantengo los estilos de fondo, borde y desenfoque existentes */
+  }
+}
+
+/* Media queries para tamaños y orientación */
+@media (max-width: 480px) {
+  .mobile-nav {
+    bottom: max(16px, env(safe-area-inset-bottom));
+    padding: 12px !important;
+    height: 60px !important;
+  }
+  .mobile-nav button {
+    width: 60px;
+    height: 60px;
+  }
+  .mobile-nav button svg {
+    width: 32px;
+    height: 32px;
+  }
+}
+@media (max-width: 768px) and (orientation: landscape) {
+  .mobile-nav {
+    bottom: max(16px, env(safe-area-inset-bottom));
+    padding: 6px !important;
+    height: 48px !important;
+  }
+  .mobile-nav button {
+    width: 48px;
+    height: 48px;
+  }
+  .mobile-nav button svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Botones e íconos unificados */
+.mobile-nav button,
+.mobile-nav button:active,
+.mobile-nav button:focus,
+.mobile-nav button:hover,
+.mobile-nav button.active {
+  background: none !important;
+  border: none !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: unset !important;
+  min-height: unset !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mobile-nav button svg {
+  background: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+.mobile-nav button.active svg {
+  color: var(--color-primary);
+}
+.mobile-nav button.active {
+  background-color: var(--color-switch-bg);
+  box-shadow: none !important;
+}
+.mobile-nav button:active,
+.mobile-nav button:focus,
+.mobile-nav button:hover {
+  box-shadow: none !important;
+}
+.dark .mobile-nav button.active {
+  background: rgba(59, 130, 246, 0.8);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  box-shadow: none !important;
+}
+.dark .mobile-nav button:active,
+.dark .mobile-nav button:focus,
+.dark .mobile-nav button:hover {
+  box-shadow: none !important;
+}
+
+/* Layout interno unificado */
 .mobile-nav__inner {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
   align-items: center;
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  gap: 0;
+  gap: clamp(6px, 2vw, 18px);
 }
+@supports (-webkit-touch-callout: none) {
+  .mobile-nav__inner {
+    width: 100%;
+    margin: 0;
+    justify-content: space-between;
+  }
+}
+
+/* === FIN BLOQUE UNIFICADO PARA .mobile-nav EN mobileOptimization.css === */
 
 /* ===== OPTIMIZACIONES PARA DIFERENTES DISPOSITIVOS ===== */
 
@@ -73,12 +196,6 @@
   .mobile-header-redesign {
     /* Header adaptado al notch */
     padding-top: max(16px, env(safe-area-inset-top));
-  }
-  
-  .mobile-nav {
-    /* Navegación adaptada a la barra de navegación gestual */
-    bottom: max(24px, env(safe-area-inset-bottom));
-    margin-bottom: env(safe-area-inset-bottom);
   }
   
   .bottom-sheet-mobile {

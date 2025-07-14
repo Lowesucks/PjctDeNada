@@ -4839,45 +4839,301 @@ body.dark .favoritos-empty {
 
 /* Barra inferior general (Android, Chrome, etc.) */
 .mobile-nav, .dark .mobile-nav {
+  position: absolute;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: clamp(6px, 2vw, 18px);
+  background: rgba(255,255,255,0.32) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1.5px solid rgba(255,255,255,0.35) !important;
+  z-index: 10;
+  margin-bottom: env(safe-area-inset-bottom);
+  overflow: hidden !important;
+  border-radius: 999px !important;
+  box-sizing: border-box !important;
   height: 68px !important;
   max-width: clamp(320px, 80vw, 410px) !important;
   margin-left: auto !important;
   margin-right: auto !important;
   padding: clamp(6px, 1vw, 12px) !important;
-  border-radius: 999px !important;
-  box-sizing: border-box !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
-  backdrop-filter: blur(28px) !important;
-  -webkit-backdrop-filter: blur(28px) !important;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+  transition-property: background-color, box-shadow, border-color !important;
 }
-
 .dark .mobile-nav {
   background: rgba(30,30,30,0.28) !important;
   border: 1.5px solid rgba(255,255,255,0.12) !important;
 }
 
-.mobile-nav {
-  background: rgba(255,255,255,0.32) !important;
-}
-
+/* iOS/Safari: estilos específicos */
 @supports (-webkit-touch-callout: none) {
   .mobile-nav, .dark .mobile-nav {
     height: 76px !important;
-    max-width: clamp(320px, 80vw, 410px) !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    padding: clamp(6px, 1vw, 12px) !important;
+    max-width: clamp(320px, 92vw, 440px) !important;
+    background: rgba(255,255,255,0.32) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
     border-radius: 999px !important;
     box-sizing: border-box !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+    border: 1.5px solid rgba(255,255,255,0.35) !important;
     backdrop-filter: blur(28px) !important;
     -webkit-backdrop-filter: blur(28px) !important;
+    padding: clamp(6px, 1vw, 12px) !important;
   }
   .dark .mobile-nav {
     background: rgba(30,30,30,0.28) !important;
     border: 1.5px solid rgba(255,255,255,0.12) !important;
   }
+}
+
+/* Media queries para tamaños y orientación */
+@media (max-width: 480px) {
   .mobile-nav {
-    background: rgba(255,255,255,0.32) !important;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    padding: 12px !important;
+    height: 60px !important;
+  }
+  .mobile-nav button {
+    width: 60px;
+    height: 60px;
+  }
+  .mobile-nav button svg {
+    width: 32px;
+    height: 32px;
+  }
+}
+@media (max-width: 768px) and (orientation: landscape) {
+  .mobile-nav {
+    bottom: max(16px, env(safe-area-inset-bottom));
+    padding: 6px !important;
+    height: 48px !important;
+  }
+  .mobile-nav button {
+    width: 48px;
+    height: 48px;
+  }
+  .mobile-nav button svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Botones e íconos unificados */
+.mobile-nav button,
+.mobile-nav button:active,
+.mobile-nav button:focus,
+.mobile-nav button:hover,
+.mobile-nav button.active {
+  background: none !important;
+  border: none !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: unset !important;
+  min-height: unset !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mobile-nav button svg {
+  background: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+.mobile-nav button.active svg {
+  color: var(--color-primary);
+}
+.mobile-nav button.active {
+  background-color: var(--color-switch-bg);
+  box-shadow: none !important;
+}
+.mobile-nav button:active,
+.mobile-nav button:focus,
+.mobile-nav button:hover {
+  box-shadow: none !important;
+}
+.dark .mobile-nav button.active {
+  background: rgba(59, 130, 246, 0.8);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  box-shadow: none !important;
+}
+.dark .mobile-nav button:active,
+.dark .mobile-nav button:focus,
+.dark .mobile-nav button:hover {
+  box-shadow: none !important;
+}
+
+/* === FIN BLOQUE UNIFICADO PARA .mobile-nav === */
+
+/* Ajuste de tamaño para la barra inferior en Android/otros navegadores (similar a la antigua iOS) */
+@supports not (-webkit-touch-callout: none) {
+  .mobile-nav, .dark .mobile-nav {
+    width: 360px !important;
+    max-width: calc(100vw - 32px) !important;
+    height: 80px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    border-radius: 999px !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+  }
+  .mobile-nav button {
+    width: 64px !important;
+    height: 64px !important;
+    min-width: 64px !important;
+    min-height: 64px !important;
+    border-radius: 50% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mobile-nav button svg {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+@supports not (-webkit-touch-callout: none) {
+  .mobile-nav button:active,
+  .mobile-nav button:focus {
+    background-color: var(--color-switch-bg) !important;
+    border-radius: 50% !important;
+    width: 64px !important;
+    height: 64px !important;
+    min-width: 64px !important;
+    min-height: 64px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@supports (-webkit-touch-callout: none) {
+  .mobile-nav button,
+  .mobile-nav button:active,
+  .mobile-nav button:focus,
+  .mobile-nav button:hover,
+  .mobile-nav button.active {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    min-height: 60px !important;
+    max-width: 60px !important;
+    max-height: 60px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* --- INICIO: Tamaño de botones solo para iOS (con media queries) --- */
+@supports (-webkit-touch-callout: none) {
+  .mobile-nav button,
+  .mobile-nav button:active,
+  .mobile-nav button:focus,
+  .mobile-nav button:hover,
+  .mobile-nav button.active {
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    min-height: 60px !important;
+    max-width: 60px !important;
+    max-height: 60px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  @media (max-width: 480px) {
+    .mobile-nav button {
+      width: 56px !important;
+      height: 56px !important;
+      min-width: 56px !important;
+      min-height: 56px !important;
+      max-width: 56px !important;
+      max-height: 56px !important;
+    }
+  }
+  @media (max-width: 360px) {
+    .mobile-nav button {
+      width: 48px !important;
+      height: 48px !important;
+      min-width: 48px !important;
+      min-height: 48px !important;
+      max-width: 48px !important;
+      max-height: 48px !important;
+    }
+  }
+  @media (max-width: 768px) and (orientation: landscape) {
+    .mobile-nav button {
+      width: 44px !important;
+      height: 44px !important;
+      min-width: 44px !important;
+      min-height: 44px !important;
+      max-width: 44px !important;
+      max-height: 44px !important;
+    }
+  }
+}
+/* --- FIN: Tamaño de botones solo para iOS (con media queries) --- */
+
+/* --- INICIO: Tamaño de botones solo para Android/otros navegadores --- */
+@supports not (-webkit-touch-callout: none) {
+  .mobile-nav button,
+  .mobile-nav button:active,
+  .mobile-nav button:focus,
+  .mobile-nav button:hover,
+  .mobile-nav button.active {
+    width: 64px !important;
+    height: 64px !important;
+    min-width: 64px !important;
+    min-height: 64px !important;
+    max-width: 64px !important;
+    max-height: 64px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+/* --- FIN: Tamaño de botones solo para Android/otros navegadores --- */
+
+.mobile-nav, .dark .mobile-nav {
+  z-index: 1002 !important;
+}
+
+.bottom-sheet-mobile {
+  z-index: 1001 !important;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .mobile-nav, .dark .mobile-nav {
+    width: 340px !important;
+    max-width: calc(100vw - 32px) !important;
+    height: 76px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    border-radius: 999px !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    /* Mantengo los estilos de fondo, borde y desenfoque existentes */
   }
 }

@@ -17,6 +17,22 @@ if (process.env.NODE_ENV === 'development') {
   };
 }
 
+// Detectar iOS y aplicar clase al body
+function setIOSClass() {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS) {
+    document.body.classList.add('is-ios');
+  } else {
+    document.body.classList.remove('is-ios');
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setIOSClass);
+} else {
+  setIOSClass();
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

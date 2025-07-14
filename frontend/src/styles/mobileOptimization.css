@@ -35,6 +35,7 @@
 /* === INICIO BLOQUE UNIFICADO PARA .mobile-nav EN mobileOptimization.css === */
 
 /* Barra de navegación inferior general (Android, Chrome, etc.) */
+/*
 .mobile-nav, .dark .mobile-nav {
   position: absolute;
   bottom: max(24px, env(safe-area-inset-bottom));
@@ -63,6 +64,7 @@
   background: rgba(30,30,30,0.28) !important;
   border: 1.5px solid rgba(255,255,255,0.12) !important;
 }
+*/
 
 /* iOS/Safari: estilos específicos */
 @supports (-webkit-touch-callout: none) {
@@ -81,6 +83,7 @@
 }
 
 /* Media queries para tamaños y orientación */
+/*
 @media (max-width: 480px) {
   .mobile-nav {
     bottom: max(16px, env(safe-area-inset-bottom));
@@ -96,6 +99,8 @@
     height: 32px;
   }
 }
+*/
+/*
 @media (max-width: 768px) and (orientation: landscape) {
   .mobile-nav {
     bottom: max(16px, env(safe-area-inset-bottom));
@@ -111,6 +116,7 @@
     height: 24px;
   }
 }
+*/
 
 /* Botones e íconos unificados */
 .mobile-nav button,
@@ -580,4 +586,41 @@ body.is-ios .mobile-nav__inner {
   width: 100%;
   margin: 0;
   justify-content: space-between;
+} 
+
+/* ===== UNIFICACIÓN DE ÁREA VISIBLE Y BARRA INFERIOR ===== */
+
+.app-mobile-redesign {
+  min-height: 100dvh;
+  height: 100dvh;
+  width: 100vw;
+  position: relative;
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  box-sizing: border-box;
+}
+
+/* ANDROID y navegadores que NO son iOS */
+body:not(.is-ios) .mobile-nav {
+  position: fixed !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: env(safe-area-inset-bottom, 0px) !important;
+  height: 60px !important;
+  max-height: 64px !important;
+  padding: 8px 12px !important;
+  z-index: 1000 !important;
+}
+
+/* iOS */
+body.is-ios .mobile-nav {
+  position: fixed !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: env(safe-area-inset-bottom, 0px) !important;
+  height: 60px !important;
+  max-height: 64px !important;
+  padding: 8px 12px !important;
+  z-index: 1000 !important;
 } 

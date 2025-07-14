@@ -1,0 +1,386 @@
+/* =====================
+   ESTILOS MOBILE
+   ===================== */
+:root {
+  --color-text: #1a202c;
+  --color-text-secondary: #718096;
+  --color-background: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-switch-bg: #e9ecef;
+  --color-shadow: rgba(0,0,0,0.1);
+  --color-label-text: #1a202c;
+}
+
+body.dark {
+  --color-text: #e2e8f0;
+  --color-text-secondary: #a0aec0;
+  --color-background: #1a202c;
+  --color-surface: #2d3748;
+  --color-border: #4a5568;
+  --color-primary: #60a5fa;
+  --color-primary-hover: #3b82f6;
+  --color-switch-bg: #4a5568;
+  --color-shadow: rgba(0,0,0,0.4);
+  --color-label-text: #1a202c;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+html, body, #root {
+  height: 100%;
+  min-height: 100vh;
+  background: rgba(30, 32, 36, 0.72);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+.app-mobile-redesign {
+  min-height: 100vh;
+  background: rgba(30, 32, 36, 0.72);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+/* ===== MIGRACIÓN MASIVA MOBILE ===== */
+
+.map-container-mobile {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.mobile-header-redesign {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(30, 32, 36, 0.72);
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 2px 8px var(--color-shadow);
+  padding: 16px 20px 8px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden !important;
+  touch-action: none;
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+@supports (padding-top: env(safe-area-inset-top)) {
+  .mobile-header-redesign {
+    padding-top: max(16px, env(safe-area-inset-top));
+    background: rgba(30, 32, 36, 0.72);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+  }
+}
+
+body.dark .mobile-header-redesign {
+  background: rgba(30, 32, 36, 0.72);
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 2px 8px var(--color-shadow);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+.mobile-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.mobile-header-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.mobile-nav {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95vw;
+  max-width: 320px;
+  background: rgba(30, 32, 36, 0.72);
+  color: #f8fafc;
+  border: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-radius: 999px;
+  padding: 14px 18px;
+  display: flex;
+  gap: 6px;
+  z-index: 100;
+  margin-bottom: 0;
+  overflow: hidden !important;
+  touch-action: none;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+  min-height: 56px;
+  max-height: 64px;
+  padding: 8px 12px;
+}
+
+@supports (bottom: env(safe-area-inset-bottom)) {
+  .mobile-nav {
+    bottom: calc(env(safe-area-inset-bottom) + 12px) !important;
+  }
+}
+
+.mobile-nav__inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.mobile-nav button {
+  background: none;
+  border: none;
+  color: #f8fafc;
+  font-size: 22px;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.mobile-nav button.active, .mobile-nav button:focus {
+  background: rgba(255,255,255,0.10);
+  color: #60a5fa;
+}
+
+.mobile-nav button svg {
+  width: 24px;
+  height: 24px;
+  color: inherit;
+}
+
+.bottom-sheet-mobile {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 75%;
+  background: var(--color-surface);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -4px 20px var(--color-shadow);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+.mobile-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-icon-left {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.search-icon-right {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-primary);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.mobile-search-input-redesign {
+  width: 100%;
+  padding: 12px 16px;
+  padding-left: 40px;
+  padding-right: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  font-size: 16px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.mobile-detail-sheet {
+  background: var(--color-surface);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px var(--color-shadow);
+  padding: 24px;
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 30;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s;
+}
+
+.modal {
+  background: var(--color-surface);
+  border-radius: 20px;
+  box-shadow: 0 2px 16px var(--color-shadow);
+  padding: 24px;
+  margin: 24px;
+  max-width: 400px;
+  width: 100%;
+  z-index: 110;
+}
+
+.mobile-profile-nav-btn {
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: 16px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.mobile-profile-nav-btn:hover {
+  background: #e0e7ef;
+  color: #2563eb;
+}
+
+.mobile-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 8px;
+}
+
+.results-list-mobile {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sheet-content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+@keyframes slideUpFromBottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes handlePulse {
+  0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(59,130,246,0); }
+  100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+}
+
+@media (max-width: 480px) {
+  .app-mobile-redesign {
+    height: 100dvh;
+  }
+  .mobile-header-title {
+    font-size: 22px;
+  }
+  .mobile-nav {
+    bottom: max(16px, env(safe-area-inset-bottom));
+    padding: 12px;
+  }
+  .mobile-nav button {
+    width: 60px;
+    height: 60px;
+  }
+  .mobile-nav button svg {
+    width: 32px;
+    height: 32px;
+  }
+}
+@media (max-width: 768px) and (orientation: landscape) {
+  .app-mobile-redesign {
+    height: 100dvh;
+  }
+  .mobile-header-redesign {
+    padding: 8px 16px;
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+  .mobile-nav {
+    bottom: max(16px, env(safe-area-inset-bottom));
+    padding: 6px;
+  }
+}
+@supports (padding-top: env(safe-area-inset-top)) {
+  .app-mobile-redesign {
+    padding-top: env(safe-area-inset-top);
+  }
+  .mobile-header-redesign {
+    padding-top: max(16px, env(safe-area-inset-top));
+  }
+  .mobile-nav {
+    bottom: max(24px, env(safe-area-inset-bottom));
+  }
+}
+@supports not (padding-top: env(safe-area-inset-top)) {
+  .app-mobile-redesign {
+    height: 100vh;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .mobile-header-redesign {
+    padding-top: 16px;
+  }
+  .mobile-nav {
+    bottom: 24px;
+  }
+} 
+
+
+
+
+
+
+
+

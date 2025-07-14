@@ -22,20 +22,16 @@
   
   /* Bloquear scroll en el contenedor principal */
   .app-mobile-redesign {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    width: 100vw !important;
+    position: relative !important;
     overflow: hidden !important;
-    /* Prevenir scroll con gestos */
-    touch-action: none;
-    /* Usar viewport dinámico para mejor compatibilidad */
-    height: 100dvh;
-    width: 100vw;
-    /* Asegurar que ocupe toda la pantalla */
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    /* Prevenir scroll con rueda del mouse */
-    overscroll-behavior: none;
+    top: unset !important;
+    left: unset !important;
+    right: unset !important;
+    bottom: unset !important;
+    box-sizing: border-box !important;
   }
   
   /* Bloquear scroll en el mapa */
@@ -270,25 +266,16 @@
     /* Contenedor principal para iOS */
     .app-mobile-redesign {
       /* Usar viewport dinámico para iOS */
-      height: 100dvh;
-      width: 100vw;
-      /* Bloquear scroll sin position fixed */
-      overflow: hidden;
-      /* Prevenir scroll con gestos */
-      touch-action: none;
-      /* Asegurar que ocupe toda la pantalla */
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      /* Prevenir scroll con rueda del mouse */
-      overscroll-behavior: none;
-      /* Ajustar para Safari */
-      -webkit-overflow-scrolling: auto;
-      /* Asegurar que no haya scroll */
-      min-height: 100dvh;
-      max-height: 100dvh;
+      height: 100dvh !important;
+      min-height: 100dvh !important;
+      width: 100vw !important;
+      position: relative !important;
+      overflow: hidden !important;
+      top: unset !important;
+      left: unset !important;
+      right: unset !important;
+      bottom: unset !important;
+      box-sizing: border-box !important;
     }
     
     /* Permitir scroll con gestos de iOS solo en elementos específicos */

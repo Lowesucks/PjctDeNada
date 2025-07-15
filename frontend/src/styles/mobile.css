@@ -18,6 +18,8 @@
   --color-label-text: #1a202c;
   --color-nav-icon: #6b7280; /* Gris medio para iconos barra inferior */
   --mobile-nav-bg: rgba(255,255,255,0.01); /* Prácticamente transparente en modo claro */
+  --mobile-search-bg: rgba(255,255,255,0.7); /* Glass claro */
+  --mobile-header-bg: rgba(255,255,255,0.7); /* Glass claro header */
 }
 
 body.dark {
@@ -33,6 +35,8 @@ body.dark {
   --color-label-text: #1a202c;
   --color-nav-icon: #a0aec0; /* Gris claro para iconos barra inferior en dark */
   --mobile-nav-bg: rgba(30,32,36,0.5); /* Liquid glass oscuro en dark */
+  --mobile-search-bg: rgba(30,32,36,0.7); /* Glass oscuro */
+  --mobile-header-bg: rgba(30,32,36,0.7); /* Glass oscuro header */
 }
 
 /* =========================
@@ -106,7 +110,7 @@ html, body, #root {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(30, 32, 36, 0.72);
+  background: var(--mobile-header-bg);
   color: var(--color-text);
   border-bottom: 1px solid var(--color-border);
   box-shadow: 0 2px 8px var(--color-shadow);
@@ -120,6 +124,7 @@ html, body, #root {
   -webkit-backdrop-filter: blur(18px) saturate(160%);
   /* Asegurar que respete el notch en iOS */
   padding-top: max(16px, env(safe-area-inset-top, 16px));
+  border-radius: 0 0 18px 18px;
 }
 
 .mobile-header-top {
@@ -296,6 +301,11 @@ html, body, #root {
 .mobile-search-wrapper {
   position: relative;
   width: 100%;
+  background: var(--mobile-search-bg);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-radius: 12px;
+  padding: 4px 0;
 }
 
 .mobile-search-input-redesign {
@@ -307,7 +317,7 @@ html, body, #root {
   border: 1px solid var(--color-border);
   font-size: 16px;
   color: var(--color-text);
-  background: var(--color-surface);
+  background: transparent;
   margin-bottom: 12px;
   box-sizing: border-box;
   touch-action: manipulation;

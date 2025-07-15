@@ -299,7 +299,8 @@ export const adjustViewportForSafari = () => {
         }
         
         .mobile-nav {
-          bottom: max(24px, env(safe-area-inset-bottom)) !important;
+          bottom: env(safe-area-inset-bottom, 0px) !important;
+          padding-bottom: 16px !important;
           z-index: 1000 !important;
         }
         

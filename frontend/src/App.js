@@ -15,6 +15,7 @@ import { obtenerFavoritos, toggleFavorito, verificarFavorito } from './utils/api
 import { initTouchVerification } from './utils/touchTest';
 import { initDeviceDetection } from './utils/mobileDetection';
 import { initScrollControl, applyScrollConfig } from './utils/scrollControl';
+import { quickCheck } from './utils/styleVerification';
 import axios from 'axios';
 
 // El interceptor ya está configurado en utils/api.js
@@ -99,6 +100,9 @@ function App() {
     // Inicializar control de scroll para prevenir scroll no deseado
     initScrollControl();
     applyScrollConfig();
+
+    // Verificar estilos móviles
+    setTimeout(() => quickCheck(), 1000);
 
     // Verificar si hay un usuario autenticado
     checkAuthStatus();

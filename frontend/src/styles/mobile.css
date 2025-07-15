@@ -16,6 +16,8 @@
   --color-switch-bg: #e9ecef;
   --color-shadow: rgba(0,0,0,0.1);
   --color-label-text: #1a202c;
+  --color-nav-icon: #6b7280; /* Gris medio para iconos barra inferior */
+  --mobile-nav-bg: rgba(255,255,255,0.01); /* Prácticamente transparente en modo claro */
 }
 
 body.dark {
@@ -29,6 +31,8 @@ body.dark {
   --color-switch-bg: #4a5568;
   --color-shadow: rgba(0,0,0,0.4);
   --color-label-text: #1a202c;
+  --color-nav-icon: #a0aec0; /* Gris claro para iconos barra inferior en dark */
+  --mobile-nav-bg: rgba(30,32,36,0.5); /* Liquid glass oscuro en dark */
 }
 
 /* =========================
@@ -144,8 +148,8 @@ html, body, #root {
   bottom: 20px;
   width: 90vw;
   max-width: 400px;
-  background: rgba(30, 32, 36, 0.95);
-  color: #f8fafc;
+  background: var(--mobile-nav-bg);
+  color: var(--color-nav-icon);
   border: none;
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   backdrop-filter: blur(20px);
@@ -167,12 +171,6 @@ html, body, #root {
 }
 
 /* Ajuste para iOS */
-html body.is-ios .app-mobile-redesign .mobile-nav {
-  bottom: 30px;
-  background: rgba(255,255,255,0.95);
-  color: #1a202c;
-  border: 1px solid rgba(255,255,255,0.3);
-}
 
 /* Layout interno de la barra */
 .mobile-nav__inner {
@@ -188,7 +186,7 @@ html body.is-ios .app-mobile-redesign .mobile-nav {
 .mobile-nav button {
   background: none;
   border: none;
-  color: #f8fafc;
+  color: var(--color-nav-icon);
   font-size: 22px;
   border-radius: 50%;
   width: 44px;
@@ -238,7 +236,7 @@ html body.is-ios .app-mobile-redesign .mobile-nav {
 .mobile-nav .mobile-profile-nav-btn {
   background: none;
   border: none;
-  color: #f8fafc;
+  color: var(--color-nav-icon);
   font-size: 22px;
   border-radius: 50%;
   width: 44px;
@@ -291,23 +289,6 @@ html body.is-ios .app-mobile-redesign .mobile-nav {
 }
 
 /* Estados específicos para iOS */
-html body.is-ios .app-mobile-redesign .mobile-nav button {
-  color: #1a202c;
-}
-
-html body.is-ios .app-mobile-redesign .mobile-nav button:hover {
-  background: rgba(0,0,0,0.05);
-}
-
-html body.is-ios .app-mobile-redesign .mobile-nav button.active {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-}
-
-html body.is-ios .app-mobile-redesign .mobile-nav .mobile-user-avatar {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  border-color: rgba(59, 130, 246, 0.3);
-}
 
 /* =========================
    COMPONENTES DE BÚSQUEDA

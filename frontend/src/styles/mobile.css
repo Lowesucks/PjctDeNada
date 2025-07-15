@@ -18,7 +18,7 @@
   --color-label-text: #1a202c;
   --color-nav-icon: #6b7280; /* Gris medio para iconos barra inferior */
   --mobile-nav-bg: rgba(255,255,255,0.08); /* Prácticamente transparente en modo claro */
-  --mobile-search-bg: rgba(255,255,255,0.01); /* Siempre transparente en claro */
+  --mobile-search-bg: rgba(255,255,255,0.15); /* Igual que el header en claro */
   --mobile-header-bg: rgba(255,255,255,0.15); /* Glass claro header (más transparente) */
 }
 
@@ -35,7 +35,7 @@ body.dark {
   --color-label-text: #1a202c;
   --color-nav-icon: #a0aec0; /* Gris claro para iconos barra inferior en dark */
   --mobile-nav-bg: rgba(30,32,36,0.18); /* Liquid glass oscuro en dark */
-  --mobile-search-bg: rgba(30,32,36,0.7); /* Glass oscuro */
+  --mobile-search-bg: rgba(30,32,36,0.28); /* Igual que el header en oscuro */
   --mobile-header-bg: rgba(30,32,36,0.28); /* Glass oscuro header (más transparente) */
 }
 

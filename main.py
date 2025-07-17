@@ -6,6 +6,8 @@ Usa la nueva estructura modular del backend
 
 import os
 import sys
+from dotenv import load_dotenv
+load_dotenv()
 from backend.app import create_app
 from backend.models import db
 from config import config

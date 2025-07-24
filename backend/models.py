@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from datetime import datetime, timezone
+from sqlalchemy import Index, text
 import bcrypt
 
 db = SQLAlchemy()
@@ -56,8 +57,17 @@ class Barberia(db.Model):
     fecha_creacion = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     google_place_id = db.Column(db.String(255), unique=True, nullable=True)
     
-    # Relación con calificaciones
-    calificaciones = db.relationship('Calificacion', backref='barberia', lazy=True, cascade='all, delete-orphan')
+    # Relación con calificaciones (optimizada con lazy='dynamic' para consultas grandes)
+    calificaciones = db.relationship('Calificacion', backref='barberia', lazy='dynamic', cascade='all, delete-orphan')
+    
+    # Índices para optimizar búsquedas
+    __table_args__ = (
+        Index('idx_barberia_geo', 'latitud', 'longitud'),
+        Index('idx_barberia_google_place_id', 'google_place_id'),
+        Index('idx_barberia_nombre_lower', text('LOWER(nombre)')),
+        Index('idx_barberia_direccion_lower', text('LOWER(direccion)')),
+        Index('idx_barberia_calificacion', 'calificacion_promedio', 'total_calificaciones'),
+    )
 
 class Calificacion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -69,6 +79,13 @@ class Calificacion(db.Model):
     
     # Mantener compatibilidad con el campo anterior
     nombre_usuario = db.Column(db.String(50), nullable=True)  # Para calificaciones antiguas
+    
+    # Índices para optimizar consultas
+    __table_args__ = (
+        Index('idx_calificacion_barberia_fecha', 'barberia_id', 'fecha'),
+        Index('idx_calificacion_usuario_fecha', 'usuario_id', 'fecha'),
+        Index('idx_calificacion_fecha', 'fecha'),
+    )
 
 class Favorito(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -80,8 +97,12 @@ class Favorito(db.Model):
     usuario = db.relationship('Usuario', backref='favoritos')
     barberia = db.relationship('Barberia', backref='favoritos')
     
-    # Índice único para evitar duplicados
-    __table_args__ = (db.UniqueConstraint('usuario_id', 'barberia_id', name='_usuario_barberia_favorito_uc'),)
+    # Índices y constraints optimizados
+    __table_args__ = (
+        db.UniqueConstraint('usuario_id', 'barberia_id', name='_usuario_barberia_favorito_uc'),
+        Index('idx_favorito_usuario_fecha', 'usuario_id', 'fecha_agregado'),
+        Index('idx_favorito_fecha', 'fecha_agregado'),
+    )
     
     def to_dict(self):
         """Convierte el favorito a diccionario"""

@@ -1,6 +1,8 @@
 import os
 import googlemaps
 from functools import lru_cache
+from .cache_manager import cache_google_places
+from .logging_config import log_auth_event, log_google_api_call, log_security_event
 from typing import Any
 import math
 import jwt
@@ -11,11 +13,18 @@ from .models import Usuario, db
 GOOGLE_API_KEY: str | None = os.environ.get('GOOGLE_MAPS_API_KEY')
 
 # Configuración JWT
-JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'tu-clave-secreta-cambiar-en-produccion')
+JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+if not JWT_SECRET_KEY:
+    raise RuntimeError('JWT_SECRET_KEY no está definida en variables de entorno')
 JWT_ALGORITHM = 'HS256'
-JWT_EXPIRATION_HOURS = 24
+JWT_EXPIRATION_HOURS = int(os.environ.get('JWT_EXPIRATION_HOURS', 24))
 
-@lru_cache(maxsize=32)
+# Configuración de APIs externas
+API_TIMEOUT = int(os.environ.get('API_TIMEOUT', 10))
+MAX_RETRIES = int(os.environ.get('MAX_RETRIES', 3))
+
+@cache_google_places(timeout=1800)  # 30 minutos de caché
+@lru_cache(maxsize=32)  # Mantener LRU como segunda capa
 def buscar_barberias_google_places(lat: float, lng: float, radio: int = 5000) -> list[dict[str, Any]]:
     """
     Busca barberías, peluquerías y salones de belleza cercanos usando la API de Google Places.
@@ -26,7 +35,7 @@ def buscar_barberias_google_places(lat: float, lng: float, radio: int = 5000) ->
         return []
 
     try:
-        gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
+        gmaps = googlemaps.Client(key=GOOGLE_API_KEY, timeout=API_TIMEOUT)
         
         # Se realiza una única búsqueda por palabras clave para mayor precisión
         places_result = gmaps.places_nearby(  # type: ignore[attr-defined, unknown-member]
@@ -63,10 +72,20 @@ def buscar_barberias_google_places(lat: float, lng: float, radio: int = 5000) ->
             
         return barberias_encontradas
 
+    except googlemaps.exceptions.ApiError as e:
+        print(f"Error de API de Google Places: {str(e)}")
+        return []
+    except googlemaps.exceptions.Timeout as e:
+        print(f"Timeout en API de Google Places: {str(e)}")
+        return []
+    except googlemaps.exceptions.TransportError as e:
+        print(f"Error de transporte en API de Google Places: {str(e)}")
+        return []
     except Exception as e:
-        print(f"Error al buscar en Google Places: {str(e)}")
+        print(f"Error inesperado al buscar en Google Places: {str(e)}")
         return []
 
+@cache_google_places(timeout=1200)  # 20 minutos de caché para texto
 def buscar_barberias_por_texto(query: str, lat: float = 19.432608, lng: float = -99.133209) -> list[dict[str, Any]]:
     """
     Busca barberías usando Google Places Text Search API.
@@ -77,7 +96,7 @@ def buscar_barberias_por_texto(query: str, lat: float = 19.432608, lng: float = 
         return []
 
     try:
-        gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
+        gmaps = googlemaps.Client(key=GOOGLE_API_KEY, timeout=API_TIMEOUT)
         
         # Construir query de búsqueda más específica
         search_query = f"{query} barbería peluquería"
@@ -118,8 +137,17 @@ def buscar_barberias_por_texto(query: str, lat: float = 19.432608, lng: float = 
             
         return barberias_encontradas
 
+    except googlemaps.exceptions.ApiError as e:
+        print(f"Error de API de Google Places Text Search: {str(e)}")
+        return []
+    except googlemaps.exceptions.Timeout as e:
+        print(f"Timeout en API de Google Places Text Search: {str(e)}")
+        return []
+    except googlemaps.exceptions.TransportError as e:
+        print(f"Error de transporte en API de Google Places Text Search : {str(e)}")
+        return []
     except Exception as e:
-        print(f"Error al buscar en Google Places Text Search: {str(e)}")
+        print(f"Error inesperado al buscar en Google Places Text Search: {str(e)}")
         return []
 
 def calcular_distancia(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
@@ -146,9 +174,17 @@ def crear_usuario(username: str, email: str, password: str, nombre_completo: str
     try:
         # Verificar si el usuario ya existe
         if Usuario.query.filter_by(username=username).first():
+            log_security_event('duplicate_username_attempt', 'low', {
+                'username': username,
+                'email': email
+            })
             return {'error': 'El nombre de usuario ya existe'}, 400
         
         if Usuario.query.filter_by(email=email).first():
+            log_security_event('duplicate_email_attempt', 'low', {
+                'email': email,
+                'username': username
+            })
             return {'error': 'El email ya está registrado'}, 400
         
         # Crear nuevo usuario
@@ -163,6 +199,12 @@ def crear_usuario(username: str, email: str, password: str, nombre_completo: str
         db.session.add(nuevo_usuario)
         db.session.commit()
         
+        # Log del evento de registro exitoso
+        log_auth_event('user_registered', nuevo_usuario.id, {
+            'username': username,
+            'email': email
+        })
+        
         return {'mensaje': 'Usuario creado exitosamente', 'usuario': nuevo_usuario.to_dict()}, 201
         
     except Exception as e:
@@ -175,9 +217,17 @@ def autenticar_usuario(username: str, password: str) -> dict[str, Any]:
         usuario = Usuario.query.filter_by(username=username).first()
         
         if not usuario or not usuario.check_password(password):
+            log_security_event('failed_login_attempt', 'medium', {
+                'username': username,
+                'reason': 'invalid_credentials'
+            })
             return {'error': 'Credenciales inválidas'}, 401
         
         if not usuario.activo:
+            log_security_event('inactive_user_login_attempt', 'medium', {
+                'username': username,
+                'user_id': usuario.id
+            })
             return {'error': 'Usuario desactivado'}, 401
         
         # Actualizar último acceso
@@ -186,6 +236,11 @@ def autenticar_usuario(username: str, password: str) -> dict[str, Any]:
         
         # Generar token JWT
         token = generar_token_jwt(usuario.id)
+        
+        # Log del login exitoso
+        log_auth_event('successful_login', usuario.id, {
+            'username': username
+        })
         
         return {
             'mensaje': 'Autenticación exitosa',

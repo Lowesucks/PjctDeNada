@@ -175,7 +175,14 @@ function App() {
   const sheetRef = useRef(null);
 
   const checkScreenSize = () => {
-    setIsMobile(window.innerWidth <= 768);
+    // Simplificar la detección para que coincida con CSS
+    const width = window.innerWidth;
+    
+    // Usar el mismo breakpoint que en CSS: 900px
+    const isMobileDevice = width <= 900;
+    
+    console.log('Screen detection:', { width, isMobileDevice });
+    setIsMobile(isMobileDevice);
   };
 
   const cargarBarberias = async (location, mostrarTodas = false) => {
@@ -1084,8 +1091,8 @@ function App() {
   // Vista desktop
   if (!isMobile) {
     return (
-      <div className={`app-desktop-sidebar ${theme === 'dark' ? 'dark' : ''}`}> 
-        {/* Barra lateral izquierda */}
+      <div className={`app-desktop-redesign ${theme === 'dark' ? 'dark' : ''}`}>
+        {/* Sidebar izquierdo */}
         <aside className="sidebar-left">
           <div className="sidebar-header">
             <h1 className="sidebar-logo">Cuts</h1>
@@ -1103,107 +1110,38 @@ function App() {
                 onClick={() => setCurrentView('cercanos')} 
                 className={currentView === 'cercanos' ? 'active' : ''} 
                 aria-label="Ver barberías cercanas"
-                title="Barberías cercanas"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
+                <span>Cercanos</span>
               </button>
               <button 
                 onClick={() => setCurrentView('favoritos')} 
                 className={currentView === 'favoritos' ? 'active' : ''} 
                 aria-label="Ver favoritos"
-                title="Mis favoritos"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                 </svg>
+                <span>Favoritos</span>
               </button>
               <button 
                 onClick={() => setCurrentView('configuracion')} 
                 className={currentView === 'configuracion' ? 'active' : ''} 
                 aria-label="Configuración"
-                title="Configuración"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
                   <path d="M19.14 12.94c.04-.31.07-.63.07-.94s-.03-.63-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.42-.49-.42h-3.84c-.25 0-.45.18-.49.42l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22l-1.92 3.32c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.07.63-.07.94s.03.63.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.24.42.49.42h3.84c.25 0 .45-.18.49-.42l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.21.08-.47-.12-.61l-2.01-1.58z"/>
-                  <circle cx="12" cy="12" r="1.3" fill="var(--color-background)"/>
+                  <circle cx="12" cy="12" r="3"/>
                 </svg>
+                <span>Configuración</span>
               </button>
-              {user ? (
-                <button 
-                  onClick={handleShowProfile} 
-                  className="user-profile-btn" 
-                  aria-label="Mi Perfil"
-                  title={`Perfil de ${user.nombre_completo}`}
-                >
-                  <div className="user-avatar-small">
-                    {user.nombre_completo.charAt(0).toUpperCase()}
-                  </div>
-                </button>
-              ) : (
-                <button 
-                  onClick={handleShowLogin} 
-                  className="login-btn" 
-                  aria-label="Iniciar Sesión"
-                  title="Iniciar sesión"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                  </svg>
-                </button>
-              )}
             </nav>
           </div>
-          
-          {/* Contenido principal del sidebar */}
-          <div className="sidebar-list-section">
-            <div className="sidebar-list-header">
-              <span className="sidebar-list-title">
-                {viewLabels[currentView]}
-              </span>
-              {currentView !== 'configuracion' && (
-                <div className="sidebar-sort-container">
-                  <button 
-                    onClick={() => setIsSortMenuOpen(!isSortMenuOpen)} 
-                    className="sort-button"
-                    aria-label="Ordenar resultados"
-                    title="Ordenar por"
-                  >
-                    <span>Ordenar por: <strong>{getSortLabel(sortOrder)}</strong></span>
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      viewBox="0 0 20 20" 
-                      fill="currentColor" 
-                      width="18" 
-                      height="18"
-                      style={{ transform: isSortMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                    >
-                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"/>
-                    </svg>
-                  </button>
-                  {isSortMenuOpen && (
-                    <div className="sort-dropdown">
-                      {Object.keys(sortLabels).map(key => (
-                        <button 
-                          key={key} 
-                          onClick={() => { 
-                            setSortOrder(key); 
-                            setIsSortMenuOpen(false); 
-                          }}
-                          className={sortOrder === key ? 'active' : ''}
-                        >
-                          {sortLabels[key]}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            
-            {/* Contenido según la vista seleccionada */}
+
+          {/* Contenido del sidebar según la vista actual */}
+          <div className="sidebar-content-area" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             {currentView === 'configuracion' ? (
               <div className="sidebar-settings-view">
                 <h2>Configuración</h2>
@@ -1242,78 +1180,120 @@ function App() {
               </div>
             ) : (
               <>
-                {/* Estados de carga y vacío */}
-                {cargando ? (
-                  <div className="sidebar-loading">
-                    <div className="loading-spinner"></div>
-                    <p>Buscando barberías...</p>
+                {/* Contador y filtros */}
+                <div style={{ padding: '1rem', borderBottom: '1px solid var(--color-border)' }}>
+                  <div style={{ marginBottom: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+                    {barberiasFiltradas.length} {barberiasFiltradas.length === 1 ? 'lugar encontrado' : 'lugares encontrados'}
                   </div>
-                ) : barberiasFiltradas.length === 0 ? (
-                  <div 
-                    className="sidebar-empty-state"
-                    data-view={currentView === 'favoritos' ? 'favoritos' : busqueda.trim() ? 'busqueda' : 'cercanos'}
-                  >
-                    <h3>
-                      {currentView === 'favoritos' 
-                        ? 'No tienes favoritos' 
-                        : busqueda.trim() 
-                          ? 'No se encontraron lugares' 
-                          : 'Cargando barberías cercanas...'}
-                    </h3>
-                    <p>
-                      {currentView === 'favoritos' 
-                        ? 'Usa el icono del corazón ❤ para guardar lugares.' 
-                        : busqueda.trim()
-                          ? 'Prueba con otros términos de búsqueda.'
-                          : 'Buscando barberías cerca de ti...'}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="sidebar-barberias-list">
-                    {/* Contador y botón de mostrar todas */}
-                    {currentView === 'cercanos' && !busqueda.trim() && barberiasFiltradas.length > 0 && (
-                      <div className="results-counter-desktop">
-                        <div className="counter-info">
-                          {mostrandoTodas ? (
-                            <span>Mostrando todas las {totalEncontradas} barberías encontradas</span>
-                          ) : (
-                            <span>Mostrando las {barberiasFiltradas.length} más cercanas</span>
-                          )}
-                        </div>
-                        <div className="counter-actions">
-                          {mostrandoTodas ? (
-                            <button onClick={handleMostrarMenos} className="show-more-btn">
-                              Mostrar menos
-                            </button>
-                          ) : (
-                            <button onClick={handleMostrarTodas} className="show-more-btn">
-                              Mostrar todas
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {barberiasFiltradas.map(barberia => (
-                      <BarberiaCard
-                        key={barberia.id}
-                        barberia={barberia}
-                        onVerDetalles={handleVerBarberia}
-                        onVerEnMapa={handleVerEnMapa}
-                        onToggleFavorite={handleToggleFavorite}
-                        isFavorite={favorites.has(barberia.id)}
-                        onCalificar={handleCalificar}
-                      />
-                    ))}
-                  </div>
-                )}
+                  
+                  {/* Contador y botón de mostrar todas */}
+                  {currentView === 'cercanos' && !busqueda.trim() && barberiasFiltradas.length > 0 && (
+                    <div style={{ marginTop: '0.5rem' }}>
+                      {mostrandoTodas ? (
+                        <button onClick={handleMostrarMenos} className="show-more-btn">
+                          Mostrar menos
+                        </button>
+                      ) : (
+                        <button onClick={handleMostrarTodas} className="show-more-btn">
+                          Mostrar todas
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Lista de resultados */}
+                <div style={{ flex: 1, overflow: 'auto', padding: '1rem' }}>
+                  {cargando ? (
+                    <div className="sidebar-loading">
+                      <div className="loading-spinner"></div>
+                      <p>Buscando barberías...</p>
+                    </div>
+                  ) : barberiasFiltradas.length === 0 ? (
+                    <div className="sidebar-empty-state">
+                      <h3>
+                        {currentView === 'favoritos' 
+                          ? 'No tienes favoritos' 
+                          : busqueda.trim() 
+                            ? 'No se encontraron lugares' 
+                            : 'No hay barberías cerca'}
+                      </h3>
+                      <p>
+                        {currentView === 'favoritos' 
+                          ? 'Usa el icono del corazón ❤ para guardar lugares.' 
+                          : busqueda.trim()
+                            ? 'Prueba con otros términos de búsqueda.'
+                            : 'Intenta expandir el área de búsqueda.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="sidebar-barberias-list">
+                      {barberiasFiltradas.map(barberia => (
+                        <BarberiaCard
+                          key={barberia.id}
+                          barberia={barberia}
+                          onVerDetalles={handleVerBarberia}
+                          onVerEnMapa={handleVerEnMapa}
+                          onToggleFavorite={handleToggleFavorite}
+                          isFavorite={favorites.has(barberia.id)}
+                          onCalificar={handleCalificar}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </div>
         </aside>
         
-        {/* Mapa a la derecha, ocupa todo el espacio restante */}
-        <main className="main-map-area">
+        {/* Header desktop profesional */}
+        <header className="desktop-header-main">
+          <h1 className="header-title">Cuts - Barberías</h1>
+          <div className="header-actions">
+            <button 
+              className="theme-toggle" 
+              onClick={toggleTheme}
+              aria-label="Cambiar tema"
+              title="Cambiar tema"
+            >
+              {theme === 'dark' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                  <path d="M12 9c1.65 0 3 1.35 3 3s-1.35 3-3 3-3-1.35-3-3 1.35-3 3-3m0-2c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                  <path d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"/>
+                </svg>
+              )}
+            </button>
+            <div className="user-menu" onClick={() => {
+              if (user) setShowUserProfile(true);
+              else setShowLoginModal(true);
+            }}>
+              {user ? (
+                <>
+                  <div className="user-avatar-desktop">
+                    {user.nombre_completo.charAt(0).toUpperCase()}
+                  </div>
+                  <span>{user.nombre_completo.split(' ')[0]}</span>
+                </>
+              ) : (
+                <>
+                  <div className="user-avatar-desktop">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                  </div>
+                  <span>Iniciar sesión</span>
+                </>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* Contenedor principal del mapa */}
+        <main className="desktop-map-container">
           <MapaBarberias 
             barberias={barberiasFiltradas}
             onBarberiaSelect={handleBarberiaSelectFromMap}
@@ -1327,6 +1307,7 @@ function App() {
             iconConfig={ICON_CONFIG}
           />
         </main>
+
         
         {/* Modales */}
         {mostrarModal && barberiaSeleccionada && (

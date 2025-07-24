@@ -6,6 +6,15 @@ from .services import (
     crear_usuario, autenticar_usuario, verificar_token_jwt, obtener_usuario_por_id,
     actualizar_usuario, cambiar_password
 )
+from .cache_manager import (
+    cache_barberia_details, cache_barberia_search, cache_user_favorites,
+    invalidate_barberia_cache, invalidate_user_cache
+)
+from .validators import (
+    validate_user_registration, validate_barberia_rating, validate_search_params,
+    validate_json_input, validate_id_param
+)
+from .logging_config import log_api_call, log_auth_event, log_security_event
 from functools import wraps
 
 # ==================== DECORADORES DE AUTENTICACIÓN ====================
@@ -43,6 +52,8 @@ def token_required(f):
 
 # ==================== RUTAS DE BARBERÍAS (EXISTENTES) ====================
 
+@log_api_call("obtener_barberias")
+@cache_barberia_search(timeout=300)  # 5 minutos de caché
 def obtener_barberias() -> list[dict[str, Any]]:
     try:
         barberias = Barberia.query.all()
@@ -78,9 +89,20 @@ def crear_barberia() -> tuple[dict[str, Any], int]:
     db.session.commit()
     return {'mensaje': 'Barbería creada exitosamente', 'id': nueva_barberia.id}, 201
 
+@cache_barberia_details(timeout=600)  # 10 minutos de caché
 def obtener_barberia(barberia_id: int) -> dict[str, Any]:
+    # Optimización: usar joinedload para evitar N+1 queries
+    from sqlalchemy.orm import joinedload
+    
     barberia = Barberia.query.get_or_404(barberia_id)
-    calificaciones = Calificacion.query.filter_by(barberia_id=barberia_id).order_by(Calificacion.fecha.desc()).all()
+    
+    # Optimización: una sola query con join para cargar usuario y calificaciones
+    calificaciones = (Calificacion.query
+                     .options(joinedload(Calificacion.usuario))
+                     .filter_by(barberia_id=barberia_id)
+                     .order_by(Calificacion.fecha.desc())
+                     .limit(50)  # Limitar resultados para performance
+                     .all())
     
     return {
         'id': barberia.id,
@@ -88,6 +110,8 @@ def obtener_barberia(barberia_id: int) -> dict[str, Any]:
         'direccion': barberia.direccion,
         'telefono': barberia.telefono,
         'horario': barberia.horario,
+        'latitud': barberia.latitud,
+        'longitud': barberia.longitud,
         'calificacion_promedio': round(barberia.calificacion_promedio, 1),
         'total_calificaciones': barberia.total_calificaciones,
         'calificaciones': [
@@ -101,6 +125,7 @@ def obtener_barberia(barberia_id: int) -> dict[str, Any]:
         ]
     }
 
+@validate_barberia_rating()
 def calificar_barberia(barberia_id: int) -> tuple[dict[str, Any], int]:
     barberia = Barberia.query.get_or_404(barberia_id)
     data: dict[str, Any] = request.get_json()
@@ -138,8 +163,13 @@ def calificar_barberia(barberia_id: int) -> tuple[dict[str, Any], int]:
     barberia.total_calificaciones = total
     
     db.session.commit()
+    
+    # Invalidar caché relacionado con esta barbería
+    invalidate_barberia_cache(barberia_id)
+    
     return {'mensaje': 'Calificación agregada exitosamente'}, 201
 
+@validate_search_params()
 def buscar_barberias() -> list[dict[str, Any]]:
     try:
         query: str = request.args.get('q', '').lower()
@@ -213,6 +243,7 @@ def buscar_barberias() -> list[dict[str, Any]]:
         print(f"Error en buscar_barberias: {e}")
         return []
 
+@validate_search_params()
 def buscar_barberias_cercanas() -> list[dict[str, Any]]:
     try:
         lat = float(request.args.get('lat', 0))
@@ -298,6 +329,7 @@ def buscar_barberias_cercanas() -> list[dict[str, Any]]:
 
 # ===== ENDPOINTS PARA FAVORITOS =====
 
+@cache_user_favorites(timeout=120)  # 2 minutos de caché para favoritos
 def obtener_favoritos() -> tuple[dict[str, Any], int]:
     """Obtiene los favoritos del usuario autenticado"""
     try:
@@ -369,6 +401,9 @@ def agregar_favorito(barberia_id: int) -> tuple[dict[str, Any], int]:
         db.session.add(nuevo_favorito)
         db.session.commit()
         
+        # Invalidar caché de favoritos del usuario
+        invalidate_user_cache(usuario.id)
+        
         return {
             'mensaje': 'Barbería agregada a favoritos',
             'favorito': nuevo_favorito.to_dict()
@@ -410,6 +445,9 @@ def eliminar_favorito(barberia_id: int) -> tuple[dict[str, Any], int]:
         db.session.delete(favorito)
         db.session.commit()
         
+        # Invalidar caché de favoritos del usuario
+        invalidate_user_cache(usuario.id)
+        
         return {'mensaje': 'Barbería eliminada de favoritos'}, 200
         
     except Exception as e:
@@ -449,6 +487,8 @@ def verificar_favorito(barberia_id: int) -> tuple[dict[str, Any], int]:
 
 # ==================== RUTAS DE AUTENTICACIÓN Y USUARIOS ====================
 
+@log_api_call("registrar_usuario")
+@validate_user_registration()
 def registrar_usuario() -> tuple[dict[str, Any], int]:
     """Registra un nuevo usuario"""
     data: dict[str, Any] = request.get_json()

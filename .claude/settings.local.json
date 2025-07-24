@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sqlite3:*)",
+      "Bash(python:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(tasklist:*)",
+      "Bash(curl:*)",
+      "Bash(powershell:*)",
+      "Bash(taskkill:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(npx react-scripts:*)",
+      "Bash(rm:*)",
+      "Bash(cmd /c \"cd /d C:\\Users\\marde\\OneDrive\\Documentos\\PjctDeNada\\frontend && npm run build\")",
+      "Bash(timeout:*)",
+      "Bash(start /B python:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)"
+    ],
+    "deny": []
+  }
+}

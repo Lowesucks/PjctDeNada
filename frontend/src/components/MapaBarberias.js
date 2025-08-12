@@ -37,7 +37,58 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
   };
 
   if (loadError) {
-    return <div>Error al cargar el mapa. Asegúrate de que la clave de API sea correcta.</div>;
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        height: '100%',
+        padding: '20px',
+        textAlign: 'center'
+      }}>
+        <div style={{ marginBottom: '20px' }}>
+          <h3>🚨 Error al cargar Google Maps</h3>
+          <p>No se pudo cargar el mapa de Google Maps.</p>
+        </div>
+        
+        <div style={{ marginBottom: '20px' }}>
+          <h4>🔑 Posibles causas:</h4>
+          <ul style={{ textAlign: 'left', maxWidth: '400px' }}>
+            <li>API key no configurada</li>
+            <li>Facturación no habilitada en Google Cloud</li>
+            <li>API key inválida o expirada</li>
+          </ul>
+        </div>
+        
+        <div style={{ marginBottom: '20px' }}>
+          <h4>🛠️ Soluciones:</h4>
+          <ol style={{ textAlign: 'left', maxWidth: '400px' }}>
+            <li>Configura REACT_APP_GOOGLE_MAPS_API_KEY en frontend/.env</li>
+            <li>Habilita facturación en Google Cloud Console</li>
+            <li>Verifica que la API key tenga permisos para Maps JavaScript API</li>
+          </ol>
+        </div>
+        
+        <div style={{ 
+          background: '#f0f8ff', 
+          padding: '15px', 
+          borderRadius: '5px', 
+          border: '1px solid #4285F4',
+          maxWidth: '500px'
+        }}>
+          <h4>📋 Pasos para configurar Google Maps:</h4>
+          <ol style={{ textAlign: 'left' }}>
+            <li>Ve a <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">Google Cloud Console</a></li>
+            <li>Crea un proyecto nuevo o selecciona uno existente</li>
+            <li>Habilita "Maps JavaScript API" en la biblioteca de APIs</li>
+            <li>Crea credenciales (API Key) en "Credenciales"</li>
+            <li>Habilita facturación (tienes $200 gratis mensual)</li>
+            <li>Copia la API key a frontend/.env</li>
+          </ol>
+        </div>
+      </div>
+    );
   }
 
   return isLoaded ? (
@@ -105,8 +156,16 @@ function MapaBarberias({ barberias, onBarberiaSelect, userLocation, center, zoom
       })}
     </GoogleMap>
   ) : (
-    <div>Cargando mapa...</div>
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      height: '100%',
+      fontSize: '18px'
+    }}>
+      ⏳ Cargando mapa...
+    </div>
   );
 }
 
-export default React.memo(MapaBarberias); 
+export default MapaBarberias; 

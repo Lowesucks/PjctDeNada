@@ -37,11 +37,12 @@ def buscar_barberias_google_places(lat: float, lng: float, radio: int = 5000) ->
     try:
         gmaps = googlemaps.Client(key=GOOGLE_API_KEY, timeout=API_TIMEOUT)
         
-        # Se realiza una única búsqueda por palabras clave para mayor precisión
+        # Se realiza una búsqueda por tipo y palabra clave para mayor precisión
         places_result = gmaps.places_nearby(  # type: ignore[attr-defined, unknown-member]
             location=(lat, lng),
             radius=radio,
-            keyword='barbería OR peluquería OR "salón de belleza"',
+            keyword='barberia',
+            type='hair_care',
             language='es'
         )
         

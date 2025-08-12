@@ -5,7 +5,7 @@ Script para ejecutar Flask con HTTPS
 
 import os
 import ssl
-from app import app
+from backend.app import app
 
 if __name__ == '__main__':
     # Configuración SSL
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     
     if os.path.exists(cert_path) and os.path.exists(key_path):
         ssl_context.load_cert_chain(cert_path, key_path)
-        print("🔒 Iniciando servidor HTTPS...")
+        print("Iniciando servidor HTTPS...")
         app.run(
             host='0.0.0.0',
             port=5000,

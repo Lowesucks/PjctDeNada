@@ -6,6 +6,7 @@ Usa la nueva estructura modular del backend
 
 import os
 import sys
+import ssl
 from dotenv import load_dotenv
 load_dotenv()
 from backend.app import create_app
@@ -25,6 +26,9 @@ def init_db():
 if __name__ == '__main__':
     print("Iniciando aplicación de Barberías optimizada...")
     
+    # Verificar si se solicita HTTPS
+    use_https = '--https' in sys.argv
+    
     # Inicializar base de datos
     init_db()
     
@@ -33,11 +37,30 @@ if __name__ == '__main__':
     port = 5000
     debug = False  # Sin debug para evitar problemas de doble logging
     
-    print('Iniciando en HTTP (sin SSL para mayor compatibilidad)')
-    print(f"Servidor iniciando en http://{host}:{port}")
-    print("IMPORTANTE: URLs para acceder:")
-    print("  - Desde PC: http://localhost:5000")
-    print("  - Desde móvil en la misma red: http://192.168.2.109:5000")
+    if use_https:
+        # Configuración HTTPS
+        cert_path = 'cert.pem'
+        key_path = 'key.pem'
+        
+        if os.path.exists(cert_path) and os.path.exists(key_path):
+            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+            ssl_context.load_cert_chain(cert_path, key_path)
+            print('🔒 Iniciando en HTTPS con certificados SSL')
+            print(f"Servidor iniciando en https://{host}:{port}")
+            print("IMPORTANTE: URLs para acceder:")
+            print("  - Desde PC: https://localhost:5000")
+            print("  - Desde móvil en la misma red: https://192.168.1.125:5000")
+        else:
+            print("⚠️  Certificados SSL no encontrados. Iniciando en HTTP...")
+            use_https = False
+    
+    if not use_https:
+        print('Iniciando en HTTP (sin SSL para mayor compatibilidad)')
+        print(f"Servidor iniciando en http://{host}:{port}")
+        print("IMPORTANTE: URLs para acceder:")
+        print("  - Desde PC: http://localhost:5000")
+        print("  - Desde móvil en la misma red: http://192.168.1.125:5000")
+    
     print("Presiona Ctrl+C para detener el servidor")
     print("")
     print("Todas las optimizaciones están activas:")
@@ -49,13 +72,23 @@ if __name__ == '__main__':
     
     # Ejecutar aplicación con configuración estable
     try:
-        app.run(
-            host=host,
-            port=port,
-            debug=debug,
-            use_reloader=False,  # Sin reloader para evitar problemas
-            threaded=True        # Para mejor rendimiento
-        )
+        if use_https and os.path.exists(cert_path) and os.path.exists(key_path):
+            app.run(
+                host=host,
+                port=port,
+                debug=debug,
+                use_reloader=False,  # Sin reloader para evitar problemas
+                threaded=True,       # Para mejor rendimiento
+                ssl_context=ssl_context
+            )
+        else:
+            app.run(
+                host=host,
+                port=port,
+                debug=debug,
+                use_reloader=False,  # Sin reloader para evitar problemas
+                threaded=True        # Para mejor rendimiento
+            )
     except Exception as e:
         print(f"Error al iniciar el servidor: {e}")
         print("Verifica que el puerto 5000 no esté ocupado por otro proceso") 

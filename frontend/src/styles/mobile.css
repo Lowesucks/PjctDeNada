@@ -358,7 +358,10 @@ html, body, #root {
   left: 0;
   right: 0;
   height: 75%;
-  background: var(--color-surface);
+  background: var(--mobile-search-bg, rgba(255,255,255,0.15)); /* Re-using variable for consistency */
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   box-shadow: 0 -4px 20px var(--color-shadow);
@@ -654,8 +657,264 @@ html, body, #root {
 
 
 
+/* =========================
+   NUEVOS ESTILOS MEJORADOS PARA BARBERIA CARD
+   ========================= */
 
+.results-list-mobile {
+  padding: 0 0.75rem 8rem 0.75rem; /* Aumentar padding inferior para no chocar con nav */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
+.barberia-card {
+  background: var(--mobile-search-bg, rgba(255,255,255,0.15));
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 8px 24px -6px rgba(0,0,0,0.1);
+  transition: all 0.25s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
 
+.barberia-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 12px -4px rgba(0,0,0,0.15);
+}
 
+.barberia-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
 
+.barberia-card .card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+
+.barberia-card .favorite-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    padding: 0;
+    cursor: pointer;
+}
+
+.barberia-card .card-address {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+.barberia-card .card-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 1rem;
+}
+
+.barberia-card .card-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.barberia-card .rating-value {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-text);
+}
+
+.barberia-card .star-rating .star {
+    color: #f59e0b;
+    font-size: 1.1rem;
+}
+
+.barberia-card .total-ratings {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-left: 0.25rem;
+}
+
+.barberia-card .card-distance {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background-color: var(--color-border-subtle);
+    padding: 0.25rem 0.6rem;
+    border-radius: 99px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.barberia-card .distance-icon {
+    font-size: 1rem;
+}
+
+.barberia-card .card-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+.barberia-card .card-btn {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.barberia-card .card-btn:active {
+    background-color: var(--color-primary-hover);
+    transform: scale(0.98);
+}
+
+.barberia-card .card-btn-secondary {
+    display: none;
+}
+
+/* =========================
+   ESTILOS PARA EL FILTRO/ORDENADOR
+   ========================= */
+
+.sort-container.mobile {
+  position: relative; /* Para el posicionamiento del dropdown */
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+}
+
+.sort-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--mobile-search-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort-button strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.sort-button svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+}
+
+.sort-container.mobile[data-open="true"] .sort-button svg {
+    transform: rotate(180deg);
+}
+
+.sort-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 1rem;
+  right: 1rem;
+  z-index: 100;
+  background: var(--color-surface);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 24px -4px rgba(0,0,0,0.25);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: fadeInSort 0.2s ease-out forwards;
+}
+
+@keyframes fadeInSort {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sort-dropdown button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 1rem;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.sort-dropdown button:last-child {
+  border-bottom: none;
+}
+
+.sort-dropdown button:active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sort-dropdown button.selected {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.sort-dropdown .checkmark-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-primary);
+}
+
+/* =========================
+   ESTILOS PARA EL HANDLE DEL BOTTOM SHEET
+   ========================= */
+
+.sheet-handle {
+  padding: 1rem 0 0.5rem 0; /* Padding superior para separar del borde */
+  display: flex;
+  justify-content: center;
+  cursor: grab;
+}
+
+.sheet-handle-bar {
+  width: 40px;
+  height: 5px;
+  background-color: var(--color-border);
+  border-radius: 2.5px;
+}
+
+/* =========================
+   AJUSTES DE PADDING
+   ========================= */
+
+.sheet-content {
+  padding-top: 0.5rem; /* Baja el contenido, incluyendo el filtro */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}

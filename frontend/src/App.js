@@ -945,7 +945,7 @@ function App() {
                 </div>
               ) : (
                 <div className="results-list-mobile">
-                  <div className="sort-container mobile">
+                  <div className="sort-container mobile" data-open={isSortMenuOpen}>
                     <button onClick={() => setIsSortMenuOpen(!isSortMenuOpen)} className="sort-button">
                       <span>Ordenar por: <strong>{getSortLabel(sortOrder)}</strong></span>
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
@@ -953,8 +953,16 @@ function App() {
                     {isSortMenuOpen && (
                       <div className="sort-dropdown">
                         {Object.keys(sortLabels).map(key => (
-                          <button key={key} onClick={() => { setSortOrder(key); setIsSortMenuOpen(false); }}>
+                          <button 
+                            key={key} 
+                            className={sortOrder === key ? 'selected' : ''}
+                            onClick={() => { setSortOrder(key); setIsSortMenuOpen(false); }}>
                             {sortLabels[key]}
+                            {sortOrder === key && (
+                              <svg className="checkmark-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
                           </button>
                         ))}
                       </div>

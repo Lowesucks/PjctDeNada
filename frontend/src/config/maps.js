@@ -1,11 +1,3 @@
-// Configuración de OpenStreetMap con Leaflet
-export const MAP_CONFIG = {
-  defaultCenter: [20, 0], // Centro del mundo por defecto [lat, lng]
-  defaultZoom: 2, // Zoom mundial
-  tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-};
-
 // Función para obtener la ubicación actual del usuario
 export const getCurrentLocation = () => {
   return new Promise((resolve, reject) => {

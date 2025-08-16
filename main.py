@@ -7,6 +7,7 @@ Usa la nueva estructura modular del backend
 import os
 import sys
 import ssl
+import socket
 from dotenv import load_dotenv
 load_dotenv()
 from backend.app import create_app
@@ -16,6 +17,18 @@ from config import config
 # Obtener configuración del entorno
 config_name = os.environ.get('FLASK_CONFIG') or 'default'
 app = create_app(config_name)
+
+def get_local_ip():
+    """Obtiene la IP local de la máquina. Devuelve 'localhost' si no se puede obtener."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # No necesita estar conectado realmente, solo se usa para obtener la interfaz preferida
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "localhost"
 
 def init_db():
     """Inicializa la base de datos"""
@@ -36,7 +49,8 @@ if __name__ == '__main__':
     host = '0.0.0.0'  # Permitir acceso desde cualquier IP de la red local
     port = 5000
     debug = False  # Sin debug para evitar problemas de doble logging
-    
+    local_ip = get_local_ip()
+
     if use_https:
         # Configuración HTTPS
         cert_path = 'cert.pem'
@@ -48,8 +62,8 @@ if __name__ == '__main__':
             print('🔒 Iniciando en HTTPS con certificados SSL')
             print(f"Servidor iniciando en https://{host}:{port}")
             print("IMPORTANTE: URLs para acceder:")
-            print("  - Desde PC: https://localhost:5000")
-            print("  - Desde móvil en la misma red: https://192.168.1.125:5000")
+            print(f"  - Desde PC: https://localhost:{port}")
+            print(f"  - Desde móvil en la misma red: https://{local_ip}:{port}")
         else:
             print("⚠️  Certificados SSL no encontrados. Iniciando en HTTP...")
             use_https = False
@@ -58,8 +72,8 @@ if __name__ == '__main__':
         print('Iniciando en HTTP (sin SSL para mayor compatibilidad)')
         print(f"Servidor iniciando en http://{host}:{port}")
         print("IMPORTANTE: URLs para acceder:")
-        print("  - Desde PC: http://localhost:5000")
-        print("  - Desde móvil en la misma red: http://192.168.1.125:5000")
+        print(f"  - Desde PC: http://localhost:{port}")
+        print(f"  - Desde móvil en la misma red: http://{local_ip}:{port}")
     
     print("Presiona Ctrl+C para detener el servidor")
     print("")
@@ -91,4 +105,4 @@ if __name__ == '__main__':
             )
     except Exception as e:
         print(f"Error al iniciar el servidor: {e}")
-        print("Verifica que el puerto 5000 no esté ocupado por otro proceso") 
+        print("Verifica que el puerto 5000 no esté ocupado por otro proceso")

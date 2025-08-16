@@ -841,3 +841,268 @@ input:checked + .slider:before {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 } 
+
+/* ===== ESTILOS PARA EL MODAL DE BARBERÍA ===== */
+
+.modal-backdrop-desktop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content-desktop {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 10px 30px var(--color-shadow-lg);
+  width: 90%;
+  max-width: 500px;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.modal-header-desktop {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title-desktop {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.modal-close-btn-desktop {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn-desktop:hover {
+  background: var(--color-border-subtle);
+  color: var(--color-text);
+}
+
+.modal-body-desktop {
+  padding: 1.5rem;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-body-desktop p {
+  margin: 0 0 1rem 0;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.modal-body-desktop strong {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.modal-footer-desktop {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.modal-btn-desktop {
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.modal-btn-desktop.primary {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.modal-btn-desktop.primary:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.modal-btn-desktop.secondary {
+  background: var(--color-border-subtle);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.modal-btn-desktop.secondary:hover {
+  background: var(--color-border);
+}
+
+/* ===== ESTILOS PARA EL PERFIL DE USUARIO ===== */
+
+.user-profile-desktop {
+  padding: 2rem;
+}
+
+.user-profile-desktop h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 1.5rem;
+}
+
+.user-profile-desktop .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.user-profile-desktop .form-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-label-text);
+  margin-bottom: 0.5rem;
+}
+
+.user-profile-desktop .form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.user-profile-desktop .form-group input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.user-profile-desktop .btn-save {
+  background: var(--color-primary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.user-profile-desktop .btn-save:hover {
+  background: var(--color-primary-hover);
+}
+
+/* ===== ESTILOS PARA EL LOGIN/REGISTER ===== */
+
+.auth-modal-desktop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.auth-modal-content-desktop {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 10px 30px var(--color-shadow-lg);
+  width: 90%;
+  max-width: 400px;
+  padding: 2rem;
+}
+
+.auth-modal-content-desktop h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.auth-modal-content-desktop .form-group {
+  margin-bottom: 1rem;
+}
+
+.auth-modal-content-desktop .form-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-label-text);
+  margin-bottom: 0.5rem;
+}
+
+.auth-modal-content-desktop .form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.875rem;
+}
+
+.auth-modal-content-desktop .btn-submit {
+  width: 100%;
+  background: var(--color-primary);
+  color: white;
+  padding: 0.75rem;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.auth-modal-content-desktop .auth-switch {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.auth-modal-content-desktop .auth-switch button {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.auth-modal-content-desktop .error-message {
+  color: var(--color-error);
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  text-align: center;
+}

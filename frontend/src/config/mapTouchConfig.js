@@ -146,7 +146,7 @@ export const getOptimizedConfig = () => {
       zoomControl: false, // Sin controles de zoom en móviles
       gestureHandling: 'greedy', // Gestos táctiles optimizados
       scrollwheel: false, // Sin zoom con rueda del mouse
-      keyboardShortcuts: false, // Sin atajos de teclado
+      keyboardShortcuts: false, // Desactiva atajos de teclado en móviles
     })
   };
 }; 

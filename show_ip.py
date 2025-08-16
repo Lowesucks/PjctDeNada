@@ -37,7 +37,7 @@ def get_all_ips():
     return ips
 
 def main():
-    print("🌐 Información de Red para Acceso desde Teléfonos")
+    print("Información de Red para Acceso desde Teléfonos")
     print("=" * 50)
     
     system = platform.system()
@@ -54,29 +54,29 @@ def main():
         for ip in all_ips:
             print(f"  • {ip}")
     
-    print("\n📱 URLs para acceso desde teléfonos:")
+    print("\nURLs para acceso desde teléfonos:")
     print("=" * 50)
     
     if main_ip != "No se pudo obtener la IP":
         print(f"Frontend: http://{main_ip}:3000")
         print(f"Backend:  http://{main_ip}:5000")
         print()
-        print("💡 Instrucciones:")
+        print("Instrucciones:")
         print("1. Asegúrate de que tu teléfono esté conectado a la misma red WiFi")
         print("2. Abre el navegador en tu teléfono")
         print("3. Ve a: http://{main_ip}:3000")
         print("4. ¡Disfruta de la aplicación en tu teléfono!")
     else:
-        print("❌ No se pudo obtener la IP local")
+        print("No se pudo obtener la IP local")
         print("Verifica tu conexión de red")
     
-    print("\n🔧 Comandos útiles:")
+    print("\nComandos útiles:")
     if system == "Windows":
         print("• Ver IP: ipconfig")
         print("• Verificar conectividad: ping {main_ip}")
     else:
         print("• Ver IP: ifconfig o ip addr")
-        print("• Verificar conectividad: ping {main_ip}")
+        print("• Verificar conectividad: ping {main_main_ip}")
 
 if __name__ == "__main__":
-    main() 
+    main()

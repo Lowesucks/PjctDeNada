@@ -418,7 +418,7 @@ class BarberiasApp:
         try:
             while self.running:
                 time.sleep(1)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt:  
             self.cleanup()
         
         return True

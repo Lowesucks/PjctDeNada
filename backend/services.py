@@ -24,11 +24,10 @@ API_TIMEOUT = int(os.environ.get('API_TIMEOUT', 10))
 MAX_RETRIES = int(os.environ.get('MAX_RETRIES', 3))
 
 @cache_google_places(timeout=1800)  # 30 minutos de caché
-@lru_cache(maxsize=32)  # Mantener LRU como segunda capa
-def buscar_barberias_google_places(lat: float, lng: float, radio: int = 5000) -> list[dict[str, Any]]:
+@lru_cache(maxsize=32)
+def buscar_barberias_google_places(lat: float, lng: float, keyword: str, radio: int = 5000) -> list[dict[str, Any]]:
     """
-    Busca barberías, peluquerías y salones de belleza cercanos usando la API de Google Places.
-    Utiliza caché para evitar llamadas repetidas a la API con las mismas coordenadas.
+    Busca lugares cercanos usando la API de Google Places con una palabra clave específica.
     """
     if not GOOGLE_API_KEY:
         print("API Key de Google no configurada. Saltando búsqueda en Google Places.")
@@ -37,18 +36,15 @@ def buscar_barberias_google_places(lat: float, lng: float, radio: int = 5000) ->
     try:
         gmaps = googlemaps.Client(key=GOOGLE_API_KEY, timeout=API_TIMEOUT)
         
-        # Se realiza una búsqueda por tipo y palabra clave para mayor precisión
         places_result = gmaps.places_nearby(  # type: ignore[attr-defined, unknown-member]
             location=(lat, lng),
             radius=radio,
-            keyword='barberia',
-            type='hair_care',
+            keyword=keyword,
             language='es'
         )
         
         barberias_encontradas: list[dict[str, Any]] = []
         for place in places_result.get('results', []):
-            # Evitar duplicados por ID de lugar
             if any(b['google_place_id'] == place.get('place_id') for b in barberias_encontradas):
                 continue
 
@@ -66,8 +62,8 @@ def buscar_barberias_google_places(lat: float, lng: float, radio: int = 5000) ->
                 'total_calificaciones': total_calificaciones,
                 'fuente': 'google',
                 'google_place_id': place.get('place_id'),
-                'telefono': 'No disponible', # Places Nearby no da teléfono, se necesitaría Place Details
-                'horario': 'No disponible', # Igual que el teléfono
+                'telefono': 'No disponible',
+                'horario': 'No disponible',
             }
             barberias_encontradas.append(barberia)
             
@@ -89,8 +85,7 @@ def buscar_barberias_google_places(lat: float, lng: float, radio: int = 5000) ->
 @cache_google_places(timeout=1200)  # 20 minutos de caché para texto
 def buscar_barberias_por_texto(query: str, lat: float = 19.432608, lng: float = -99.133209) -> list[dict[str, Any]]:
     """
-    Busca barberías usando Google Places Text Search API.
-    Más preciso para búsquedas por texto.
+    Busca lugares usando Google Places Text Search API.
     """
     if not GOOGLE_API_KEY:
         print("API Key de Google no configurada. Saltando búsqueda en Google Places.")
@@ -99,21 +94,15 @@ def buscar_barberias_por_texto(query: str, lat: float = 19.432608, lng: float = 
     try:
         gmaps = googlemaps.Client(key=GOOGLE_API_KEY, timeout=API_TIMEOUT)
         
-        # Construir query de búsqueda más específica
-        search_query = f"{query} barbería peluquería"
-        
-        # Usar Text Search API para búsquedas más precisas
         places_result = gmaps.places(  # type: ignore[attr-defined, unknown-member]
-            query=search_query,
+            query=query,
             location=(lat, lng),
-            radius=25000,  # Radio más pequeño para resultados más cercanos
-            language='es',
-            type='hair_care'  # Especificar tipo de negocio
+            radius=25000,
+            language='es'
         )
         
         barberias_encontradas: list[dict[str, Any]] = []
         for place in places_result.get('results', []):
-            # Evitar duplicados por ID de lugar
             if any(b['google_place_id'] == place.get('place_id') for b in barberias_encontradas):
                 continue
 

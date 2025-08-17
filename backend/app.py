@@ -45,6 +45,7 @@ def create_app(config_name='default'):
     
     # Registrar rutas de barberías
     app.add_url_rule('/api/barberias', 'obtener_barberias', obtener_barberias, methods=['GET'])
+    
     app.add_url_rule('/api/barberias', 'crear_barberia', crear_barberia, methods=['POST'])
     app.add_url_rule('/api/barberias/<int:barberia_id>', 'obtener_barberia', obtener_barberia, methods=['GET'])
     app.add_url_rule('/api/barberias/<int:barberia_id>/calificar', 'calificar_barberia', calificar_barberia, methods=['POST'])

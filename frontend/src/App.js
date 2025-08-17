@@ -13,7 +13,7 @@ import api from './utils/api';
 import { mapStyles } from './config/mapStyles';
 import { obtenerFavoritos, toggleFavorito, verificarFavorito } from './utils/api';
 import { initTouchVerification } from './utils/touchTest';
-import { initDeviceDetection } from './utils/mobileDetection';
+import { initDeviceDetection, isMobileDevice } from './utils/mobileDetection';
 import { initScrollControl, applyScrollConfig } from './utils/scrollControl';
 import { quickCheck } from './utils/styleVerification';
 import axios from 'axios';
@@ -175,14 +175,9 @@ function App() {
   const sheetRef = useRef(null);
 
   const checkScreenSize = () => {
-    // Simplificar la detección para que coincida con CSS
-    const width = window.innerWidth;
-    
-    // Usar el mismo breakpoint que en CSS: 900px
-    const isMobileDevice = width <= 900;
-    
-    console.log('Screen detection:', { width, isMobileDevice });
-    setIsMobile(isMobileDevice);
+    const mobile = isMobileDevice();
+    console.log('Screen detection:', { isMobile: mobile });
+    setIsMobile(mobile);
   };
 
   const cargarBarberias = async (location, mostrarTodas = false) => {
@@ -1224,7 +1219,7 @@ function App() {
                 </div>
 
                 {/* Lista de resultados */}
-                <div style={{ flex: 1, overflow: 'auto', padding: '1rem' }}>
+                <div className="sidebar-scroll-container">
                   {cargando ? (
                     <div className="sidebar-loading">
                       <div className="loading-spinner"></div>
